@@ -10,22 +10,48 @@ class JobController {
 
     static allowedMethods = [ save: "POST" ]
 
-    def save = {
+    def save(Job job) {
 
-        if (!params.emailAddress) {
-            response.status = 400
-            render text: "Invalid request format: 'emailAddress' must be specified."
-        }
-        else if (!params.temporalExtent) {
-            response.status = 400
-            render text: "Invalid request format: 'temporalExtent' must be specified."
-        }
-        else if (!params.spatialExtent) {
-            response.status = 400
-            render text: "Invalid request format: 'spatialExtent' must be specified."
+        if (job.hasErrors()) {
+            render (status: 400, text: "Invalid request format: ${job.errors}")
         }
         else {
-            response.status = 200
+            render (status: 200)
         }
+    }
+}
+
+@grails.validation.Validateable
+class TemporalExtent {
+    String start
+    String end
+
+    static constraints = {
+        start blank: false
+        end blank: false
+    }
+}
+
+@grails.validation.Validateable
+class SpatialExtent {
+    String north
+    String south
+    String east
+    String west
+
+    static constraints = {
+    }
+}
+
+@grails.validation.Validateable
+class Job {
+    String emailAddress
+    SpatialExtent spatialExtent
+    TemporalExtent temporalExtent
+
+    static constraints = {
+        emailAddress email: true
+        spatialExtent nullable: false
+        temporalExtent nullable: false
     }
 }
