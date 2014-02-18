@@ -5,5 +5,5 @@
 ## Usage
 
 ```
-    curl -v --data '{"param1":"value1"}' --header "Content-Type: application/json" http://localhost:8080/go-go-duck/job/save
+    curl -v --data '{"emailAddress":"gogo@duck.com"}' --header "Content-Type: application/json" http://localhost:8080/go-go-duck/job/save
 ```
