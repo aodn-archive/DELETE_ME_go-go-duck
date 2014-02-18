@@ -1,0 +1,96 @@
+#!/bin/bash
+
+# when downloading stuff from GeoServer we'll need to do some manipulation!
+declare -r URL_PREFIX_PATTERN=/mnt/imos-t3/
+declare -r URL_PREFIX_REPLACE=http://data.aodn.org.au/
+declare -r GEOSERVER_URL=http://geoserver-123.aodn.org.au/geoserver
+
+# this function takes a subset and should output the list of urls to the given
+# file
+# $1 - profile
+# $2 - output file
+# $3 - subset
+get_list_of_urls() {
+    local profile=$1; shift
+    local output_file=$1; shift
+    local subset="$1"; shift
+
+    # make attributes greppable!
+    local tmp_attrs=`mktemp`
+    echo "$subset" | tr -s ";" "\n" > $tmp_attrs
+    time_coverage_start=`grep "^TIME," $tmp_attrs | cut -d, -f2`
+    time_coverage_end=`grep "^TIME," $tmp_attrs | cut -d, -f3`
+    rm -f $tmp_attrs
+
+    local url="$GEOSERVER_URL/wfs?typeName=$profile&SERVICE=WFS&outputFormat=csv&REQUEST=GetFeature&VERSION=1.0.0"
+    local parameters="CQL_FILTER=time >= $time_coverage_start and time <= $time_coverage_end"
+
+    # TODO PATCHY!!
+    # we'll need to replace '/mnt/imos-t3' with 'http://data.aodn.org.au'
+    # take the third field (URL)
+    # and remove the first line
+    curl -s "$url" --get --data-urlencode "$parameters" |\
+        tail -n+2 | \
+        cut -d',' -f3 | \
+        sed -e "s#${URL_PREFIX_PATTERN}#${URL_PREFIX_REPLACE}#" > \
+            $output_file
+
+    #curl -s "$url" --get --data-urlencode "$parameters" |\
+    #    tail -n+2 | \
+    #    cut -d',' -f3 | \
+    #    sed -e "s#^#file://#" > \
+    #        $output_file
+}
+
+# this function takes a semicolon separated subset and should produce viable
+# parameters for the ncks command
+# for the default implementation we just subset on all given parameters
+# $1 - profile name
+# $2 - subset to apply
+get_subset_command() {
+    local profile=$1; shift
+    local subset="$1"; shift
+    # LATITUDE,-33.433849,-30.150743;LONGTITUDE,113.15197,115.741219 becomes:
+    # -d LATITUDE,-33.433849,-30.150743 -d LONGTITUDE,113.15197,115.741219
+    local ncks_arguments="-d "`echo $subset | sed -e 's/;$//' -e 's/;/ -d /g'`
+    echo $ncks_arguments
+}
+
+# this function takes a semicolon separated subset and an aggregated file and
+# should update its header (metadata)
+# $1 - profile name
+# $2 - aggregated file
+# $3 - subset applied (semicolon separated)
+update_header() {
+    local profile=$1; shift
+    local aggregated_file="$1"; shift
+    local subset="$1"; shift
+
+    # make attributes greppable!
+    local tmp_attrs=`mktemp`
+    echo "$subset" | tr -s ";" "\n" > $tmp_attrs
+
+    # update title
+    local title=`ncks -M $aggregated_file  | grep "^Global attribute [0-9]\+: title," | grep -o "value = .*" | cut -d' ' -f3-`
+    local title=${title%,*} # trim current time in title
+
+    local geospatial_lat_min=`grep "^LATITUDE," $tmp_attrs | cut -d, -f2`
+    local geospatial_lat_max=`grep "^LATITUDE," $tmp_attrs | cut -d, -f3`
+    local geospatial_lon_min=`grep "^LONGITUDE," $tmp_attrs | cut -d, -f2`
+    local geospatial_lon_max=`grep "^LONGITUDE," $tmp_attrs | cut -d, -f3`
+    local time_coverage_start=`grep "^TIME," $tmp_attrs | cut -d, -f2`
+    local time_coverage_end=`grep "^TIME," $tmp_attrs | cut -d, -f3`
+
+    rm -f $tmp_attrs
+
+    [ x"$geospatial_lat_min"  != x ] && ncatted -O -h -a geospatial_lat_min,global,o,c,"$geospatial_lat_min"   "$aggregated_file"
+    [ x"$geospatial_lat_max"  != x ] && ncatted -O -h -a geospatial_lat_max,global,o,c,"$geospatial_lat_max"   "$aggregated_file"
+    [ x"$geospatial_lon_min"  != x ] && ncatted -O -h -a geospatial_lon_min,global,o,c,"$geospatial_lon_min"   "$aggregated_file"
+    [ x"$geospatial_lon_max"  != x ] && ncatted -O -h -a geospatial_lon_max,global,o,c,"$geospatial_lon_max"   "$aggregated_file"
+    [ x"$time_coverage_start" != x ] && ncatted -O -h -a time_coverage_start,global,o,c,"$time_coverage_start" "$aggregated_file"
+    [ x"$time_coverage_end"   != x ] && ncatted -O -h -a time_coverage_end,global,o,c,"$time_coverage_end"     "$aggregated_file"
+    [ x"$title"               != x ] && ncatted -O -h -a title,global,o,c,"$title, $time_coverage_start, $time_coverage_end" "$aggregated_file"
+
+    # if we didn't update the header - don't spoil the aggregation :)
+    true
+}
