@@ -10,7 +10,7 @@ class JobExecutorServiceSpec extends Specification {
         given:
         def job = TestHelper.createJob()
         def workerCmd = 'gogoduck.sh'
-        service.grailsApplication = [ worker: [ cmd: workerCmd ] ]
+        service.grailsApplication = [ config: [ worker: [ cmd: workerCmd ] ] ]
 
         def cmd
         service.metaClass.execute = {
