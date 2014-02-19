@@ -3,12 +3,12 @@ package au.org.emii.gogoduck.job
 @grails.validation.Validateable
 class Job {
     String emailAddress
-    SpatialExtent spatialExtent
-    TemporalExtent temporalExtent
+    String layerName
+    SubsetDescriptor subsetDescriptor
 
     static constraints = {
         emailAddress email: true
-        spatialExtent nullable: false
-        temporalExtent nullable: false
+        layerName blank: false
+        subsetDescriptor nullable: false
     }
 }
