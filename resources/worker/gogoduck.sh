@@ -251,7 +251,7 @@ main() {
             -s|--subset) subset="$2"; shift 2;;
             -p|--profile) profile="$2"; shift 2;;
             -o|--output) output="$2"; shift 2;;
-            -l|--limit) output="$2"; shift 2;;
+            -l|--limit) limit="$2"; shift 2;;
             --) shift; break;;
             *) usage;;
         esac
