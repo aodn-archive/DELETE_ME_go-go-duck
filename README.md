@@ -8,7 +8,7 @@ Supposing you have a JSON document such as the one at [doc/example_job_request.j
 
 ```
 {
-  layerName: 'some_layer',
+  layerName: 'acorn_hourly_avg_rot_qc_timeseries_url',
   emailAddress: 'gogo@duck.com',
   subsetDescriptor: {
     temporalExtent: {
