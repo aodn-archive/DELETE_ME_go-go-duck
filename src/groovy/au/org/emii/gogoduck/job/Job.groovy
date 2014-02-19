@@ -11,4 +11,8 @@ class Job {
         layerName blank: false
         subsetDescriptor nullable: false
     }
+
+    String toCmdString() {
+        "-p ${layerName} ${subsetDescriptor.toCmdString()} -o output.nc"
+    }
 }
