@@ -1,6 +1,4 @@
-worker {
-    cmd = 'resources/worker/gogoduck.sh'
-}
+worker.cmd = 'echo'
 
 grails.project.groupId = appName // change this to alter the default package name and Maven publishing destination
 grails.mime.file.extensions = true // enables the parsing of file extensions from URLs into the request format
@@ -60,10 +58,10 @@ environments {
 def log4jConversionPattern = '%d [%t] %-5p %c{1} - %m%n'
 
 log4j = {
-	appenders {
-		console name: 'stdout', layout: pattern(conversionPattern: log4jConversionPattern)
-		'null' name: "stacktrace"
-	}
+    appenders {
+        console name: 'stdout', layout: pattern(conversionPattern: log4jConversionPattern)
+        'null' name: "stacktrace"
+    }
 
     error  'org.codehaus.groovy.grails.web.servlet',        // controllers
            'org.codehaus.groovy.grails.web.pages',          // GSP
@@ -76,4 +74,8 @@ log4j = {
            'org.springframework',
            'org.hibernate',
            'net.sf.ehcache.hibernate'
+
+    root {
+        info 'stdout', 'null'
+    }
 }
