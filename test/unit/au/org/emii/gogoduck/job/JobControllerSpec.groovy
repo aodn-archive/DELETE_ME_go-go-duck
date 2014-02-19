@@ -6,31 +6,17 @@ import spock.lang.Specification
 @TestFor(JobController)
 class JobControllerSpec extends Specification {
 
-    def "save with valid request"() {
-
+    def "save with valid request runs job"() {
         given:
-        def job = createJob()
+        def job = TestHelper.createJob()
+        JobExecutorService jobExecutorService = Mock()
+        controller.jobExecutorService = jobExecutorService
 
         when:
         controller.save(job)
 
         then:
         response.status == 200
-    }
-
-    def createJob() {
-        return new Job(
-            emailAddress: 'gogo@duck.com',
-            temporalExtent: [
-                start: '2013-11-20T00:30:00.000Z',
-                end:   '2013-11-20T10:30:00.000Z'
-            ],
-            spatialExtent: [
-                north: '-32.150743',
-                south: '-33.433849',
-                east:  '114.15197',
-                west:  '115.741219'
-            ]
-        )
+        1 * jobExecutorService.run(job)
     }
 }
