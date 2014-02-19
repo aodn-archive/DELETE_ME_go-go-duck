@@ -6,6 +6,8 @@ class JobExecutorService {
 
     def run(job) {
         job.outputFilename = grailsApplication.config.worker.outputFilename
+        job.fileLimit = grailsApplication.config.worker.fileLimit
+
         execute(grailsApplication.config.worker.cmd.call(job.toCmdString()))
     }
 
@@ -18,7 +20,8 @@ class JobExecutorService {
 
         proc.consumeProcessOutput(sout, serr)
         proc.waitForOrKill(10000)
-        log.info(sout)
-        log.error(serr)
+
+        log.debug("Command output: ${sout}")
+        log.debug("Command error: ${serr}")
     }
 }

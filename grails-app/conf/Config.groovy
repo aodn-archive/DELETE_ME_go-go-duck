@@ -43,6 +43,10 @@ grails.exceptionresolver.params.exclude = ['password']
 // configure auto-caching of queries by default (if false you can cache individual queries with 'cache: true')
 grails.hibernate.cache.queries = false
 
+worker {
+    fileLimit = 100
+}
+
 environments {
     development {
         grails.logging.jul.usebridge = true
@@ -83,6 +87,12 @@ log4j = {
            'org.springframework',
            'org.hibernate',
            'net.sf.ehcache.hibernate'
+
+    environments {
+        development {
+            debug  'grails.app.services'
+        }
+    }
 
     root {
         info 'stdout', 'null'
