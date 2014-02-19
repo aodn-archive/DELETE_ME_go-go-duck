@@ -1,4 +1,5 @@
 *.iml
+.vagrant
 target
 stacktrace.log
 .DS_Store
@@ -14,6 +15,7 @@ target-eclipse
 plugins
 \#*\#
 .\#*
+*.swp
 
 # Include code style settings for IntelliJ IDEA projects
 .idea/*
