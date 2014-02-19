@@ -2,6 +2,7 @@ package au.org.emii.gogoduck.job
 
 @grails.validation.Validateable
 class Job {
+    String id
     String emailAddress
     String layerName
     String outputFilename
@@ -15,6 +16,10 @@ class Job {
         emailAddress email: true
         layerName blank: false
         subsetDescriptor nullable: false
+    }
+
+    Job() {
+        id = UUID.randomUUID().toString()[0..7]
     }
 
     String toCmdString() {
