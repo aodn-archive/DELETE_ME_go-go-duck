@@ -3,6 +3,8 @@ package au.org.emii.gogoduck.job
 import grails.test.mixin.*
 import spock.lang.Specification
 
+import au.org.emii.gogoduck.test.TestHelper
+
 @TestFor(JobExecutorService)
 class JobExecutorServiceSpec extends Specification {
     def "run shells out to gogoduck script"() {

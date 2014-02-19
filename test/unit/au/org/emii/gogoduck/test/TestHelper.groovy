@@ -1,4 +1,6 @@
-package au.org.emii.gogoduck.job
+package au.org.emii.gogoduck.test
+
+import au.org.emii.gogoduck.job.Job
 
 class TestHelper {
     static Job createJob() {
