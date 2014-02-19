@@ -1,5 +1,3 @@
-worker.cmd = 'echo'
-
 grails.project.groupId = appName // change this to alter the default package name and Maven publishing destination
 grails.mime.file.extensions = true // enables the parsing of file extensions from URLs into the request format
 grails.mime.use.accept.header = false
@@ -48,10 +46,21 @@ grails.hibernate.cache.queries = false
 environments {
     development {
         grails.logging.jul.usebridge = true
+        worker {
+            cmd = {
+                ['vagrant',  'ssh', '-c', "/vagrant/resources/worker/gogoduck.sh ${it}"]
+            }
+            outputFilename = '/vagrant/output.nc'
+        }
     }
     production {
         grails.logging.jul.usebridge = false
-        // TODO: grails.serverURL = "http://www.changeme.com"
+        worker {
+            cmd = {
+                "resources/worker/gogoduck.sh ${it}"
+            }
+            outputFilename = 'output.nc'
+        }
     }
 }
 

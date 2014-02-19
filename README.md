@@ -28,5 +28,12 @@ Supposing you have a JSON document such as the one at [doc/example_job_request.j
 then the service can be called/test like this:
 
 ```
-    curl -v --data @doc/example_job_request.json --header "Content-Type: application/json" http://localhost:8080/go-go-duck/job/save
+# Bring up a VM containing NetCDF command line dependencies
+vagrant up
+
+# Start the web-app
+grails run-app
+
+# Send a request
+curl -v --data @doc/example_job_request.json --header "Content-Type: application/json" http://localhost:8080/go-go-duck/job/save
 ```

@@ -5,11 +5,20 @@ class JobExecutorService {
     def grailsApplication
 
     def run(job) {
-        execute("${grailsApplication.config.worker.cmd} ${job.toCmdString()}")
+        job.outputFilename = grailsApplication.config.worker.outputFilename
+        execute(grailsApplication.config.worker.cmd.call(job.toCmdString()))
     }
 
     def execute(cmd) {
         log.info("Executing command: '${cmd}'")
-        cmd.execute()
+
+        def sout = new StringBuffer()
+        def serr = new StringBuffer()
+        def proc = cmd.execute()
+
+        proc.consumeProcessOutput(sout, serr)
+        proc.waitForOrKill(10000)
+        log.info(sout)
+        log.error(serr)
     }
 }
