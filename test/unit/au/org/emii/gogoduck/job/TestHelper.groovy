@@ -3,7 +3,7 @@ package au.org.emii.gogoduck.job
 class TestHelper {
     static Job createJob() {
         return new Job(
-            layerName: 'some layer',
+            layerName: 'some_layer',
             emailAddress: 'gogo@duck.com',
             subsetDescriptor: [
                 temporalExtent: [
@@ -13,8 +13,8 @@ class TestHelper {
                 spatialExtent: [
                     north: '-32.150743',
                     south: '-33.433849',
-                    east:  '114.15197',
-                    west:  '115.741219'
+                    east:  '115.741219',
+                    west:  '114.15197'
                 ]
             ]
         )

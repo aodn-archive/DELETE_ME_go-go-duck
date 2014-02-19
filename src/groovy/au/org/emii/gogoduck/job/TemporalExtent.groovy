@@ -9,4 +9,8 @@ class TemporalExtent {
         start blank: false
         end blank: false
     }
+
+    String toCmdString() {
+        "TIME,${start},${end}"
+    }
 }

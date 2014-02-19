@@ -9,6 +9,9 @@ class JobExecutorServiceSpec extends Specification {
 
         given:
         def job = TestHelper.createJob()
+        def workerCmd = 'gogoduck.sh'
+        service.grailsApplication = [ worker: [ cmd: workerCmd ] ]
+
         def cmd
         service.metaClass.execute = {
             cmd = it
@@ -18,6 +21,7 @@ class JobExecutorServiceSpec extends Specification {
         service.run(job)
 
         then:
-        cmd == './gogoduck.sh'
+
+        cmd == "${workerCmd} -p some_layer -s \"TIME,2013-11-20T00:30:00.000Z,2013-11-20T10:30:00.000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219\" -o output.nc"
     }
 }
