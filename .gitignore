@@ -1,4 +1,5 @@
 *.iml
+output.nc
 .vagrant
 target
 stacktrace.log

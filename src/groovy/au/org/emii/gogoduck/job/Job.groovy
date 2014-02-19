@@ -4,6 +4,7 @@ package au.org.emii.gogoduck.job
 class Job {
     String emailAddress
     String layerName
+    String outputFilename
 
     // Need to instantiate nested objects, otherwise they are not bound.
     // See: http://grails.1312388.n4.nabble.com/How-to-bind-data-to-a-command-object-that-has-an-non-domain-object-as-property-tp4021559p4328826.html
@@ -16,6 +17,6 @@ class Job {
     }
 
     String toCmdString() {
-        "-p ${layerName} ${subsetDescriptor.toCmdString()} -o output.nc"
+        "-p ${layerName} ${subsetDescriptor.toCmdString()} -o ${outputFilename}"
     }
 }
