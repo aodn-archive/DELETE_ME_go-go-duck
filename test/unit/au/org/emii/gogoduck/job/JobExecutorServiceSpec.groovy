@@ -4,33 +4,24 @@ import grails.test.mixin.*
 import spock.lang.Specification
 
 import au.org.emii.gogoduck.test.TestHelper
+import au.org.emii.gogoduck.worker.Worker
 
 @TestFor(JobExecutorService)
 class JobExecutorServiceSpec extends Specification {
-    def "run shells out to gogoduck script"() {
 
+    def "runs worker"() {
         given:
         def job = TestHelper.createJob()
-        def workerCmd = {
-            "gogoduck.sh ${it}"
-        }
+        def worker = Mock(Worker)
 
-        service.grailsApplication = [ config: [ worker: [
-                    cmd: workerCmd,
-                    outputFilename: 'output.nc',
-                    fileLimit: 123
-                ] ] ]
-
-        def cmd
-        service.metaClass.execute = {
-            cmd = it
+        service.metaClass.getWorker = {
+            worker
         }
 
         when:
         service.run(job)
 
         then:
-
-        cmd == "gogoduck.sh -p some_layer -s \"TIME,2013-11-20T00:30:00.000Z,2013-11-20T10:30:00.000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219\" -o output.nc -l 123"
+        1 * worker.run()
     }
 }
