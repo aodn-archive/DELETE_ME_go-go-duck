@@ -13,7 +13,19 @@ class Worker {
     }
 
     String getCmd() {
-        shellCmd.call("-p ${job.layerName} -s \"TIME,${job.subsetDescriptor.temporalExtent.start},${job.subsetDescriptor.temporalExtent.end};LATITUDE,${job.subsetDescriptor.spatialExtent.south},${job.subsetDescriptor.spatialExtent.north};LONGITUDE,${job.subsetDescriptor.spatialExtent.west},${job.subsetDescriptor.spatialExtent.east}\" -o ${outputFilename} -l ${fileLimit}")
+        def cmdOptions = String.format(
+            '-p %1s -s "TIME,%2s,%3s;LATITUDE,%4s,%5s;LONGITUDE,%6s,%7s" -o %8s -l %9$1s',
+            job.layerName,
+            job.subsetDescriptor.temporalExtent.start,
+            job.subsetDescriptor.temporalExtent.end,
+            job.subsetDescriptor.spatialExtent.south,
+            job.subsetDescriptor.spatialExtent.north,
+            job.subsetDescriptor.spatialExtent.west,
+            job.subsetDescriptor.spatialExtent.east,
+            outputFilename,
+            fileLimit
+        )
+        shellCmd.call(cmdOptions)
     }
 
     void execute(cmd) {
