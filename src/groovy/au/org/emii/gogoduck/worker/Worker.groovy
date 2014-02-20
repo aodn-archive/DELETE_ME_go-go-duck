@@ -1,6 +1,7 @@
 package au.org.emii.gogoduck.worker
 
 import au.org.emii.gogoduck.job.Job
+import grails.converters.JSON
 
 class Worker {
     Job job
@@ -11,12 +12,17 @@ class Worker {
 
     void run() {
         mkJobDir(getPath())
+        writeJobToJsonFile()
         execute(getCmd())
     }
 
     def mkJobDir(path) {
         log.debug("Making directory: ${path}")
         new File(path).mkdirs()
+    }
+
+    def writeJobToJsonFile() {
+        new File("${getPath()}${File.separator}job.json").write((job as JSON).toString(true))
     }
 
     def getPath() {

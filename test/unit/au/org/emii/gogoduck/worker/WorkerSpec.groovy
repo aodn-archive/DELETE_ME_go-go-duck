@@ -31,6 +31,7 @@ class WorkerSpec extends Specification {
         worker.outputFilename = 'file.nc'
         worker.job = new Job(uuid: '123')
         worker.metaClass.getCmd = { }
+        worker.metaClass.writeJobToJsonFile = { }
         worker.metaClass.execute = { }
 
         when:
@@ -38,7 +39,6 @@ class WorkerSpec extends Specification {
 
         then:
         1 * worker.mkJobDir('path/123')
-
     }
 
     def "runs command"() {
@@ -53,6 +53,7 @@ class WorkerSpec extends Specification {
             executedCmd = it
         }
         worker.metaClass.mkJobDir = { }
+        worker.metaClass.writeJobToJsonFile = { }
 
         when:
         worker.run()
