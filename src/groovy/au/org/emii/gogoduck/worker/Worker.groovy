@@ -13,11 +13,7 @@ class Worker {
     }
 
     String getCmd() {
-        // TODO: remove these from job
-        job.fileLimit = fileLimit
-        job.outputFilename = outputFilename
-
-        shellCmd.call(job.toCmdString())
+        shellCmd.call("-p ${job.layerName} -s \"TIME,${job.subsetDescriptor.temporalExtent.start},${job.subsetDescriptor.temporalExtent.end};LATITUDE,${job.subsetDescriptor.spatialExtent.south},${job.subsetDescriptor.spatialExtent.north};LONGITUDE,${job.subsetDescriptor.spatialExtent.west},${job.subsetDescriptor.spatialExtent.east}\" -o ${outputFilename} -l ${fileLimit}")
     }
 
     void execute(cmd) {

@@ -13,8 +13,4 @@ class SpatialExtent {
         east  nullable: false
         west  nullable: false
     }
-
-    String toCmdString() {
-        "LATITUDE,${south},${north};LONGITUDE,${west},${east}"
-    }
 }

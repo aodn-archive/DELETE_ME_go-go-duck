@@ -5,8 +5,6 @@ class Job {
     String id
     String emailAddress
     String layerName
-    String outputFilename
-    Integer fileLimit
 
     // Need to instantiate nested objects, otherwise they are not bound.
     // See: http://grails.1312388.n4.nabble.com/How-to-bind-data-to-a-command-object-that-has-an-non-domain-object-as-property-tp4021559p4328826.html
@@ -20,9 +18,5 @@ class Job {
 
     Job() {
         id = UUID.randomUUID().toString()[0..7]
-    }
-
-    String toCmdString() {
-        "-p ${layerName} ${subsetDescriptor.toCmdString()} -o ${outputFilename} -l ${fileLimit}"
     }
 }

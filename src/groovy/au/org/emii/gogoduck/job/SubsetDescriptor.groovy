@@ -9,8 +9,4 @@ class SubsetDescriptor {
         spatialExtent nullable: false
         temporalExtent nullable: false
     }
-
-    String toCmdString() {
-        "-s \"${temporalExtent.toCmdString()};${spatialExtent.toCmdString()}\""
-    }
 }
