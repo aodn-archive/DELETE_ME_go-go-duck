@@ -14,6 +14,7 @@ class JobExecutorService {
         return new Worker(
             shellCmd: grailsApplication.config.worker.cmd,
             job: job,
+            outputPath: grailsApplication.config.worker.outputPath,
             outputFilename: grailsApplication.config.worker.outputFilename,
             fileLimit: grailsApplication.config.worker.fileLimit
         )

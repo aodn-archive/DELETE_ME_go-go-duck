@@ -54,15 +54,19 @@ environments {
             cmd = {
                 ['vagrant',  'ssh', '-c', "/vagrant/resources/worker/gogoduck.sh ${it}"]
             }
-            outputFilename = '/vagrant/output.nc'
+            outputPath = 'jobs'
+            outputFilename = 'output.nc'
         }
     }
     production {
         grails.logging.jul.usebridge = false
+
+        // TODO: these need to be configured by chef.
         worker {
             cmd = {
                 "resources/worker/gogoduck.sh ${it}"
             }
+            outputPath = '/tmp/jobs'
             outputFilename = 'output.nc'
         }
     }

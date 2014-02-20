@@ -13,6 +13,7 @@ wget -O /tmp/${NCO_PACKAGE} https://jenkins.aodn.org.au/job/nco/lastSuccessfulBu
 (sudo dpkg -i /tmp/${NCO_PACKAGE}; true)
 sudo apt-get -f -y install
 sudo apt-get install -y netcdf-bin
+ln -s /vagrant/jobs jobs
 SCRIPT
 
   config.vm.provision "shell", inline: $script

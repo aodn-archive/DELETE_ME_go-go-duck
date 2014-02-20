@@ -1,6 +1,7 @@
 *.iml
 output.nc
 .vagrant
+jobs
 target
 stacktrace.log
 .DS_Store

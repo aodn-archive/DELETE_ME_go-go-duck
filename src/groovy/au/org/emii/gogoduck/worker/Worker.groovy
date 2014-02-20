@@ -5,11 +5,26 @@ import au.org.emii.gogoduck.job.Job
 class Worker {
     Job job
     Closure shellCmd
+    String outputPath
     String outputFilename
     Integer fileLimit
 
     void run() {
+        mkJobDir(getPath())
         execute(getCmd())
+    }
+
+    def mkJobDir(path) {
+        log.debug("Making directory: ${path}")
+        new File(path).mkdirs()
+    }
+
+    def getPath() {
+        "${outputPath}${File.separator}${job.getUuid()}"
+    }
+
+    def getFullOutputFilename() {
+        "${getPath()}${File.separator}${outputFilename}"
     }
 
     def getCmd() {
@@ -22,7 +37,7 @@ class Worker {
             job.subsetDescriptor.spatialExtent.north,
             job.subsetDescriptor.spatialExtent.west,
             job.subsetDescriptor.spatialExtent.east,
-            outputFilename,
+            fullOutputFilename,
             fileLimit
         )
         shellCmd.call(cmdOptions)

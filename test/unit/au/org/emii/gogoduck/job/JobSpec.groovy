@@ -15,8 +15,8 @@ class JobSpec extends Specification {
         // Ok, not mathematically fool proof, but good enough for us (probably).
         1000.times {
             def job = TestHelper.createJob()
-            assert job.getId()
-            assert existingIds.add(job.getId())
+            assert job.getUuid()
+            assert existingIds.add(job.getUuid())
         }
     }
 }
