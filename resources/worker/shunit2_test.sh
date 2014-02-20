@@ -21,6 +21,8 @@ test_get_profile_module() {
     source $GOGODUCK_NO_MAIN
     local profile
 
+    touch profiles/acorn
+
     profile=`_get_profile_module acorn`
     profile=`basename $profile`
     assertTrue 'acorn -> acorn' \
@@ -35,13 +37,15 @@ test_get_profile_module() {
     profile=`basename $profile`
     assertTrue 'profiles/acorn_uga_booga -> profiles/acorn' \
         "[ "$profile" = "default" ]"
+
+    rm -f profiles/acorn
 }
 
 # test if acorn can get some files for a specific layer
 test_get_files_acorn() {
     source $GOGODUCK_NO_MAIN
     local tmp_file=`mktemp`
-    _get_list_of_urls profiles/acorn acorn_hourly_avg_sag_nonqc_timeseries_url $tmp_file "TIME,2013-12-21T00:30:00.000Z,2013-12-21T04:30:00.000Z;LATITUDE,-36.375741295316,-35.683114342188;LONGITUDE,134.60681553516,136.11743565234" acorn_hourly_avg_sag_nonqc_timeseries_url
+    _get_list_of_urls profiles/default acorn_hourly_avg_sag_nonqc_timeseries_url $tmp_file "TIME,2013-12-21T00:30:00.000Z,2013-12-21T04:30:00.000Z;LATITUDE,-36.375741295316,-35.683114342188;LONGITUDE,134.60681553516,136.11743565234" acorn_hourly_avg_sag_nonqc_timeseries_url
 
     # expect 5 urls
     assertTrue '5 urls returned for acorn_hourly_avg_sag_nonqc_timeseries_url 21/12/2013 00:30-04:30' \
@@ -80,7 +84,7 @@ test_header_acorn_metadata() {
     curl -s -o $tmp_netcdf \
         "http://data.aodn.org.au/IMOS/opendap/ACORN/gridded_1h-avg-current-map_QC/ROT/2012/04/04/IMOS_ACORN_V_20120404T033000Z_ROT_FV01_1-hour-avg.nc"
 
-    _update_header profiles/acorn acorn_hourly_avg_rot_qc_timeseries_url $tmp_netcdf \
+    _update_header profiles/default acorn_hourly_avg_rot_qc_timeseries_url $tmp_netcdf \
         "TIME,2013-11-20T00:30:00.000Z,2013-11-20T10:30:00.000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219"
 
 
@@ -131,11 +135,29 @@ test_aggregation_acorn_file_size() {
     local -i file_size=`cat $tmp_output_file | wc --bytes`
     rm -f $tmp_output_file
 
-    # expect something like 100KB, OK?? :)
+    # expect something like 100KB
     assertTrue 'acorn aggregation file size is around 100KB' \
         "[ $file_size -lt 130000 ] && [ $file_size -gt 80000 ]"
 }
 
+# integration test for testing acorn
+test_aggregation_gsla() {
+    source $GOGODUCK_NO_MAIN
+    local tmp_output_file=`mktemp`
+    gogoduck_main \
+        100 \
+        "gsla_nrt00_timeseries_url" \
+        "TIME,2011-10-10T00:00:00.000Z,2011-10-20T00:00:00.000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219" \
+        $tmp_output_file >& /dev/null
+
+    local -i file_size=`cat $tmp_output_file | wc --bytes`
+    rm -f $tmp_output_file
+    echo $file_size
+
+    # expect something like 60KB
+    assertTrue 'gsla aggregation file size is around 60KB' \
+        "[ $file_size -lt 80000 ] && [ $file_size -gt 40000 ]"
+}
 
 ##################
 # SETUP/TEARDOWN #

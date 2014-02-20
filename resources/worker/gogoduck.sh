@@ -79,6 +79,7 @@ _get_files() {
 
     local url
     for url in `cat $url_file`; do
+        local file_basename=`basename $url`
         if [ ${url:0:7} = "file://" ]; then
             # trim file:// part
             url=${url:7}
@@ -94,6 +95,12 @@ _get_files() {
             if ! (cd $dir && curl -s -O "$url"); then
                 logger_warn "Failed downloading: '$url'"
                 return 1
+            fi
+
+            # if suffix is .gz, gunzip it!
+            if [ "${url: -3}" = ".gz" ]; then
+                logger_info "gunzipping: '$dir/$file_basename'"
+                gunzip $dir/$file_basename
             fi
         fi
     done
@@ -124,7 +131,7 @@ _apply_subset() {
     for file in $dir/*; do
         local tmp_file=`mktemp`
         logger_info "Applying subset '$subset_cmd' to '$file'"
-        ncks -a -3 -O $subset_cmd $file $tmp_file
+        ncks -a -4 -O $subset_cmd $file $tmp_file
 
         # overwrite original file
         mv $tmp_file $file
@@ -143,7 +150,7 @@ _aggregate() {
     if [ `ls -1 $dir/* | wc -l` -eq 1 ]; then
         mv $dir/* $output_file
     else
-        ncrcat -3 -h -O $dir/* $output_file
+        ncrcat -4 -h -O $dir/* $output_file
     fi
 }
 
