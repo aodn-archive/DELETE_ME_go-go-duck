@@ -45,6 +45,7 @@ grails.hibernate.cache.queries = false
 
 worker {
     fileLimit = 100
+    outputFilename = 'output.nc'
 }
 
 environments {
@@ -55,7 +56,6 @@ environments {
                 ['vagrant',  'ssh', '-c', "/vagrant/resources/worker/gogoduck.sh ${it}"]
             }
             outputPath = 'jobs'
-            outputFilename = 'output.nc'
         }
     }
     production {
@@ -67,7 +67,6 @@ environments {
                 "resources/worker/gogoduck.sh ${it}"
             }
             outputPath = '/tmp/jobs'
-            outputFilename = 'output.nc'
         }
     }
 }
