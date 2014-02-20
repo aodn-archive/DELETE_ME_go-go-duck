@@ -1,16 +1,3 @@
-// locations to search for config files that get merged into the main config;
-// config files can be ConfigSlurper scripts, Java properties files, or classes
-// in the classpath in ConfigSlurper format
-
-// grails.config.locations = [ "classpath:${appName}-config.properties",
-//                             "classpath:${appName}-config.groovy",
-//                             "file:${userHome}/.grails/${appName}-config.properties",
-//                             "file:${userHome}/.grails/${appName}-config.groovy"]
-
-// if (System.properties["${appName}.config.location"]) {
-//    grails.config.locations << "file:" + System.properties["${appName}.config.location"]
-// }
-
 grails.project.groupId = appName // change this to alter the default package name and Maven publishing destination
 grails.mime.file.extensions = true // enables the parsing of file extensions from URLs into the request format
 grails.mime.use.accept.header = false
@@ -28,9 +15,6 @@ grails.mime.types = [
     text:          'text/plain',
     xml:           ['text/xml', 'application/xml']
 ]
-
-// URL Mapping Cache Max Size, defaults to 5000
-//grails.urlmapping.cache.maxsize = 1000
 
 // What URL patterns should be processed by the resources plugin
 grails.resources.adhoc.patterns = ['/images/*', '/css/*', '/js/*', '/plugins/*']
@@ -59,23 +43,38 @@ grails.exceptionresolver.params.exclude = ['password']
 // configure auto-caching of queries by default (if false you can cache individual queries with 'cache: true')
 grails.hibernate.cache.queries = false
 
+worker {
+    fileLimit = 100
+}
+
 environments {
     development {
         grails.logging.jul.usebridge = true
+        worker {
+            cmd = {
+                ['vagrant',  'ssh', '-c', "/vagrant/resources/worker/gogoduck.sh ${it}"]
+            }
+            outputFilename = '/vagrant/output.nc'
+        }
     }
     production {
         grails.logging.jul.usebridge = false
-        // TODO: grails.serverURL = "http://www.changeme.com"
+        worker {
+            cmd = {
+                "resources/worker/gogoduck.sh ${it}"
+            }
+            outputFilename = 'output.nc'
+        }
     }
 }
 
-// log4j configuration
+def log4jConversionPattern = '%d [%t] %-5p %c{1} - %m%n'
+
 log4j = {
-    // Example of changing the log pattern for the default console appender:
-    //
-    //appenders {
-    //    console name:'stdout', layout:pattern(conversionPattern: '%c{2} %m%n')
-    //}
+    appenders {
+        console name: 'stdout', layout: pattern(conversionPattern: log4jConversionPattern)
+        'null' name: "stacktrace"
+    }
 
     error  'org.codehaus.groovy.grails.web.servlet',        // controllers
            'org.codehaus.groovy.grails.web.pages',          // GSP
@@ -88,4 +87,14 @@ log4j = {
            'org.springframework',
            'org.hibernate',
            'net.sf.ehcache.hibernate'
+
+    environments {
+        development {
+            debug  'grails.app.services'
+        }
+    }
+
+    root {
+        info 'stdout', 'null'
+    }
 }
