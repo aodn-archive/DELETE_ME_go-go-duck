@@ -12,7 +12,7 @@ class Worker {
         execute(getCmd())
     }
 
-    String getCmd() {
+    def getCmd() {
         def cmdOptions = String.format(
             '-p %1s -s "TIME,%2s,%3s;LATITUDE,%4s,%5s;LONGITUDE,%6s,%7s" -o %8s -l %9$1s',
             job.layerName,
@@ -33,6 +33,7 @@ class Worker {
 
         def sout = new StringBuffer()
         def serr = new StringBuffer()
+
         def proc = cmd.execute()
 
         proc.consumeProcessOutput(sout, serr)

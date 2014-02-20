@@ -68,7 +68,7 @@ environments {
     }
 }
 
-def log4jConversionPattern = '%d [%t] %-5p %c{1} - %m%n'
+def log4jConversionPattern = '%d [%t] %-5p %c - %m%n'
 
 log4j = {
     appenders {
@@ -90,7 +90,8 @@ log4j = {
 
     environments {
         development {
-            debug  'grails.app.services'
+            debug 'grails.app.services',
+                  'au.org.emii.gogoduck.worker.Worker'
         }
     }
 
