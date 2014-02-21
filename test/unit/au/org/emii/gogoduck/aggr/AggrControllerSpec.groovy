@@ -32,7 +32,7 @@ class AggrControllerSpec extends Specification {
         }
 
         when:
-        controller.params.id = jobId
+        controller.params.uuid = jobId
 
         controller.show()
 
