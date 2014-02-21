@@ -34,6 +34,6 @@ vagrant up
 # Start the web-app
 grails run-app
 
-# Send a request
-curl -v --data @doc/example_job_request.json --header "Content-Type: application/json" http://localhost:8080/go-go-duck/job/save
+# Request a new Job
+curl -v --data @doc/example_job_request.json --header "Content-Type: application/json" http://localhost:8080/go-go-duck/job
 ```
