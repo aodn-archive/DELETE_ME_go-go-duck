@@ -1,5 +1,7 @@
 package au.org.emii.gogoduck.job
 
+import grails.converters.JSON
+
 @grails.validation.Validateable
 class Job {
     String uuid
@@ -18,5 +20,17 @@ class Job {
 
     Job() {
         uuid = UUID.randomUUID().toString()[0..7]
+    }
+
+    static {
+        grails.converters.JSON.registerObjectMarshaller(Job) {
+            return it.properties.findAll {
+                k,v -> !['class', 'errors', 'properties'].contains(k)
+            }
+        }
+    }
+
+    String toJsonString() {
+        return (this as JSON).toString(true)
     }
 }

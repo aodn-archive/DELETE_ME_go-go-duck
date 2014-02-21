@@ -22,7 +22,8 @@ class Worker {
     }
 
     def writeJobToJsonFile() {
-        new File("${getPath()}${File.separator}job.json").write((job as JSON).toString(true))
+        log.debug("Job: ${job.toJsonString()}")
+        new File("${getPath()}${File.separator}job.json").write(job.toJsonString())
     }
 
     def getPath() {
