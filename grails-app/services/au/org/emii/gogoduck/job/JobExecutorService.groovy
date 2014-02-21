@@ -5,8 +5,11 @@ import au.org.emii.gogoduck.worker.Worker
 class JobExecutorService {
 
     def grailsApplication
+    def jobStoreService
 
     def run(job) {
+        jobStoreService.makeDir(job)
+        jobStoreService.writeToFileAsJson(job)
         getWorker(job).run()
     }
 
@@ -14,8 +17,7 @@ class JobExecutorService {
         return new Worker(
             shellCmd: grailsApplication.config.worker.cmd,
             job: job,
-            outputPath: grailsApplication.config.worker.outputPath,
-            outputFilename: grailsApplication.config.worker.outputFilename,
+            outputFilename: jobStoreService.getAggrPath(job),
             fileLimit: grailsApplication.config.worker.fileLimit
         )
     }

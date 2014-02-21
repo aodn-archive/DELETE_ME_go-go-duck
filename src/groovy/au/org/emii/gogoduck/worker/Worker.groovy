@@ -6,32 +6,11 @@ import grails.converters.JSON
 class Worker {
     Job job
     Closure shellCmd
-    String outputPath
     String outputFilename
     Integer fileLimit
 
     void run() {
-        mkJobDir(getPath())
-        writeJobToJsonFile()
         execute(getCmd())
-    }
-
-    def mkJobDir(path) {
-        log.debug("Making directory: ${path}")
-        new File(path).mkdirs()
-    }
-
-    def writeJobToJsonFile() {
-        log.debug("Job: ${job.toJsonString()}")
-        new File("${getPath()}${File.separator}job.json").write(job.toJsonString())
-    }
-
-    def getPath() {
-        "${outputPath}${File.separator}${job.getUuid()}"
-    }
-
-    def getFullOutputFilename() {
-        "${getPath()}${File.separator}${outputFilename}"
     }
 
     def getCmd() {
@@ -44,7 +23,7 @@ class Worker {
             job.subsetDescriptor.spatialExtent.north,
             job.subsetDescriptor.spatialExtent.west,
             job.subsetDescriptor.spatialExtent.east,
-            fullOutputFilename,
+            outputFilename,
             fileLimit
         )
         shellCmd.call(cmdOptions)
