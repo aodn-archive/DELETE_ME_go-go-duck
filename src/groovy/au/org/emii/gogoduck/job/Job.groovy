@@ -15,7 +15,7 @@ class Job {
 
     static constraints = {
         emailAddress email: true
-        layername blank: false
+        layerName blank: false
         subsetDescriptor nullable: false
     }
 

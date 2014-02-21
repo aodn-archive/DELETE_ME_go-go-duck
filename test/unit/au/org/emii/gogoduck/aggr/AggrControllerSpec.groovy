@@ -20,8 +20,11 @@ class AggrControllerSpec extends Specification {
         File tempFile = File.createTempFile("tempFile-file-name", ".tmp")
         tempFile << "some bytes"
 
+        def job = TestHelper.createJob()
         def jobId = 'asdf'
-        1 * jobStoreService.getAggrFile(jobId) >> tempFile
+        job.uuid = jobId
+        1 * jobStoreService.getJob(jobId) >> job
+        1 * jobStoreService.getAggrFile(job) >> tempFile
 
         def bytes
         controller.response.outputStream.metaClass.write = {

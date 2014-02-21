@@ -32,9 +32,9 @@ class JobStoreService {
         "${getDirForId(jobId)}${File.separator}${grailsApplication.config.worker.outputFilename}"
     }
 
-    File getAggrFile(jobId) {
-        log.info("File path: ${getAggrPathForId(jobId)}")
-        def aggrFile = new File(getAggrPathForId(jobId))
+    File getAggrFile(job) {
+        log.info("File path: ${getAggrPath(job)}")
+        def aggrFile = new File(getAggrPath(job))
         log.info("aggrFile.name = ${aggrFile.name}")
         return aggrFile
     }

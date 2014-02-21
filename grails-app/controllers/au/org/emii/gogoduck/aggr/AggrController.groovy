@@ -14,7 +14,7 @@ class AggrController {
         log.debug("job: ${job}")
 
 
-        def aggrFile = jobStoreService.getAggrFile(params.uuid)
+        def aggrFile = jobStoreService.getAggrFile(job)
 
         if (aggrFile) {
             response.setContentType("application/octet-stream")
