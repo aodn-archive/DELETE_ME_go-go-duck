@@ -12,7 +12,7 @@ class JobController {
         }
         else {
             jobExecutorService.run(job)
-            render (status: 200)
+            render (status: 200, text: job.toJsonString())
         }
     }
 }
