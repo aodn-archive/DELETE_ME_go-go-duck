@@ -28,6 +28,8 @@ class Job {
     }
 
     public String toJsonString() {
+        // Groovy 2.0. whatever grails 2.2.0 uses has a bug:
+        // http://stackoverflow.com/questions/14406981/why-do-i-get-a-stackoverflowerror-on-when-groovy-jsonbuilder-tries-to-serialize
         new JSONSerializer(target: this).getJSON()
     }
 
