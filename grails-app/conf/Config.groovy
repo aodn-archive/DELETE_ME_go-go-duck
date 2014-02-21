@@ -93,7 +93,8 @@ log4j = {
 
     environments {
         development {
-            debug 'grails.app.services',
+            debug 'grails.app.controllers',
+                  'grails.app.services',
                   'au.org.emii.gogoduck.worker.Worker'
         }
     }

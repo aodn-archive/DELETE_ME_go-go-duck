@@ -9,11 +9,27 @@ class JobStoreService {
     }
 
     String getDir(job) {
-        "${grailsApplication.config.worker.outputPath}${File.separator}${job.getUuid()}"
+        getDirForId(job.uuid)
+    }
+
+    // TODO: Deal only with jobs (not IDs)?
+    String getDirForId(jobId) {
+        "${grailsApplication.config.worker.outputPath}${File.separator}${jobId}"
     }
 
     String getAggrPath(job) {
-        "${getDir(job)}${File.separator}${job.getUuid()}"
+        getAggrPathForId(job.uuid)
+    }
+
+    String getAggrPathForId(jobId) {
+        "${getDirForId(jobId)}${File.separator}${grailsApplication.config.worker.outputFilename}"
+    }
+
+    File getAggrFile(jobId) {
+        log.info("File path: ${getAggrPathForId(jobId)}")
+        def aggrFile = new File(getAggrPathForId(jobId))
+        log.info("aggrFile.name = ${aggrFile.name}")
+        return aggrFile
     }
 
     void writeToFileAsJson(job) {

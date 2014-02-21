@@ -38,7 +38,7 @@ class Worker {
         def proc = cmd.execute()
 
         proc.consumeProcessOutput(sout, serr)
-        proc.waitForOrKill(10000)
+        proc.waitFor()
 
         log.debug("Command output: ${sout}")
         log.debug("Command error: ${serr}")
