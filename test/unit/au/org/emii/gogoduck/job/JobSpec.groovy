@@ -6,6 +6,25 @@ import spock.lang.Specification
 import au.org.emii.gogoduck.test.TestHelper
 
 class JobSpec extends Specification {
+
+    def jobAsJson = '''{
+   "subsetDescriptor": {
+      "spatialExtent": {
+         "south": "-33.433849",
+         "north": "-32.150743",
+         "east": "115.741219",
+         "west": "114.15197"
+      },
+      "temporalExtent": {
+         "start": "2013-11-20T00:30:00.000Z",
+         "end": "2013-11-20T10:30:00.000Z"
+      }
+   },
+   "emailAddress": "gogo@duck.com",
+   "layerName": "some_layer",
+   "uuid": "1234"
+}'''
+
     def "initialised with a UUID"() {
         given:
         Set<String> existingIds = new HashSet<String>()
@@ -25,25 +44,20 @@ class JobSpec extends Specification {
         def job = TestHelper.createJob()
         job.uuid = '1234'
 
-        def expectedJson = '''{
-   "subsetDescriptor": {
-      "spatialExtent": {
-         "south": "-33.433849",
-         "north": "-32.150743",
-         "east": "115.741219",
-         "west": "114.15197"
-      },
-      "temporalExtent": {
-         "start": "2013-11-20T00:30:00.000Z",
-         "end": "2013-11-20T10:30:00.000Z"
-      }
-   },
-   "emailAddress": "gogo@duck.com",
-   "layerName": "some_layer",
-   "uuid": "1234"
-}'''
 
         expect:
-        job.toJsonString() == expectedJson
+        job.toJsonString() == jobAsJson
+    }
+
+    def "from JSON"() {
+        given:
+        def job = Job.fromJsonString(jobAsJson)
+
+        expect:
+        job.uuid == '1234'
+        job.emailAddress == "gogo@duck.com"
+        job.layerName == "some_layer"
+        job.subsetDescriptor.spatialExtent.south == "-33.433849"
+        job.subsetDescriptor.temporalExtent.start == "2013-11-20T00:30:00.000Z"
     }
 }
