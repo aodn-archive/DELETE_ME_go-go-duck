@@ -1,6 +1,7 @@
 package au.org.emii.gogoduck.job
 
 import grails.converters.JSON
+import au.org.emii.gogoduck.json.JSONSerializer
 
 @grails.validation.Validateable
 class Job {
@@ -14,7 +15,7 @@ class Job {
 
     static constraints = {
         emailAddress email: true
-        layerName blank: false
+        layername blank: false
         subsetDescriptor nullable: false
     }
 
@@ -22,20 +23,12 @@ class Job {
         uuid = UUID.randomUUID().toString()[0..7]
     }
 
-    static {
-        grails.converters.JSON.registerObjectMarshaller(Job) {
-            return it.properties.findAll {
-                k,v -> !['class', 'errors', 'properties'].contains(k)
-            }
-        }
-    }
-
     String toString() {
         toJsonString()
     }
 
-    String toJsonString() {
-        return (this as JSON).toString(true)
+    public String toJsonString() {
+        new JSONSerializer(target: this).getJSON()
     }
 
     static Job fromJsonString(jobAsJson) {
