@@ -10,9 +10,11 @@ class AggrController {
     def show() {
         log.debug("params: ${params}")
 
-        def aggrFile = jobStoreService.getAggrFile(params.id)
+        def job = jobStoreService.getJob(params.uuid)
+        log.debug("job: ${job}")
 
-        log.debug("aggrFile: ${aggrFile}")
+
+        def aggrFile = jobStoreService.getAggrFile(params.uuid)
 
         if (aggrFile) {
             response.setContentType("application/octet-stream")

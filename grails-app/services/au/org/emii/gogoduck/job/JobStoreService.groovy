@@ -3,6 +3,13 @@ package au.org.emii.gogoduck.job
 class JobStoreService {
     def grailsApplication
 
+    Job getJob(uuid) {
+
+        log.debug("file: ${getJsonPathForId(uuid)}, text: ${new File(getJsonPathForId(uuid)).text}")
+
+        Job.fromJsonString(new File(getJsonPathForId(uuid)).text)
+    }
+
     void makeDir(job) {
         log.debug("Making directory: ${getDir(job)}")
         new File(getDir(job)).mkdirs()
@@ -32,8 +39,12 @@ class JobStoreService {
         return aggrFile
     }
 
+    String getJsonPathForId(jobId) {
+        "${getDirForId(jobId)}${File.separator}job.json"
+    }
+
     void writeToFileAsJson(job) {
         log.debug("Job: ${job.toJsonString()}")
-        new File("${getDir(job)}${File.separator}job.json").write(job.toJsonString())
+        new File(getJsonPathForId(job.uuid)).write(job.toJsonString())
     }
 }

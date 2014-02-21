@@ -30,7 +30,15 @@ class Job {
         }
     }
 
+    String toString() {
+        toJsonString()
+    }
+
     String toJsonString() {
         return (this as JSON).toString(true)
+    }
+
+    static Job fromJsonString(jobAsJson) {
+        new Job(JSON.parse(jobAsJson))
     }
 }
