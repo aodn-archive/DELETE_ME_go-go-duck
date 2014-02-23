@@ -25,21 +25,22 @@ get_list_of_urls() {
     local url="$GEOSERVER_URL/wfs?typeName=$profile&SERVICE=WFS&outputFormat=csv&REQUEST=GetFeature&VERSION=1.0.0"
     local parameters="CQL_FILTER=time >= $time_coverage_start and time <= $time_coverage_end"
 
-    # TODO PATCHY!!
-    # we'll need to replace '/mnt/imos-t3' with 'http://data.aodn.org.au'
-    # take the third field (URL)
-    # and remove the first line
+    # get list of files from geoserver
     curl -s "$url" --get --data-urlencode "$parameters" |\
-        tail -n+2 | \
-        cut -d',' -f3 | \
-        sed -e "s#${URL_PREFIX_PATTERN}#${URL_PREFIX_REPLACE}#" > \
-            $output_file
+        tail -n+2 | cut -d',' -f3 > $output_file
 
-    #curl -s "$url" --get --data-urlencode "$parameters" |\
-    #    tail -n+2 | \
-    #    cut -d',' -f3 | \
-    #    sed -e "s#^#file://#" > \
-    #        $output_file
+    # post process file, see if filesystem is mounted?
+    local sample_file=`head -1 $output_file`
+    if [ -f $sample_file ]; then
+        # if the first file exists on disk, append a file:// prefix
+        # this will use the linking method which is faster
+        logger_info "Using linking method, could find '$sample_file' in its location"
+        sed -i -e 's#^#file://#' $output_file
+    else
+        # if not, just use the download method
+        logger_info "Using HTTP method, could not find '$sample_file' in its location"
+        sed -i -e "s#${URL_PREFIX_PATTERN}#${URL_PREFIX_REPLACE}#" $output_file
+    fi
 }
 
 # this function takes a semicolon separated subset and should produce viable

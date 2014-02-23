@@ -83,13 +83,20 @@ _get_files() {
         if [ ${url:0:7} = "file://" ]; then
             # trim file:// part
             url=${url:7}
-            logger_info "Linking file: '$url' -> '$dir'"
-            if test -f $url; then
-                ln -s $url $dir/
+
+            if [ "${url: -3}" = ".gz" ]; then
+                logger_info "gunzipping: '$url' to '$dir/$file_basename'"
+                gunzip -c $url > $dir/$file_basename
             else
-                logger_warn "Failed accessing: '$url'"
-                return 1
+                logger_info "Linking file: '$url' -> '$dir'"
+                if test -f $url; then
+                    ln -s $url $dir/
+                else
+                    logger_warn "Failed accessing: '$url'"
+                    return 1
+                fi
             fi
+
         else
             logger_info "Downloading file: '$url'"
             if ! (cd $dir && curl -s -O "$url"); then
