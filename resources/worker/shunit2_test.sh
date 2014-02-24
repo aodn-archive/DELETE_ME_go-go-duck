@@ -16,7 +16,8 @@
 # GNU General Public License for more details.
 #
 
-test_is_gzip() {
+# test for .gz suffix in file
+_test_is_gzip() {
     source $GOGODUCK_NO_MAIN
     assertTrue 'gzip suffix' '_is_gzipped test.gz'
     assertTrue 'gzip suffix with space' '_is_gzipped "test 2.gz"'
@@ -25,7 +26,7 @@ test_is_gzip() {
 }
 
 # given a plugin name, it'll find the most appropriate plugin for it
-test_get_profile_module() {
+_test_get_profile_module() {
     source $GOGODUCK_NO_MAIN
     local profile
 
@@ -50,7 +51,7 @@ test_get_profile_module() {
 }
 
 # test if acorn can get some files for a specific layer
-test_get_files_acorn() {
+_test_get_files_acorn() {
     source $GOGODUCK_NO_MAIN
     local tmp_file=`mktemp`
     _get_list_of_urls profiles/default acorn_hourly_avg_sag_nonqc_timeseries_url $tmp_file "TIME,2013-12-21T00:30:00.000Z,2013-12-21T04:30:00.000Z;LATITUDE,-36.375741295316,-35.683114342188;LONGITUDE,134.60681553516,136.11743565234" acorn_hourly_avg_sag_nonqc_timeseries_url
@@ -63,7 +64,7 @@ test_get_files_acorn() {
 }
 
 # test file limit in gogoduck, not allowing processing of too many files
-test_file_limit() {
+_test_file_limit() {
     source $GOGODUCK_NO_MAIN
 
     local tmp_file=`mktemp`
@@ -84,7 +85,7 @@ test_file_limit() {
 }
 
 # test for acorn metadata update
-test_header_acorn_metadata() {
+_test_header_acorn_metadata() {
     source $GOGODUCK_NO_MAIN
     local tmp_netcdf=`mktemp`
 
@@ -131,7 +132,7 @@ test_header_acorn_metadata() {
 }
 
 # integration test for testing acorn
-test_aggregation_acorn_file_size() {
+_test_aggregation_acorn_file_size() {
     source $GOGODUCK_NO_MAIN
     local tmp_output_file=`mktemp`
     gogoduck_main \
@@ -149,7 +150,7 @@ test_aggregation_acorn_file_size() {
 }
 
 # integration test for testing acorn
-test_aggregation_gsla() {
+_test_aggregation_gsla() {
     source $GOGODUCK_NO_MAIN
     local tmp_output_file=`mktemp`
     gogoduck_main \
@@ -164,6 +165,37 @@ test_aggregation_gsla() {
     # expect something like 60KB
     assertTrue 'gsla aggregation file size is around 60KB' \
         "[ $file_size -lt 80000 ] && [ $file_size -gt 40000 ]"
+}
+
+# test for subset command in CARS profile, should replace 'TIME' with 'DAY_OF_YEAR'
+test_cars_subset_parameters() {
+    source profiles/cars
+    local cars_subset_command=`get_subset_command \
+        cars \
+        "TIME,2009-06-01T00:30:00.000Z,2009-12-01T00:30:00.000Z;LATITUDE,-90.0,90.0;LONGITUDE,-180.0,180.0"`
+
+    # expect something like 60KB
+    assertTrue 'cars replaces TIME with DAY_OF_YEAR' \
+        "[ '$cars_subset_command' = '-d DAY_OF_YEAR,2009-06-01T00:30:00.000Z,2009-12-01T00:30:00.000Z -d LATITUDE,-90.0,90.0 -d LONGITUDE,-180.0,180.0' ]"
+}
+
+# test aggregation of CARS
+# disabled by default, just because it takes a while (downloads 300MB)
+_DISABLED_test_cars_aggregation() {
+    source $GOGODUCK_NO_MAIN
+    local tmp_output_file=`mktemp`
+    gogoduck_main \
+        100 \
+        "cars" \
+        "TIME,2009-06-01T00:30:00.000Z,2009-12-01T00:30:00.000Z;LATITUDE,-90.0,90.0;LONGITUDE,-180.0,180.0" \
+        $tmp_output_file >& /dev/null
+
+    local -i file_size=`cat $tmp_output_file | wc --bytes`
+    rm -f $tmp_output_file
+
+    # expect something like 90MB
+    assertTrue 'cars aggregation file size is around 60KB' \
+        "[ $file_size -lt 100000000 ] && [ $file_size -gt 80000000 ]"
 }
 
 ##################
