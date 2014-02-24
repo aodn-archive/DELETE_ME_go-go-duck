@@ -43,6 +43,19 @@ grails.exceptionresolver.params.exclude = ['password']
 // configure auto-caching of queries by default (if false you can cache individual queries with 'cache: true')
 grails.hibernate.cache.queries = false
 
+
+grails {
+    mail {
+        'default' {
+            from = "gogduck@emii.org.au"
+        }
+
+        host = "localhost"
+        port = 25
+        props = ["mail.smtp.auth": "false"]
+    }
+}
+
 worker {
     fileLimit = 100
     outputFilename = 'output.nc'

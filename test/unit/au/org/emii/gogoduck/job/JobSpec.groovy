@@ -60,4 +60,16 @@ class JobSpec extends Specification {
         job.subsetDescriptor.spatialExtent.south == "-33.433849"
         job.subsetDescriptor.temporalExtent.start == "2013-11-20T00:30:00.000Z"
     }
+
+    def "aggr URL"() {
+        given:
+        def job = TestHelper.createJob()
+        def jobUuid = '1234'
+        job.uuid = jobUuid
+        def serverURL = 'http://localhost:8080/gogoduck'
+        job.grailsApplication = [ config: [ grails: [ serverURL: serverURL ] ] ]
+
+        expect:
+        job.getAggrUrl().toString() == "${serverURL}/aggr/${jobUuid}"
+    }
 }

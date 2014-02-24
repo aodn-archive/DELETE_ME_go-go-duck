@@ -31,11 +31,7 @@ grails.project.dependency.resolution = {
         mavenLocal()
         mavenCentral()
 
-        // uncomment these (or add new ones) to enable remote dependency resolution from public Maven repositories
-        //mavenRepo "http://snapshots.repository.codehaus.org"
-        //mavenRepo "http://repository.codehaus.org"
-        //mavenRepo "http://download.java.net/maven/2/"
-        //mavenRepo "http://repository.jboss.com/maven2/"
+        mavenRepo "http://download.java.net/maven/2/"
     }
 
     dependencies {
@@ -43,6 +39,10 @@ grails.project.dependency.resolution = {
     }
 
     plugins {
+        compile ':cache:1.0.1'
+        compile ":mail:1.0.1"
+
+        runtime ":database-migration:1.2.1"
         runtime ":hibernate:$grailsVersion"
         runtime ":jquery:1.8.3"
         runtime ":resources:1.1.6"
@@ -51,15 +51,6 @@ grails.project.dependency.resolution = {
             exclude "spock-grails-support"
         }
 
-        // Uncomment these (or add new ones) to enable additional resources capabilities
-        //runtime ":zipped-resources:1.0"
-        //runtime ":cached-resources:1.0"
-        //runtime ":yui-minify-resources:0.1.4"
-
         build ":tomcat:$grailsVersion"
-
-        runtime ":database-migration:1.2.1"
-
-        compile ':cache:1.0.1'
     }
 }
