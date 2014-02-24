@@ -30,7 +30,7 @@ class Job {
     }
 
     URL getAggrUrl() {
-        new URL("${grailsApplication?.config.grails.serverURL}${File.separator}aggr${File.separator}${uuid}")
+        new URL("${grailsApplication?.config?.grails?.serverURL}${File.separator}aggr${File.separator}${uuid}")
     }
 
     public String toJsonString() {
