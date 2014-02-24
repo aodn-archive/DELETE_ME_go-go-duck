@@ -70,6 +70,13 @@ _enforce_file_limit() {
     fi
 }
 
+# returns 0 if file has .gz suffix, 1 otherwise
+# $1 - file to check
+_is_gzipped() {
+    local file="$1"; shift
+    [ "${file: -3}" = ".gz" ]
+}
+
 # downloads all files (or link them)
 # $1 - directory to download files to
 # $2 - file containing liste of URLs to download
@@ -84,7 +91,7 @@ _get_files() {
             # trim file:// part
             url=${url:7}
 
-            if [ "${url: -3}" = ".gz" ]; then
+            if _is_gzipped $url; then
                 logger_info "gunzipping: '$url' to '$dir/$file_basename'"
                 gunzip -c $url > $dir/$file_basename
             else
@@ -105,7 +112,7 @@ _get_files() {
             fi
 
             # if suffix is .gz, gunzip it!
-            if [ "${url: -3}" = ".gz" ]; then
+            if _is_gzipped $url; then
                 logger_info "gunzipping: '$dir/$file_basename'"
                 gunzip $dir/$file_basename
             fi

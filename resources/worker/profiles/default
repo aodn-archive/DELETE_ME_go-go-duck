@@ -5,6 +5,13 @@ declare -r URL_PREFIX_PATTERN=/mnt/imos-t3/
 declare -r URL_PREFIX_REPLACE=http://data.aodn.org.au/
 declare -r GEOSERVER_URL=http://geoserver-123.aodn.org.au/geoserver
 
+# returns 0 if given file can be accessed by filesystem, 1 otherwise
+# $1 - file to check
+can_access_via_fs() {
+    local file=$1; shift
+    test -f $file
+}
+
 # this function takes a subset and should output the list of urls to the given
 # file
 # $1 - profile
@@ -31,7 +38,7 @@ get_list_of_urls() {
 
     # post process file, see if filesystem is mounted?
     local sample_file=`head -1 $output_file`
-    if [ -f $sample_file ]; then
+    if can_access_via_fs $sample_file; then
         # if the first file exists on disk, append a file:// prefix
         # this will use the linking method which is faster
         logger_info "Using linking method, could find '$sample_file' in its location"
