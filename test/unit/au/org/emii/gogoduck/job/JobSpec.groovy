@@ -5,6 +5,9 @@ import spock.lang.Specification
 
 import au.org.emii.gogoduck.test.TestHelper
 
+// Hack to load converters:
+// http://grails.1312388.n4.nabble.com/Error-using-as-JSON-converter-in-a-service-in-a-unit-test-tp4637433p4637457.html
+@TestFor(JobController)
 class JobSpec extends Specification {
 
     def jobAsJson = '''{
