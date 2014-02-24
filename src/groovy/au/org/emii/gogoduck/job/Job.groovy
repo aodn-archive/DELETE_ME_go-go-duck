@@ -5,6 +5,8 @@ import au.org.emii.gogoduck.json.JSONSerializer
 
 @grails.validation.Validateable
 class Job {
+    def grailsApplication
+
     String uuid
     String emailAddress
     String layerName
@@ -25,6 +27,10 @@ class Job {
 
     String toString() {
         toJsonString()
+    }
+
+    URL getAggrUrl() {
+        new URL("${grailsApplication?.config.grails.serverURL}${File.separator}aggr${File.separator}${uuid}")
     }
 
     public String toJsonString() {

@@ -16,6 +16,14 @@
 # GNU General Public License for more details.
 #
 
+test_is_gzip() {
+    source $GOGODUCK_NO_MAIN
+    assertTrue 'gzip suffix' '_is_gzipped test.gz'
+    assertTrue 'gzip suffix with space' '_is_gzipped "test 2.gz"'
+    assertFalse 'no suffix' '_is_gzipped test.bz'
+    assertFalse 'with space' '_is_gzipped "test 2.bz"'
+}
+
 # given a plugin name, it'll find the most appropriate plugin for it
 test_get_profile_module() {
     source $GOGODUCK_NO_MAIN
@@ -152,7 +160,6 @@ test_aggregation_gsla() {
 
     local -i file_size=`cat $tmp_output_file | wc --bytes`
     rm -f $tmp_output_file
-    echo $file_size
 
     # expect something like 60KB
     assertTrue 'gsla aggregation file size is around 60KB' \
