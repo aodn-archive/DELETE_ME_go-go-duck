@@ -25,12 +25,17 @@ class JobExecutorServiceSpec extends Specification {
         }
     }
 
-    def "runs worker"() {
+    def "run sends 'job registered' notification email"() {
+        given:
+        def job = TestHelper.createJob()
+        def mailService = Mock(MailService)
+        service.mailService = mailService
+
         when:
         service.run(job)
 
         then:
-        1 * worker.run()
+        1 * mailService.sendMail()
     }
 
     def "makes job dir, writes job as json to file"() {
@@ -40,5 +45,13 @@ class JobExecutorServiceSpec extends Specification {
         then:
         1 * jobStoreService.makeDir(job)
         1 * jobStoreService.writeToFileAsJson(job)
+    }
+
+    def "runs worker"() {
+        when:
+        service.run(job)
+
+        then:
+        1 * worker.run()
     }
 }

@@ -6,6 +6,7 @@ class JobExecutorService {
 
     def grailsApplication
     def jobStoreService
+    def mailService
 
     def run(job) {
         jobStoreService.makeDir(job)
