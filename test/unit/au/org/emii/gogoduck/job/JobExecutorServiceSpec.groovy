@@ -9,18 +9,23 @@ import au.org.emii.gogoduck.worker.Worker
 @TestFor(JobExecutorService)
 class JobExecutorServiceSpec extends Specification {
 
-    def "runs worker"() {
-        given:
-        def job = TestHelper.createJob()
-        def jobStoreService = Mock(JobStoreService)
+    def job
+    def jobStoreService
+    def worker
+
+    def setup() {
+        job = TestHelper.createJob()
+        jobStoreService = Mock(JobStoreService)
         service.jobStoreService = jobStoreService
 
-        def worker = Mock(Worker)
+        worker = Mock(Worker)
 
         service.metaClass.getWorker = {
             worker
         }
+    }
 
+    def "runs worker"() {
         when:
         service.run(job)
 
@@ -29,17 +34,6 @@ class JobExecutorServiceSpec extends Specification {
     }
 
     def "makes job dir, writes job as json to file"() {
-        given:
-        def job = TestHelper.createJob()
-        def jobStoreService = Mock(JobStoreService)
-        service.jobStoreService = jobStoreService
-
-        def worker = Mock(Worker)
-
-        service.metaClass.getWorker = {
-            worker
-        }
-
         when:
         service.run(job)
 
