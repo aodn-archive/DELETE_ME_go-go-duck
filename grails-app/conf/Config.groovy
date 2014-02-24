@@ -50,6 +50,7 @@ grails {
             from = "gogduck@emii.org.au"
         }
 
+        // Configurable mail properties: see http://grails.org/plugin/mail
         host = "localhost"
         port = 25
         props = ["mail.smtp.auth": "false"]
@@ -59,6 +60,10 @@ grails {
 worker {
     fileLimit = 100
     outputFilename = 'output.nc'
+    cmd = {
+        "resources/worker/gogoduck.sh ${it}"
+    }
+    outputPath = '/tmp/jobs'
 }
 
 environments {
@@ -73,14 +78,6 @@ environments {
     }
     production {
         grails.logging.jul.usebridge = false
-
-        // TODO: these need to be configured by chef.
-        worker {
-            cmd = {
-                "resources/worker/gogoduck.sh ${it}"
-            }
-            outputPath = '/tmp/jobs'
-        }
     }
 }
 
