@@ -9,16 +9,19 @@ import au.org.emii.gogoduck.test.TestHelper
 class JobExecutorServiceSpec extends Specification {
 
     def job
-    def jobExecutorJob
     def notificationService
+    def triggerNowCalled
 
     def setup() {
         job = TestHelper.createJob()
         job.uuid = '1234'
-        jobExecutorJob = Mock(JobExecutorJob)
-        service.jobExecutorJob = jobExecutorJob
         notificationService = Mock(NotificationService)
         service.notificationService = notificationService
+
+        triggerNowCalled = false
+        JobExecutorJob.metaClass.static.triggerNow = {
+            triggerNowCalled = (it == [job: job])
+        }
     }
 
     def "run sends 'job registered' notification"() {
@@ -29,11 +32,12 @@ class JobExecutorServiceSpec extends Specification {
         1 * notificationService.sendJobRegisteredNotification(job)
     }
 
-    def "calls run on job executor job"() {
+    def "triggers job executor job"() {
         when:
+
         service.run(job)
 
         then:
-        1 * jobExecutorJob.run(job)
+        triggerNowCalled
     }
 }
