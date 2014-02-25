@@ -11,6 +11,10 @@ class JobExecutorJob {
     def jobStoreService
     def notificationService
 
+    def execute(context) {
+        run(context.mergedJobDataMap.get('job'))
+    }
+
     def run(job) {
         jobStoreService.makeDir(job)
         jobStoreService.writeToFileAsJson(job)
