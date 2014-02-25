@@ -12,6 +12,26 @@ can_access_via_fs() {
     test -f $file
 }
 
+# formats output file with either a file:// prefix or http://data.aodn.org.au/
+# prefix, depending if we can or cannot access the files locally
+# $1 - list of urls file
+format_output_file() {
+    local file=$1; shift
+
+    # post process file, see if filesystem is mounted?
+    local sample_file=`head -1 $file`
+    if can_access_via_fs $sample_file; then
+        # if the first file exists on disk, append a file:// prefix
+        # this will use the linking method which is faster
+        logger_info "Using linking method, could find '$sample_file' in its location"
+        sed -i -e 's#^#file://#' $file
+    else
+        # if not, just use the download method
+        logger_info "Using HTTP method, could not find '$sample_file' in its location"
+        sed -i -e "s#${URL_PREFIX_PATTERN}#${URL_PREFIX_REPLACE}#" $file
+    fi
+}
+
 # this function takes a subset and should output the list of urls to the given
 # file
 # $1 - profile
@@ -36,18 +56,7 @@ get_list_of_urls() {
     curl -s "$url" --get --data-urlencode "$parameters" |\
         tail -n+2 | cut -d',' -f3 > $output_file
 
-    # post process file, see if filesystem is mounted?
-    local sample_file=`head -1 $output_file`
-    if can_access_via_fs $sample_file; then
-        # if the first file exists on disk, append a file:// prefix
-        # this will use the linking method which is faster
-        logger_info "Using linking method, could find '$sample_file' in its location"
-        sed -i -e 's#^#file://#' $output_file
-    else
-        # if not, just use the download method
-        logger_info "Using HTTP method, could not find '$sample_file' in its location"
-        sed -i -e "s#${URL_PREFIX_PATTERN}#${URL_PREFIX_REPLACE}#" $output_file
-    fi
+    format_output_file $output_file
 }
 
 # this function takes a semicolon separated subset and should produce viable

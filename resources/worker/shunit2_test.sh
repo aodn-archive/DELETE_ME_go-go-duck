@@ -16,6 +16,7 @@
 # GNU General Public License for more details.
 #
 
+# test for .gz suffix in file
 test_is_gzip() {
     source $GOGODUCK_NO_MAIN
     assertTrue 'gzip suffix' '_is_gzipped test.gz'
@@ -164,6 +165,56 @@ test_aggregation_gsla() {
     # expect something like 60KB
     assertTrue 'gsla aggregation file size is around 60KB' \
         "[ $file_size -lt 80000 ] && [ $file_size -gt 40000 ]"
+}
+
+# test for subset command in CARS profile, should replace 'TIME' with 'DAY_OF_YEAR'
+test_cars_subset_parameters() {
+    source profiles/cars
+    local cars_subset_command=`get_subset_command \
+        cars \
+        "TIME,2009-06-01T00:30:00.000Z,2009-12-01T00:30:00.000Z;LATITUDE,-90.0,90.0;LONGITUDE,-180.0,180.0"`
+
+    # expect something like 60KB
+    assertTrue 'cars replaces TIME with DAY_OF_YEAR' \
+        "[ '$cars_subset_command' = '-d DAY_OF_YEAR,2009-06-01T00:30:00.000Z,2009-12-01T00:30:00.000Z -d LATITUDE,-90.0,90.0 -d LONGITUDE,-180.0,180.0' ]"
+}
+
+# test aggregation of CARS
+# disabled by default, just because it takes a while (downloads 300MB)
+_DISABLED_test_cars_aggregation() {
+    source $GOGODUCK_NO_MAIN
+    local tmp_output_file=`mktemp`
+    gogoduck_main \
+        100 \
+        "cars" \
+        "TIME,2009-06-01T00:30:00.000Z,2009-12-01T00:30:00.000Z;LATITUDE,-90.0,90.0;LONGITUDE,-180.0,180.0" \
+        $tmp_output_file >& /dev/null
+
+    local -i file_size=`cat $tmp_output_file | wc --bytes`
+    rm -f $tmp_output_file
+
+    # expect something like 90MB
+    assertTrue 'cars aggregation file size is around 60KB' \
+        "[ $file_size -lt 100000000 ] && [ $file_size -gt 80000000 ]"
+}
+
+# test aggregation of CARS with DEPTH passed
+# disabled by default, just because it takes a while (downloads 300MB)
+_DISABLED_test_cars_aggregation_with_depth() {
+    source $GOGODUCK_NO_MAIN
+    local tmp_output_file=`mktemp`
+    gogoduck_main \
+        100 \
+        "cars" \
+        "TIME,2009-06-01T00:30:00.000Z,2009-12-01T00:30:00.000Z;DEPTH,50.0,50.0;LATITUDE,-90.0,90.0;LONGITUDE,-180.0,180.0" \
+        $tmp_output_file >& /dev/null
+
+    local -i file_size=`cat $tmp_output_file | wc --bytes`
+    rm -f $tmp_output_file
+
+    # expect something like 25MB
+    assertTrue 'cars aggregation file size is around 60KB' \
+        "[ $file_size -lt 30000000 ] && [ $file_size -gt 20000000 ]"
 }
 
 ##################

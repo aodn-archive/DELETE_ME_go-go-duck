@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# overriding the default profile a bit
+source profiles/default
+
+declare -r CARS_DATA="/mnt/imos-t3/climatology/CARS/2009/eMII-product/CARS2009_World_monthly.nc"
+
+# this function takes a subset and should output the list of urls to the given
+# file
+# $1 - profile
+# $2 - output file
+# $3 - subset
+get_list_of_urls() {
+    local profile=$1; shift
+    local output_file=$1; shift
+    local subset="$1"; shift
+
+    echo $CARS_DATA > $output_file
+
+    format_output_file $output_file
+}
+
+# this function takes a semicolon separated subset and should produce viable
+# parameters for the ncks command
+# for the default implementation we just subset on all given parameters
+# $1 - profile name
+# $2 - subset to apply
+get_subset_command() {
+    local profile=$1; shift
+    local subset="$1"; shift
+
+    # for CARS layers, we'll need to change 'TIME', to be 'DAY_OF_YEAR'
+    subset=`echo $subset | sed -e 's#\bTIME\b#DAY_OF_YEAR##';`
+
+    # LATITUDE,-33.433849,-30.150743;LONGTITUDE,113.15197,115.741219 becomes:
+    # -d LATITUDE,-33.433849,-30.150743 -d LONGTITUDE,113.15197,115.741219
+    local ncks_arguments="-d "`echo $subset | sed -e 's/;$//' -e 's/;/ -d /g'`
+    echo $ncks_arguments
+}
