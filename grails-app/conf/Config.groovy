@@ -43,6 +43,7 @@ grails.exceptionresolver.params.exclude = ['password']
 // configure auto-caching of queries by default (if false you can cache individual queries with 'cache: true')
 grails.hibernate.cache.queries = false
 
+grails.serverURL = "http://localhost:8080/go-go-duck"
 
 grails.serverURL = "http://localhost:8080/go-go-duck"
 
