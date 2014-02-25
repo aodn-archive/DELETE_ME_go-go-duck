@@ -7,7 +7,7 @@ class NotificationService {
     def messageSource
 
     def sendJobRegisteredNotification(job) {
-        mailService.sendMail {
+        sendMailAndLog {
             to job.emailAddress.toString()
             subject getRegisteredNotificationSubject(job)
             body getRegisteredNotificationBody(job)
@@ -31,7 +31,7 @@ class NotificationService {
     }
 
     def sendJobSuccessNotification(job) {
-        mailService.sendMail {
+        sendMailAndLog {
             to job.emailAddress.toString()
             subject getSuccessNotificationSubject(job)
             body getSuccessNotificationBody(job)
@@ -52,5 +52,18 @@ class NotificationService {
             [job.uuid, job.aggrUrl].toArray(),
             LocaleContextHolder.locale
         )
+    }
+
+    def sendMailAndLog(Closure callable) {
+        if (log.isDebugEnabled()) {
+            callable.delegate = this
+            callable.call()
+        }
+
+        mailService.sendMail callable
+    }
+
+    def methodMissing(String name, args) {
+        log.debug("sending email, ${name}: ${args}")
     }
 }
