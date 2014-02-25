@@ -20,8 +20,10 @@ SCRIPT
 
     chef.json = {
       'postfix' => {
-        'inet_interfaces' => 'all',
-        'mail_relay_networks' => '127.0.0.0/8, 10.0.2.0/24'
+        'main' => {
+          'inet_interfaces' => 'all',
+          'mynetworks' => '127.0.0.0/8, 10.0.2.0/24'
+        }
       }
     }
   end
