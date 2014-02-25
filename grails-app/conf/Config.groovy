@@ -71,7 +71,7 @@ environments {
         grails.logging.jul.usebridge = true
         worker {
             cmd = {
-                ['vagrant',  'ssh', '-c', "/vagrant/resources/worker/gogoduck.sh ${it}"]
+                "echo mocked command: \"resources/worker/gogoduck.sh ${it}\""
             }
             outputPath = 'jobs'
         }
