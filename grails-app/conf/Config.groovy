@@ -55,6 +55,7 @@ grails {
         port = 25
         props = ["mail.smtp.auth": "false"]
     }
+    serverURL = "http://localhost:8080/gogoduck"  // TODO: does this need to be set in config, or can we query (from the servlet context)?
 }
 
 worker {
@@ -69,6 +70,11 @@ worker {
 environments {
     development {
         grails.logging.jul.usebridge = true
+        grails {
+            mail {
+                port = 1025
+            }
+        }
         worker {
             cmd = {
                 ['vagrant',  'ssh', '-c', "/vagrant/resources/worker/gogoduck.sh ${it}"]
