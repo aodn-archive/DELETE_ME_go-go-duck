@@ -6,16 +6,25 @@ Vagrant.configure("2") do |config|
   config.vm.box = ENV['VAGRANT_BOX'] || "precise64-chef-client-omnibus-11.4.0-0.4"
   config.vm.box_url = ENV['VAGRANT_BOX_URL'] || "http://binary.aodn.org.au/static/boxes/precise64-chef-client-omnibus-11.4.0-0.4.box"
 
-  # TODO: replace with chef recipe when it's available...
+  config.vm.network "forwarded_port", guest: 25, host: 1025
+
   $script = <<SCRIPT
-NCO_PACKAGE=nco_4.3.4-1_amd64.deb
-wget -O /tmp/${NCO_PACKAGE} https://jenkins.aodn.org.au/job/nco/lastSuccessfulBuild/artifact/resources/worker/${NCO_PACKAGE}
-(sudo dpkg -i /tmp/${NCO_PACKAGE}; true)
-sudo apt-get -f -y install
-sudo apt-get install -y netcdf-bin
-ln -s /vagrant/jobs jobs
+ln -s /vagrant/jobs jobs || true
 SCRIPT
 
   config.vm.provision "shell", inline: $script
 
+  config.vm.provision "chef_solo" do |chef|
+    chef.add_recipe "imos_core::nco"
+    chef.add_recipe "postfix"
+
+    chef.json = {
+      'postfix' => {
+        'main' => {
+          'inet_interfaces' => 'all',
+          'mynetworks' => '127.0.0.0/8, 10.0.2.0/24'
+        }
+      }
+    }
+  end
 end
