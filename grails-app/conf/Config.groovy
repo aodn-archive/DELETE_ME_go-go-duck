@@ -43,9 +43,27 @@ grails.exceptionresolver.params.exclude = ['password']
 // configure auto-caching of queries by default (if false you can cache individual queries with 'cache: true')
 grails.hibernate.cache.queries = false
 
+
+grails {
+    mail {
+        'default' {
+            from = "gogduck@emii.org.au"
+        }
+
+        // Configurable mail properties: see http://grails.org/plugin/mail
+        host = "localhost"
+        port = 25
+        props = ["mail.smtp.auth": "false"]
+    }
+}
+
 worker {
     fileLimit = 100
     outputFilename = 'output.nc'
+    cmd = {
+        "resources/worker/gogoduck.sh ${it}"
+    }
+    outputPath = '/tmp/jobs'
 }
 
 environments {
@@ -60,14 +78,6 @@ environments {
     }
     production {
         grails.logging.jul.usebridge = false
-
-        // TODO: these need to be configured by chef.
-        worker {
-            cmd = {
-                "resources/worker/gogoduck.sh ${it}"
-            }
-            outputPath = '/tmp/jobs'
-        }
     }
 }
 

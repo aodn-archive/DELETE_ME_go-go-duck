@@ -5,6 +5,9 @@ import spock.lang.Specification
 
 import au.org.emii.gogoduck.test.TestHelper
 
+// Hack to load converters:
+// http://grails.1312388.n4.nabble.com/Error-using-as-JSON-converter-in-a-service-in-a-unit-test-tp4637433p4637457.html
+@TestFor(JobController)
 class JobSpec extends Specification {
 
     def jobAsJson = '''{
@@ -59,5 +62,17 @@ class JobSpec extends Specification {
         job.layerName == "some_layer"
         job.subsetDescriptor.spatialExtent.south == "-33.433849"
         job.subsetDescriptor.temporalExtent.start == "2013-11-20T00:30:00.000Z"
+    }
+
+    def "aggr URL"() {
+        given:
+        def job = TestHelper.createJob()
+        def jobUuid = '1234'
+        job.uuid = jobUuid
+        def serverURL = 'http://localhost:8080/gogoduck'
+        job.grailsApplication = [ config: [ grails: [ serverURL: serverURL ] ] ]
+
+        expect:
+        job.getAggrUrl().toString() == "${serverURL}/aggr/${jobUuid}"
     }
 }
