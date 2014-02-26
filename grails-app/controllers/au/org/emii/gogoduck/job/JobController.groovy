@@ -8,11 +8,11 @@ class JobController {
 
     def save(Job job) {
         if (job.hasErrors()) {
-            render (status: 400, text: "Invalid request format: ${job.errors}")
+            render(status: 400, template: "error", model: [job: job])
         }
         else {
             jobExecutorService.run(job)
-            render (status: 200, text: job.toJsonString())
+            render(status: 200, text: job.toJsonString())
         }
     }
 }
