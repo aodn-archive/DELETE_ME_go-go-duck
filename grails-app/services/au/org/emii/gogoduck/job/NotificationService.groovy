@@ -55,6 +55,27 @@ class NotificationService {
     }
 
     def sendJobFailureNotification(job, errMsg) {
+        sendMailAndLog {
+            to job.emailAddress.toString()
+            subject getFailureNotificationSubject(job)
+            body getFailureNotificationBody(job, errMsg)
+        }
+    }
+
+    def getFailureNotificationSubject(job) {
+        messageSource.getMessage(
+            'job.failure.subject',
+            [job.uuid].toArray(),
+            LocaleContextHolder.locale
+        )
+    }
+
+    def getFailureNotificationBody(job, errMsg) {
+        messageSource.getMessage(
+            'job.failure.body',
+            [job.uuid, errMsg].toArray(),
+            LocaleContextHolder.locale
+        )
     }
 
     def sendMailAndLog(Closure callable) {
