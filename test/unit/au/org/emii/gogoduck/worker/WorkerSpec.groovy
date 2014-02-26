@@ -8,9 +8,16 @@ import au.org.emii.gogoduck.test.TestHelper
 
 class WorkerSpec extends Specification {
 
+    def job
+    def worker
+
+    def setup() {
+        job = TestHelper.createJob()
+        worker = new Worker(job: job)
+    }
+
     def "generates command line from job"() {
         given:
-        def job = TestHelper.createJob()
         def worker = new Worker(
             shellCmd: { "gogoduck.sh ${it}" },
             job: job,
@@ -27,7 +34,6 @@ class WorkerSpec extends Specification {
 
     def "runs command"() {
         given:
-        def worker = new Worker()
         worker.job = [ uuid: '123' ]
         worker.metaClass.getCmd = {
             'thecommand'
@@ -47,10 +53,9 @@ class WorkerSpec extends Specification {
         executedCmd == 'thecommand'
     }
 
+    // TODO: can we parameterise the following two methods?
     def "calls 'successHandler' on success"() {
         given:
-        def job = TestHelper.createJob()
-        def worker = new Worker(job: job)
         def successCalled = false
         def successHandler = {
             Job ajob ->
@@ -80,8 +85,6 @@ class WorkerSpec extends Specification {
 
     def "calls 'failureHandler' on success"() {
         given:
-        def job = TestHelper.createJob()
-        def worker = new Worker(job: job)
         def successCalled = false
         def successHandler = {
             Job ajob ->
