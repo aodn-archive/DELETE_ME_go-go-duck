@@ -54,6 +54,9 @@ class NotificationService {
         )
     }
 
+    def sendJobFailureNotification(job, errMsg) {
+    }
+
     def sendMailAndLog(Closure callable) {
         if (log.isDebugEnabled()) {
             callable.delegate = this

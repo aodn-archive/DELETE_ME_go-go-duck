@@ -9,7 +9,7 @@ class Worker {
     String outputFilename
     Integer fileLimit
 
-    void run() {
+    void run(successHandler, failureHandler) {
         execute(getCmd())
     }
 

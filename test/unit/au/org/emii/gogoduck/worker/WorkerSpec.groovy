@@ -40,7 +40,7 @@ class WorkerSpec extends Specification {
         worker.metaClass.writeJobToJsonFile = { }
 
         when:
-        worker.run()
+        worker.run({}, {})
 
         then:
         executedCmd == 'thecommand'

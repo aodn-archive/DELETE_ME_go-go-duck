@@ -18,8 +18,7 @@ class JobExecutorJob {
     def run(job) {
         jobStoreService.makeDir(job)
         jobStoreService.writeToFileAsJson(job)
-        getWorker(job).run()
-        notificationService.sendJobSuccessNotification(job)
+        getWorker(job).run(successHandler, failureHandler)
     }
 
     def getWorker(job) {
@@ -29,5 +28,15 @@ class JobExecutorJob {
             outputFilename: jobStoreService.getAggrPath(job),
             fileLimit: grailsApplication.config.worker.fileLimit
         )
+    }
+
+    def successHandler = {
+        job ->
+        notificationService.sendJobSuccessNotification(job)
+    }
+
+    def failureHandler = {
+        job, errMsg ->
+            notificationService.sendJobFailureNotification(job, errMsg)
     }
 }

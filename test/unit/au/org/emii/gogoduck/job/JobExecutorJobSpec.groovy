@@ -26,6 +26,7 @@ class JobExecutorJobSpec extends Specification {
         worker = Mock(Worker)
 
         jobExecutorJob.metaClass.getWorker = {
+            job ->
             worker
         }
     }
@@ -44,14 +45,25 @@ class JobExecutorJobSpec extends Specification {
         jobExecutorJob.run(job)
 
         then:
-        1 * worker.run()
+        1 * worker.run(jobExecutorJob.successHandler, jobExecutorJob.failureHandler)
     }
 
-    def "run sends 'job success' notification"() {
+    def "success handler sends 'job success' notification"() {
         when:
-        jobExecutorJob.run(job)
+        jobExecutorJob.successHandler.call(job)
 
         then:
         1 * notificationService.sendJobSuccessNotification(job)
+    }
+
+    def "failure handler sends 'job failed' notification"() {
+        given:
+        def errMsg = 'something died'
+
+        when:
+        jobExecutorJob.failureHandler.call(job, errMsg)
+
+        then:
+        1 * notificationService.sendJobFailureNotification(job, errMsg)
     }
 }
