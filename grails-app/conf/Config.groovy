@@ -44,6 +44,8 @@ grails.exceptionresolver.params.exclude = ['password']
 grails.hibernate.cache.queries = false
 
 
+grails.serverURL = "http://localhost:8080/go-go-duck"
+
 grails {
     mail {
         'default' {
@@ -69,9 +71,10 @@ worker {
 environments {
     development {
         grails.logging.jul.usebridge = true
+        grails.mail.disabled=true
         worker {
             cmd = {
-                ['vagrant',  'ssh', '-c', "/vagrant/resources/worker/gogoduck.sh ${it}"]
+                "echo mocked command: \"resources/worker/gogoduck.sh ${it}\""
             }
             outputPath = 'jobs'
         }
@@ -104,7 +107,7 @@ log4j = {
     environments {
         development {
             debug 'grails.app.controllers',
-                  'grails.app.services',
+                  'grails.app.services.au.org.emii.gogoduck.job.NotificationService',
                   'au.org.emii.gogoduck.worker.Worker'
         }
     }

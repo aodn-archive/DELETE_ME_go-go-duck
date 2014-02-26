@@ -27,16 +27,9 @@ Supposing you have a JSON document such as the one at [doc/example_job_request.j
 }
 ```
 
-then the service can be called/test like this:
+then a job cab be requested like this:
 
 ```
-# Bring up a VM containing NetCDF command line dependencies
-vagrant up
-
-# Start the web-app
-grails run-app
-
-# Request a new Job
 curl -v --data @doc/example_job_request.json --header "Content-Type: application/json" http://localhost:8080/go-go-duck/job
 ```
 
@@ -48,7 +41,7 @@ curl -v -O -J --get http://localhost:8080/go-go-duck/aggr/8d0ed017
 
 where `8d0ed017` is the job ID.
 
-# Origin Of The Name
+## Origin Of The Name
 
 Originally there was AODAAC, which is the "Australian Oceans DAAC", a heavy
 weight aggregator which /should/ do the same job as GoGoDuck and much more.
