@@ -45,8 +45,6 @@ grails.hibernate.cache.queries = false
 
 grails.serverURL = "http://localhost:8080/go-go-duck"
 
-grails.serverURL = "http://localhost:8080/go-go-duck"
-
 grails {
     mail {
         'default' {
