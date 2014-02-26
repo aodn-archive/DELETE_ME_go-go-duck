@@ -10,5 +10,7 @@ class UrlMappings {
                     action = [GET: "list", POST: "save"]
                 }
         }
+
+        "/"(view: "/index")
     }
 }
