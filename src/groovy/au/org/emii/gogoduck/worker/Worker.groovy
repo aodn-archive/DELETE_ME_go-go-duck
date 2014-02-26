@@ -10,7 +10,14 @@ class Worker {
     Integer fileLimit
 
     void run(successHandler, failureHandler) {
-        execute(getCmd())
+        def process = execute(getCmd())
+
+        if (process.exitValue() == 0) {
+            successHandler(job)
+        }
+        else {
+            failureHandler(job, "Fixed error message")
+        }
     }
 
     def getCmd() {
@@ -29,18 +36,20 @@ class Worker {
         shellCmd.call(cmdOptions)
     }
 
-    void execute(cmd) {
+    Process execute(cmd) {
         log.info("Executing command: '${cmd}'")
 
-        def sout = new StringBuffer()
-        def serr = new StringBuffer()
+        // def sout = new StringBuffer()
+        // def serr = new StringBuffer()
 
         def proc = cmd.execute()
 
-        proc.consumeProcessOutput(sout, serr)
+        // proc.consumeProcessOutput(sout, serr)
         proc.waitFor()
 
-        log.debug("Command output: ${sout}")
-        log.debug("Command error: ${serr}")
+        // log.debug("Command output: ${sout}")
+        // log.debug("Command error: ${serr}")
+
+        return proc
     }
 }

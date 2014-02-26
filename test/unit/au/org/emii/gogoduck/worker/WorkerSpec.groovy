@@ -35,6 +35,7 @@ class WorkerSpec extends Specification {
         def executedCmd
         worker.metaClass.execute = {
             executedCmd = it
+            [ exitValue: { 0 } ]
         }
         worker.metaClass.mkJobDir = { }
         worker.metaClass.writeJobToJsonFile = { }
@@ -44,5 +45,67 @@ class WorkerSpec extends Specification {
 
         then:
         executedCmd == 'thecommand'
+    }
+
+    def "calls 'successHandler' on success"() {
+        given:
+        def job = TestHelper.createJob()
+        def worker = new Worker(job: job)
+        def successCalled = false
+        def successHandler = {
+            Job ajob ->
+            successCalled = (ajob == job)
+        }
+        def failureCalled = false
+        def failureHandler = {
+            Job ajob, String errMs ->
+            failureCalled = (ajob == job)
+        }
+
+        worker.metaClass.execute = {
+            cmd ->
+
+            [ exitValue: { 0 } ]
+        }
+
+        worker.metaClass.getCmd = { "the command" }
+
+        when:
+        worker.run(successHandler, failureHandler)
+
+        then:
+        successCalled
+        !failureCalled
+    }
+
+    def "calls 'failureHandler' on success"() {
+        given:
+        def job = TestHelper.createJob()
+        def worker = new Worker(job: job)
+        def successCalled = false
+        def successHandler = {
+            Job ajob ->
+            successCalled = (ajob == job)
+        }
+        def failureCalled = false
+        def failureHandler = {
+            Job ajob, String errMsg ->
+            failureCalled = (ajob == job)
+        }
+
+        worker.metaClass.execute = {
+            cmd ->
+
+            [ exitValue: { 1 } ]
+        }
+
+        worker.metaClass.getCmd = { "the command" }
+
+        when:
+        worker.run(successHandler, failureHandler)
+
+        then:
+        !successCalled
+        failureCalled
     }
 }
