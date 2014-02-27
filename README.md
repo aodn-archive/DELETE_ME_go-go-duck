@@ -21,7 +21,7 @@ Supposing you have a JSON document such as the one at [doc/example_job_request.j
       north: '-32.150743',
       south: '-33.433849',
       east:  '115.741219',
-      west:  '114.15197'.
+      west:  '114.15197'
     }
   }
 }
