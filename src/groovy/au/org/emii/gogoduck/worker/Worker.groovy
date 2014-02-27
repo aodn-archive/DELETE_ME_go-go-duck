@@ -12,13 +12,22 @@ class Worker {
     Integer fileLimit
 
     void run(successHandler, failureHandler) {
-        def process = execute(getCmd())
 
-        if (process.exitValue() == 0) {
-            successHandler(job)
+        try {
+            def process = execute(getCmd())
+
+            if (process.exitValue() == 0) {
+                successHandler(job)
+            }
+            else {
+                String errMsg = IOUtils.toString(process.getErrorStream(), 'UTF-8')
+                log.error("Worker failed: ${errMsg}")
+                failureHandler(job, errMsg)
+            }
         }
-        else {
-            failureHandler(job, IOUtils.toString(process.getErrorStream(), 'UTF-8'))
+        catch (IOException e) {
+            log.error('Worker failed', e)
+            failureHandler(job, e.message)
         }
     }
 

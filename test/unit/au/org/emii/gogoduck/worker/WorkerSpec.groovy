@@ -63,21 +63,24 @@ class WorkerSpec extends Specification {
             Job ajob ->
             successCalled = (ajob == job)
         }
-        def errMsg = 'some error message'
 
         def failureCalled = false
         def failureHandler = {
             Job ajob, String anErrMsg ->
-            failureCalled = (ajob == job && anErrMsg == errMsg)
+            failureCalled = (ajob == job && anErrMsg == expectErrMsg)
         }
 
         worker.metaClass.execute = {
             cmd ->
 
+                if (executeException) {
+                    throw executeException
+                }
+
                 [
                     exitValue: { exitValue },
                     getErrorStream: {
-                        IOUtils.toInputStream(errMsg, 'UTF-8')
+                        IOUtils.toInputStream(expectErrMsg, 'UTF-8')
                     }
                 ]
         }
@@ -92,8 +95,9 @@ class WorkerSpec extends Specification {
         failureCalled != expectSuccessCalled
 
         where:
-        exitValue | expectSuccessCalled
-        0         | true
-        1         | false
+        exitValue | executeException              | expectErrMsg | expectSuccessCalled
+        0         | null                          | null         | true
+        1         | null                          | 'some error' | false
+        0         | new IOException('cannot run') | 'cannot run' | false
     }
 }
