@@ -69,10 +69,8 @@ class JobSpec extends Specification {
         def job = TestHelper.createJob()
         def jobUuid = '1234'
         job.uuid = jobUuid
-        def serverURL = 'http://localhost:8080/gogoduck'
-        job.grailsApplication = [ config: [ grails: [ serverURL: serverURL ] ] ]
 
         expect:
-        job.getAggrUrl().toString() == "${serverURL}/aggr/${jobUuid}"
+        job.getAggrUrl().toString() == "${job.serverURL}/aggr/${jobUuid}"
     }
 }

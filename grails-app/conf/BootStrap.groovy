@@ -5,9 +5,8 @@ class BootStrap {
     def grailsApplication
 
     def init = { servletContext ->
-        Job.metaClass.getGrailsApplication = {
-            ->
-            grailsApplication
+        Job.metaClass.getServerURL = {
+            grailsApplication.config.grails.serverURL
         }
     }
 

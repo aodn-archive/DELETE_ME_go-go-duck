@@ -4,8 +4,7 @@ import au.org.emii.gogoduck.job.Job
 
 class TestHelper {
     static Job createJob() {
-        return new Job(
-            grailsApplication: [ config: [ grails: [ serverURL: "http://localhost:8080/gogoduck" ] ] ],
+        def job = new Job(
             layerName: 'some_layer',
             emailAddress: 'gogo@duck.com',
             subsetDescriptor: [
@@ -21,5 +20,9 @@ class TestHelper {
                 ]
             ]
         )
+        def serverURL = 'http://localhost:8080/gogoduck'
+        job.metaClass.getServerURL = { serverURL }
+
+        return job
     }
 }
