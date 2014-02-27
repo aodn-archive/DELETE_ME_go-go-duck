@@ -1,3 +1,5 @@
+import javax.naming.InitialContext
+
 grails.project.groupId = appName // change this to alter the default package name and Maven publishing destination
 grails.mime.file.extensions = true // enables the parsing of file extensions from URLs into the request format
 grails.mime.use.accept.header = false
@@ -62,7 +64,7 @@ worker {
     fileLimit = 100
     outputFilename = 'output.nc'
     cmd = {
-        "resources/worker/gogoduck.sh ${it}"
+        "web-app/resources/worker/gogoduck.sh ${it}"
     }
     outputPath = '/tmp/jobs'
 }
@@ -82,6 +84,36 @@ environments {
     production {
         grails.logging.jul.usebridge = false
     }
+}
+
+/**
+ * Instance specific customisation, clearly stolen from:
+ * http://phatness.com/2010/03/how-to-externalize-your-grails-configuration/
+ *
+ * To use set for a specific instance, either set the environment variable "INSTANCE_NAME", or add this in the grails
+ * commandline like so:
+ *
+ * grails -DINSTANCE_NAME=WA run-app
+ *
+ * Instance specific config files are located in $project_home/instances/
+ *
+ * Any configuration found in these instance specific file will OVERRIDE values set in Config.groovy and
+ * application.properties.
+ *
+ * NOTE: app.name and version is ignored in external application.properties
+ */
+if(!grails.config.locations || !(grails.config.locations instanceof List)) {
+    grails.config.locations = []
+}
+
+try {
+    configurationPath = new InitialContext().lookup('java:comp/env/aodn.configuration')
+    grails.config.locations << "file:${configurationPath}"
+
+    println "Loading external config from '$configurationPath'..."
+}
+catch (e) {
+    println "Not loading external config"
 }
 
 def log4jConversionPattern = '%d [%t] %-5p %c - %m%n'
