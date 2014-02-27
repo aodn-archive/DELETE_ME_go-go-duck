@@ -41,16 +41,8 @@ class Worker {
     Process execute(cmd) {
         log.info("Executing command: '${cmd}'")
 
-        // def sout = new StringBuffer()
-        // def serr = new StringBuffer()
-
         def proc = cmd.execute()
-
-        // proc.consumeProcessOutput(sout, serr)
         proc.waitFor()
-
-        // log.debug("Command output: ${sout}")
-        // log.debug("Command error: ${serr}")
 
         return proc
     }
