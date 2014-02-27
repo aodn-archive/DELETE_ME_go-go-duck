@@ -10,19 +10,19 @@ import au.org.emii.gogoduck.test.TestHelper
 
 class WorkerSpec extends Specification {
 
-    def job
+    def testJob
     def worker
 
     def setup() {
-        job = TestHelper.createJob()
-        worker = new Worker(job: job)
+        testJob = TestHelper.createJob()
+        worker = new Worker(job: testJob)
     }
 
     def "generates command line from job"() {
         given:
         def worker = new Worker(
             shellCmd: { "gogoduck.sh ${it}" },
-            job: job,
+            job: testJob,
             outputFilename: 'output.nc',
             fileLimit: 123
         )
@@ -60,14 +60,17 @@ class WorkerSpec extends Specification {
         given:
         def successCalled = false
         def successHandler = {
-            Job ajob ->
-            successCalled = (ajob == job)
+            Job job ->
+            successCalled = (job == testJob)
         }
 
         def failureCalled = false
         def failureHandler = {
-            Job ajob, String anErrMsg ->
-            failureCalled = (ajob == job && anErrMsg == expectErrMsg)
+            Job job, String anErrMsg ->
+
+            assertEquals job, testJob
+            assertEquals anErrMsg, expectErrMsg
+            failureCalled = true
         }
 
         worker.metaClass.execute = {

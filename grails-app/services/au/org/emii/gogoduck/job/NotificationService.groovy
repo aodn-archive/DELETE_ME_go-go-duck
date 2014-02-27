@@ -15,19 +15,11 @@ class NotificationService {
     }
 
     def getRegisteredNotificationSubject(job) {
-        messageSource.getMessage(
-            'job.registered.subject',
-            [job.uuid].toArray(),
-            LocaleContextHolder.locale
-        )
+        getMessage('job.registered.subject', [job.uuid])
     }
 
     def getRegisteredNotificationBody(job) {
-        messageSource.getMessage(
-            'job.registered.body',
-            [job.uuid].toArray(),
-            LocaleContextHolder.locale
-        )
+        getMessage('job.registered.body', [job.uuid])
     }
 
     def sendJobSuccessNotification(job) {
@@ -39,19 +31,11 @@ class NotificationService {
     }
 
     def getSuccessNotificationSubject(job) {
-        messageSource.getMessage(
-            'job.success.subject',
-            [job.uuid].toArray(),
-            LocaleContextHolder.locale
-        )
+        getMessage('job.success.subject', [job.uuid])
     }
 
     def getSuccessNotificationBody(job) {
-        messageSource.getMessage(
-            'job.success.body',
-            [job.uuid, job.aggrUrl].toArray(),
-            LocaleContextHolder.locale
-        )
+        getMessage('job.success.body', [job.uuid, job.aggrUrl])
     }
 
     def sendJobFailureNotification(job, errMsg) {
@@ -63,17 +47,17 @@ class NotificationService {
     }
 
     def getFailureNotificationSubject(job) {
-        messageSource.getMessage(
-            'job.failure.subject',
-            [job.uuid].toArray(),
-            LocaleContextHolder.locale
-        )
+        getMessage('job.failure.subject', [job.uuid])
     }
 
     def getFailureNotificationBody(job, errMsg) {
+        getMessage('job.failure.body', [job.uuid, errMsg])
+    }
+
+    def getMessage(messageKey, messageParams) {
         messageSource.getMessage(
-            'job.failure.body',
-            [job.uuid, errMsg].toArray(),
+            messageKey,
+            messageParams.toArray(),
             LocaleContextHolder.locale
         )
     }
