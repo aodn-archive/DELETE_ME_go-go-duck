@@ -12,7 +12,12 @@ class JobCleanupControllerSpec extends Specification {
     }
 
     def "prettySize"() {
-
+        given:
+        def jobCleanup = new JobCleanupController()
+        when:
+        def res = jobCleanup._prettySize(20)
+        then:
+        res == "20B"
     }
 
     void "test something"() {
