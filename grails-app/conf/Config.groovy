@@ -73,7 +73,8 @@ environments {
         grails.mail.disabled=true
         worker {
             cmd = {
-                "echo mocked command: \"resources/worker/gogoduck.sh ${it}\""
+                def filename = (it =~ /-o ([a-zA-Z0-9\/\.]+)/)[0][1]
+                [ 'bash', '-c', "echo bytes > ${filename}" ]
             }
             outputPath = 'jobs'
         }
@@ -106,7 +107,9 @@ log4j = {
     environments {
         development {
             debug 'grails.app.controllers',
+                  'grails.app.services.au.org.emii.gogoduck.job.JobStoreService',
                   'grails.app.services.au.org.emii.gogoduck.job.NotificationService',
+                  'au.org.emii.gogoduck.job.Job',
                   'au.org.emii.gogoduck.worker.Worker'
         }
     }

@@ -23,7 +23,7 @@ class JSONSerializer {
 
         obj.properties.each {propName, propValue ->
 
-            if (!['class', 'metaClass', 'errors', 'constraints', 'grailsApplication', 'aggrUrl'].contains(propName)) {
+            if (!['class', 'metaClass', 'errors', 'constraints', 'grailsApplication', 'aggrUrl', 'serverURL'].contains(propName)) {
 
                 if (isSimple(propValue)) {
                     // It seems "propName = propValue" doesn't work when propName is dynamic so we need to
