@@ -3,6 +3,7 @@ package au.org.emii.gogoduck.worker
 import grails.test.mixin.*
 import org.apache.commons.io.IOUtils
 import spock.lang.Specification
+import spock.lang.Unroll
 
 import au.org.emii.gogoduck.job.Job
 import au.org.emii.gogoduck.test.TestHelper
@@ -54,37 +55,8 @@ class WorkerSpec extends Specification {
         executedCmd == 'thecommand'
     }
 
-    // TODO: can we parameterise the following two methods?
-    def "calls 'successHandler' on success"() {
-        given:
-        def successCalled = false
-        def successHandler = {
-            Job ajob ->
-            successCalled = (ajob == job)
-        }
-        def failureCalled = false
-        def failureHandler = {
-            Job ajob, String errMs ->
-            failureCalled = (ajob == job)
-        }
-
-        worker.metaClass.execute = {
-            cmd ->
-
-                [ exitValue: { 0 } ]
-        }
-
-        worker.metaClass.getCmd = { "the command" }
-
-        when:
-        worker.run(successHandler, failureHandler)
-
-        then:
-        successCalled
-        !failureCalled
-    }
-
-    def "calls 'failureHandler' on failure"() {
+    @Unroll
+    def "calls appropriate handler"() {
         given:
         def successCalled = false
         def successHandler = {
@@ -103,7 +75,7 @@ class WorkerSpec extends Specification {
             cmd ->
 
                 [
-                    exitValue: { 1 },
+                    exitValue: { exitValue },
                     getErrorStream: {
                         IOUtils.toInputStream(errMsg, 'UTF-8')
                     }
@@ -116,7 +88,12 @@ class WorkerSpec extends Specification {
         worker.run(successHandler, failureHandler)
 
         then:
-        !successCalled
-        failureCalled
+        successCalled == expectSuccessCalled
+        failureCalled != expectSuccessCalled
+
+        where:
+        exitValue | expectSuccessCalled
+        0         | true
+        1         | false
     }
 }
