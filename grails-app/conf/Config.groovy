@@ -59,6 +59,7 @@ grails {
 
 worker {
     fileLimit = 100
+    fileAgeDays = 7
     outputFilename = 'output.nc'
     cmd = {
         "resources/worker/gogoduck.sh ${it}"
