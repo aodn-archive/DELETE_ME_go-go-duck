@@ -1,5 +1,7 @@
 package au.org.emii.gogoduck.worker
 
+import org.apache.commons.io.IOUtils
+
 import au.org.emii.gogoduck.job.Job
 import grails.converters.JSON
 
@@ -16,7 +18,7 @@ class Worker {
             successHandler(job)
         }
         else {
-            failureHandler(job, "Fixed error message")
+            failureHandler(job, IOUtils.toString(process.getErrorStream(), 'UTF-8'))
         }
     }
 

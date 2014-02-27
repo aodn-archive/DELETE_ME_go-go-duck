@@ -1,6 +1,7 @@
 package au.org.emii.gogoduck.worker
 
 import grails.test.mixin.*
+import org.apache.commons.io.IOUtils
 import spock.lang.Specification
 
 import au.org.emii.gogoduck.job.Job
@@ -70,7 +71,7 @@ class WorkerSpec extends Specification {
         worker.metaClass.execute = {
             cmd ->
 
-            [ exitValue: { 0 } ]
+                [ exitValue: { 0 } ]
         }
 
         worker.metaClass.getCmd = { "the command" }
@@ -83,23 +84,30 @@ class WorkerSpec extends Specification {
         !failureCalled
     }
 
-    def "calls 'failureHandler' on success"() {
+    def "calls 'failureHandler' on failure"() {
         given:
         def successCalled = false
         def successHandler = {
             Job ajob ->
             successCalled = (ajob == job)
         }
+        def errMsg = 'some error message'
+
         def failureCalled = false
         def failureHandler = {
-            Job ajob, String errMsg ->
-            failureCalled = (ajob == job)
+            Job ajob, String anErrMsg ->
+            failureCalled = (ajob == job && anErrMsg == errMsg)
         }
 
         worker.metaClass.execute = {
             cmd ->
 
-            [ exitValue: { 1 } ]
+                [
+                    exitValue: { 1 },
+                    getErrorStream: {
+                        IOUtils.toInputStream(errMsg, 'UTF-8')
+                    }
+                ]
         }
 
         worker.metaClass.getCmd = { "the command" }
