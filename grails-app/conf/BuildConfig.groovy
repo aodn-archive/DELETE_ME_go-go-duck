@@ -40,6 +40,7 @@ grails.project.dependency.resolution = {
 
     plugins {
         compile ':cache:1.0.1'
+        compile ":joda-time:1.4"
         compile ":mail:1.0.1"
         compile ':quartz:1.0.1'
 
