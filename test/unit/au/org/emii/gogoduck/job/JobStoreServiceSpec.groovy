@@ -8,9 +8,14 @@ import au.org.emii.gogoduck.test.TestHelper
 @TestFor(JobStoreService)
 class JobStoreServiceSpec extends Specification {
 
+    def job
+
+    def setup() {
+        job = TestHelper.createJob()
+    }
+
     def "get job directory path"() {
         given:
-        def job = TestHelper.createJob()
         job.uuid = 'asdf'
         service.grailsApplication = [
             config: [
@@ -27,7 +32,6 @@ class JobStoreServiceSpec extends Specification {
 
     def "save makes dir, writes json"() {
         given:
-        def job = TestHelper.createJob()
         def service = Spy(JobStoreService)
 
         when:
@@ -36,5 +40,20 @@ class JobStoreServiceSpec extends Specification {
         then:
         1 * service.makeDir(job) >> null
         1 * service.writeToFileAsJson(job) >> null
+    }
+
+    def "list"() {
+
+    }
+
+    def "delete"() {
+        given:
+        def service = Spy(JobStoreService)
+
+        when:
+        service.delete(job)
+
+        then:
+        1 * service.rmDir(job) >> null
     }
 }

@@ -13,6 +13,10 @@ class JobStoreService {
         writeToFileAsJson(job)
     }
 
+    void delete(job) {
+        rmDir(job)
+    }
+
     String getAggrPath(job) {
         getAggrPathForId(job.uuid)
     }
@@ -25,6 +29,11 @@ class JobStoreService {
     void makeDir(job) {
         log.debug("Making directory: ${getDir(job)}")
         new File(getDir(job)).mkdirs()
+    }
+
+    void rmDir(job) {
+        log.debug("Removing directory: ${getDir(job)}")
+        new File(getDir(job)).deleteDir()
     }
 
     void writeToFileAsJson(job) {
