@@ -61,7 +61,9 @@ class WorkerSpec extends Specification {
         def successCalled = false
         def successHandler = {
             Job job ->
-            successCalled = (job == testJob)
+
+                assertEquals job, testJob
+                successCalled = true
         }
 
         def failureCalled = false
