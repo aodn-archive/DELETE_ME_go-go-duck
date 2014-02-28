@@ -30,7 +30,7 @@ class WorkerSpec extends Specification {
         }
 
         expect:
-        worker.getCmd() == "gogoduck.sh -p some_layer -s \"TIME,2013-11-20T00:30:00.000Z,2013-11-20T10:30:00.000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219\" -o output.nc -l 123"
+        worker.getCmd() == "gogoduck.sh -p some_layer -s TIME,2013-11-20T00:30:00.000Z,2013-11-20T10:30:00.000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219 -o output.nc -l 123"
     }
 
     def "runs command"() {
@@ -42,7 +42,12 @@ class WorkerSpec extends Specification {
         def executedCmd
         worker.metaClass.execute = {
             executedCmd = it
-            [ exitValue: { 0 } ]
+            [
+                exitValue: { 0 },
+                getInputStream: {
+                    IOUtils.toInputStream('some output', 'UTF-8')
+                }
+            ]
         }
         worker.metaClass.mkJobDir = {}
         worker.metaClass.writeJobToJsonFile = {}
@@ -70,7 +75,7 @@ class WorkerSpec extends Specification {
             Job job, String anErrMsg ->
 
             assertEquals job, testJob
-            assertEquals anErrMsg, expectErrMsg
+            assertEquals expectErrMsg, anErrMsg
             failureCalled = true
         }
 
@@ -83,6 +88,9 @@ class WorkerSpec extends Specification {
 
                 [
                     exitValue: { exitValue },
+                    getInputStream: {
+                        IOUtils.toInputStream('some output', 'UTF-8')
+                    },
                     getErrorStream: {
                         IOUtils.toInputStream(expectErrMsg, 'UTF-8')
                     }
@@ -99,9 +107,9 @@ class WorkerSpec extends Specification {
         failureCalled != expectSuccessCalled
 
         where:
-        exitValue | executeException              | expectErrMsg | expectSuccessCalled
-        0         | null                          | null         | true
-        1         | null                          | 'some error' | false
-        0         | new IOException('cannot run') | 'cannot run' | false
+        exitValue | executeException              |  expectErrMsg             | expectSuccessCalled
+        0         | null                          |  null                     | true
+        1         | null                          | 'some error'              | false
+        0         | new IOException('cannot run') | 'cannot run'              | false
     }
 }

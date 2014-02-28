@@ -137,6 +137,8 @@ log4j = {
            'org.hibernate',
            'net.sf.ehcache.hibernate'
 
+    info   'au.org.emii.gogoduck.worker.Worker'
+
     environments {
         development {
             debug 'grails.app.controllers',
