@@ -1,19 +1,28 @@
 package au.org.emii.gogoduck.worker
 
 import grails.test.mixin.*
+import org.apache.commons.io.IOUtils
 import spock.lang.Specification
+import spock.lang.Unroll
 
 import au.org.emii.gogoduck.job.Job
 import au.org.emii.gogoduck.test.TestHelper
 
 class WorkerSpec extends Specification {
 
+    def testJob
+    def worker
+
+    def setup() {
+        testJob = TestHelper.createJob()
+        worker = new Worker(job: testJob)
+    }
+
     def "generates command line from job"() {
         given:
-        def job = TestHelper.createJob()
         def worker = new Worker(
             shellCmd: { "gogoduck.sh ${it}" },
-            job: job,
+            job: testJob,
             outputFilename: 'output.nc',
             fileLimit: 123
         )
@@ -27,7 +36,6 @@ class WorkerSpec extends Specification {
 
     def "runs command"() {
         given:
-        def worker = new Worker()
         worker.job = [ uuid: '123' ]
         worker.metaClass.getCmd = {
             'thecommand'
@@ -35,14 +43,66 @@ class WorkerSpec extends Specification {
         def executedCmd
         worker.metaClass.execute = {
             executedCmd = it
+            [ exitValue: { 0 } ]
         }
         worker.metaClass.mkJobDir = { }
         worker.metaClass.writeJobToJsonFile = { }
 
         when:
-        worker.run()
+        worker.run({}, {})
 
         then:
         executedCmd == 'thecommand'
+    }
+
+    @Unroll
+    def "calls appropriate handler"() {
+        given:
+        def successCalled = false
+        def successHandler = {
+            Job job ->
+
+                assertEquals job, testJob
+                successCalled = true
+        }
+
+        def failureCalled = false
+        def failureHandler = {
+            Job job, String anErrMsg ->
+
+            assertEquals job, testJob
+            assertEquals anErrMsg, expectErrMsg
+            failureCalled = true
+        }
+
+        worker.metaClass.execute = {
+            cmd ->
+
+                if (executeException) {
+                    throw executeException
+                }
+
+                [
+                    exitValue: { exitValue },
+                    getErrorStream: {
+                        IOUtils.toInputStream(expectErrMsg, 'UTF-8')
+                    }
+                ]
+        }
+
+        worker.metaClass.getCmd = { "the command" }
+
+        when:
+        worker.run(successHandler, failureHandler)
+
+        then:
+        successCalled == expectSuccessCalled
+        failureCalled != expectSuccessCalled
+
+        where:
+        exitValue | executeException              | expectErrMsg | expectSuccessCalled
+        0         | null                          | null         | true
+        1         | null                          | 'some error' | false
+        0         | new IOException('cannot run') | 'cannot run' | false
     }
 }

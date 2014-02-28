@@ -77,6 +77,7 @@ environments {
             cmd = {
                 def filename = (it =~ /-o ([a-zA-Z0-9\/\.]+)/)[0][1]
                 [ 'bash', '-c', "echo bytes > ${filename}" ]
+                // "test/resources/error.sh" // Uncomment this to test error handling.
             }
             outputPath = 'jobs'
         }

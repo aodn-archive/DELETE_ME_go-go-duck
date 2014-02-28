@@ -83,4 +83,31 @@ class NotificationServiceSpec extends Specification {
             LocaleContextHolder.locale
         )
     }
+
+    def "failure notification subject"() {
+        when:
+        service.getFailureNotificationSubject(job)
+
+        then:
+        1 * messageSource.getMessage(
+            'job.failure.subject',
+            ['1234'].toArray(),
+            LocaleContextHolder.locale
+        )
+    }
+
+    def "failure notification body"() {
+        given:
+        def errMsg = 'something died'
+
+        when:
+        service.getFailureNotificationBody(job, errMsg)
+
+        then:
+        1 * messageSource.getMessage(
+            'job.failure.body',
+            ['1234', errMsg].toArray(),
+            LocaleContextHolder.locale
+        )
+    }
 }
