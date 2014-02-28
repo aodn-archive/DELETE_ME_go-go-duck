@@ -1,7 +1,5 @@
 package au.org.emii.gogoduck.aggr
 
-import au.org.emii.gogoduck.job.*
-
 class AggrController {
 
     static allowedMethods = [ show: "GET" ]
@@ -23,7 +21,7 @@ class AggrController {
             response.outputStream.flush()
         }
         else {
-            render (status: 500, text: "No aggregration file for id '${params.id}'.")
+            render(status: 500, text: "No aggregration file for id '${params.id}'.")
         }
     }
 }

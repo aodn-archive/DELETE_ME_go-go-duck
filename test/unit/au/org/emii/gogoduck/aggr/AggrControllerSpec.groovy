@@ -6,8 +6,6 @@ import spock.lang.Specification
 import au.org.emii.gogoduck.job.*
 import au.org.emii.gogoduck.test.TestHelper
 
-import org.codehaus.groovy.grails.plugins.testing.GrailsMockHttpServletResponse
-
 @TestFor(AggrController)
 class AggrControllerSpec extends Specification {
 
@@ -30,8 +28,7 @@ class AggrControllerSpec extends Specification {
         controller.response.outputStream.metaClass.write = {
             byte[] b ->
 
-                bytes = b
-
+            bytes = b
         }
 
         when:
