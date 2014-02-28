@@ -1,6 +1,5 @@
 package au.org.emii.gogoduck.worker
 
-import grails.test.mixin.*
 import org.apache.commons.io.IOUtils
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -45,8 +44,8 @@ class WorkerSpec extends Specification {
             executedCmd = it
             [ exitValue: { 0 } ]
         }
-        worker.metaClass.mkJobDir = { }
-        worker.metaClass.writeJobToJsonFile = { }
+        worker.metaClass.mkJobDir = {}
+        worker.metaClass.writeJobToJsonFile = {}
 
         when:
         worker.run({}, {})
