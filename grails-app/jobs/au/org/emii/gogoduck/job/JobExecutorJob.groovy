@@ -16,8 +16,7 @@ class JobExecutorJob {
     }
 
     def run(job) {
-        jobStoreService.makeDir(job)
-        jobStoreService.writeToFileAsJson(job)
+        jobStoreService.save(job)
         getWorker(job).run(successHandler, failureHandler)
     }
 

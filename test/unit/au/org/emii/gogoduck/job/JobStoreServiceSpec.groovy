@@ -24,4 +24,17 @@ class JobStoreServiceSpec extends Specification {
         expect:
         service.getDir(job) == 'jobsDirPath/asdf'
     }
+
+    def "save makes dir, writes json"() {
+        given:
+        def job = TestHelper.createJob()
+        def service = Spy(JobStoreService)
+
+        when:
+        service.save(job)
+
+        then:
+        1 * service.makeDir(job) >> null
+        1 * service.writeToFileAsJson(job) >> null
+    }
 }

@@ -8,9 +8,9 @@ class JobStoreService {
         Job.fromJsonString(new File(getJsonPathForId(uuid)).text)
     }
 
-    void makeDir(job) {
-        log.debug("Making directory: ${getDir(job)}")
-        new File(getDir(job)).mkdirs()
+    void save(job) {
+        makeDir(job)
+        writeToFileAsJson(job)
     }
 
     String getAggrPath(job) {
@@ -20,6 +20,11 @@ class JobStoreService {
     File getAggrFile(job) {
         log.debug("File path: ${getAggrPath(job)}")
         new File(getAggrPath(job))
+    }
+
+    void makeDir(job) {
+        log.debug("Making directory: ${getDir(job)}")
+        new File(getDir(job)).mkdirs()
     }
 
     void writeToFileAsJson(job) {
