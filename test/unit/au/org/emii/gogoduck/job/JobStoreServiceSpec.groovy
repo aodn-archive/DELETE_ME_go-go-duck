@@ -5,13 +5,14 @@ import spock.lang.Specification
 
 import au.org.emii.gogoduck.test.TestHelper
 
-@TestFor(JobStoreService)
 class JobStoreServiceSpec extends Specification {
 
     def job
+    def service
 
     def setup() {
         job = TestHelper.createJob()
+        service = Spy(JobStoreService)
     }
 
     def "get job directory path"() {
@@ -31,9 +32,6 @@ class JobStoreServiceSpec extends Specification {
     }
 
     def "save makes dir, writes json"() {
-        given:
-        def service = Spy(JobStoreService)
-
         when:
         service.save(job)
 
@@ -43,13 +41,22 @@ class JobStoreServiceSpec extends Specification {
     }
 
     def "list"() {
+        given:
+        // TODO: why cannot use: 1 * service.listUuids() >> ['1111', '2222', '3333']
+        service.metaClass.listUuids = {
+            ['1111', '2222', '3333']
+        }
 
+        when:
+        service.list()
+
+        then:
+        1 * service.get('1111') >> null
+        1 * service.get('2222') >> null
+        1 * service.get('3333') >> null
     }
 
     def "delete"() {
-        given:
-        def service = Spy(JobStoreService)
-
         when:
         service.delete(job)
 

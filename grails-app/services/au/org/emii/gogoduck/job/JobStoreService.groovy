@@ -17,6 +17,12 @@ class JobStoreService {
         rmDir(job)
     }
 
+    List<Job> list() {
+        listUuids().collect {
+            get(it)
+        }
+    }
+
     String getAggrPath(job) {
         getAggrPathForId(job.uuid)
     }
@@ -55,5 +61,10 @@ class JobStoreService {
 
     private String getJsonPathForId(jobId) {
         "${getDirForId(jobId)}${File.separator}job.json"
+    }
+
+    List<String> listUuids() {
+        println "listUuid() called"
+        new File(grailsApplication.config.worker.outputPath).list().toList()
     }
 }
