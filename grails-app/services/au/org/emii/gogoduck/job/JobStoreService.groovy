@@ -3,7 +3,7 @@ package au.org.emii.gogoduck.job
 class JobStoreService {
     def grailsApplication
 
-    Job getJob(uuid) {
+    Job get(uuid) {
         log.debug("file: ${getJsonPathForId(uuid)}, text: ${new File(getJsonPathForId(uuid)).text}")
         Job.fromJsonString(new File(getJsonPathForId(uuid)).text)
     }

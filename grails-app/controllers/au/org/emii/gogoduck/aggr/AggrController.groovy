@@ -8,7 +8,7 @@ class AggrController {
     def show() {
         log.debug("params: ${params}")
 
-        def job = jobStoreService.getJob(params.uuid)
+        def job = jobStoreService.get(params.uuid)
         log.debug("job: ${job}")
 
 
