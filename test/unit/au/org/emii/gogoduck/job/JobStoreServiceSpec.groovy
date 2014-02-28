@@ -56,11 +56,19 @@ class JobStoreServiceSpec extends Specification {
         1 * service.get('3333') >> null
     }
 
-    def "delete"() {
+    def "delete single job"() {
         when:
         service.delete(job)
 
         then:
         1 * service.rmDir(job) >> null
+    }
+
+    def "delete list of jobs"() {
+        when:
+        service.delete([job, job])
+
+        then:
+        2 * service.rmDir(job) >> null
     }
 }

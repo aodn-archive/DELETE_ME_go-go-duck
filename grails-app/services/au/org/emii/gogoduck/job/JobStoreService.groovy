@@ -13,8 +13,10 @@ class JobStoreService {
         writeToFileAsJson(job)
     }
 
-    void delete(job) {
-        rmDir(job)
+    void delete(jobs) {
+        jobs.each {
+            rmDir(it)
+        }
     }
 
     List<Job> list() {
