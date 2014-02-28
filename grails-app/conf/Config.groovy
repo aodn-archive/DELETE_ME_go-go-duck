@@ -60,6 +60,13 @@ grails {
     }
 }
 
+job {
+    cleanup {
+        daysToKeep = 10
+        trigger = '0 0 0 * * ?'
+    }
+}
+
 worker {
     fileLimit = 100
     outputFilename = 'output.nc'

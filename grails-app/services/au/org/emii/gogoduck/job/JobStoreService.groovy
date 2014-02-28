@@ -9,12 +9,14 @@ class JobStoreService {
     }
 
     void save(job) {
+        log.info("Saving job: ${job.toString()}")
         makeDir(job)
         writeToFileAsJson(job)
     }
 
     void delete(jobs) {
         jobs.each {
+            log.info("Deleting job: ${it.toString()}")
             rmDir(it)
         }
     }
@@ -66,7 +68,6 @@ class JobStoreService {
     }
 
     List<String> listUuids() {
-        println "listUuid() called"
         new File(grailsApplication.config.worker.outputPath).list().toList()
     }
 }
