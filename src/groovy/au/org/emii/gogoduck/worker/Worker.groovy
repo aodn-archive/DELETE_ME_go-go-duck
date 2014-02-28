@@ -15,6 +15,7 @@ class Worker {
 
         try {
             def process = execute(getCmd())
+            log.info("worker output: ${IOUtils.toString(process.getInputStream(), 'UTF-8')}")
 
             if (process.exitValue() == 0) {
                 successHandler(job)
@@ -33,7 +34,7 @@ class Worker {
 
     def getCmd() {
         def cmdOptions = String.format(
-            '-p %1s -s "TIME,%2s,%3s;LATITUDE,%4s,%5s;LONGITUDE,%6s,%7s" -o %8s -l %9$1s',
+            '-p %1s -s TIME,%2s,%3s;LATITUDE,%4s,%5s;LONGITUDE,%6s,%7s -o %8s -l %9$1s',
             job.layerName,
             job.subsetDescriptor.temporalExtent.start,
             job.subsetDescriptor.temporalExtent.end,
