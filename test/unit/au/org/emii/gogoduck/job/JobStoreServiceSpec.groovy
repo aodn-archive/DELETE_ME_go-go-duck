@@ -34,6 +34,20 @@ class JobStoreServiceSpec extends Specification {
         service.getDir(job) == 'jobsDirPath/asdf'
     }
 
+    def "get invalid job"() {
+        given:
+        service.getJsonPathForId('1234') >> 'jobs/1234/job.json'
+        1 * service.getFile('jobs/1234/job.json') >> {
+            throw new FileNotFoundException('jobs/1234/job.json (Not asda directory)')
+        }
+
+        when:
+        true
+
+        then:
+        service.get('1234') == null
+    }
+
     def "save makes dir, writes json"() {
         when:
         service.save(job)
@@ -51,12 +65,13 @@ class JobStoreServiceSpec extends Specification {
         }
 
         when:
-        service.list()
+        def jobs = service.list()
 
         then:
-        1 * service.get('1111') >> null
+        1 * service.get('1111') >> job
         1 * service.get('2222') >> null
-        1 * service.get('3333') >> null
+        1 * service.get('3333') >> job
+        jobs == [job, job]
     }
 
     def "delete single job"() {
@@ -69,7 +84,7 @@ class JobStoreServiceSpec extends Specification {
 
     def "delete list of jobs"() {
         when:
-        service.delete([job, job])
+        service.delete([job, null, job])
 
         then:
         2 * service.rmDir(job) >> null

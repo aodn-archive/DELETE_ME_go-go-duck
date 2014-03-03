@@ -4,8 +4,14 @@ class JobStoreService {
     def grailsApplication
 
     Job get(uuid) {
-        log.debug("file: ${getJsonPathForId(uuid)}, text: ${new File(getJsonPathForId(uuid)).text}")
-        Job.fromJsonString(new File(getJsonPathForId(uuid)).text)
+        try {
+            log.debug("file: ${getJsonPathForId(uuid)}, text: ${getFile(getJsonPathForId(uuid)).text}")
+            return Job.fromJsonString(getFile(getJsonPathForId(uuid)).text)
+        }
+        catch (Exception e) {
+            log.warn("Invalid or corrupt job with ID: ${uuid}", e)
+            return null
+        }
     }
 
     void save(job) {
@@ -15,7 +21,7 @@ class JobStoreService {
     }
 
     void delete(jobs) {
-        jobs.each {
+        jobs.grep { it }.each {
             log.info("Deleting job: ${it.toString()}")
             rmDir(it)
         }
@@ -24,6 +30,8 @@ class JobStoreService {
     List<Job> list() {
         listUuids().collect {
             get(it)
+        }.grep {
+            it
         }
     }
 
@@ -33,22 +41,22 @@ class JobStoreService {
 
     File getAggrFile(job) {
         log.debug("File path: ${getAggrPath(job)}")
-        new File(getAggrPath(job))
+        getFile(getAggrPath(job))
     }
 
     void makeDir(job) {
         log.debug("Making directory: ${getDir(job)}")
-        new File(getDir(job)).mkdirs()
+        getFile(getDir(job)).mkdirs()
     }
 
     void rmDir(job) {
         log.debug("Removing directory: ${getDir(job)}")
-        new File(getDir(job)).deleteDir()
+        getFile(getDir(job)).deleteDir()
     }
 
     void writeToFileAsJson(job) {
         log.debug("Job: ${job.toJsonString()}")
-        new File(getJsonPathForId(job.uuid)).write(job.toJsonString())
+        getFile(getJsonPathForId(job.uuid)).write(job.toJsonString())
     }
 
     private String getDir(job) {
@@ -63,11 +71,15 @@ class JobStoreService {
         "${getDirForId(jobId)}${File.separator}${grailsApplication.config.worker.outputFilename}"
     }
 
-    private String getJsonPathForId(jobId) {
+    String getJsonPathForId(jobId) {
         "${getDirForId(jobId)}${File.separator}job.json"
     }
 
     List<String> listUuids() {
         new File(grailsApplication.config.worker.outputPath).list().toList()
+    }
+
+    File getFile(path) {
+        new File(path)
     }
 }
