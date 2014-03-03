@@ -45,13 +45,13 @@ class JobStoreService {
     }
 
     void makeDir(job) {
-        log.debug("Making directory: ${getDir(job)}")
-        getFile(getDir(job)).mkdirs()
+        log.debug("Making directory: ${getPath(job)}")
+        getFile(getPath(job)).mkdirs()
     }
 
     void rmDir(job) {
-        log.debug("Removing directory: ${getDir(job)}")
-        getFile(getDir(job)).deleteDir()
+        log.debug("Removing directory: ${getPath(job)}")
+        getFile(getPath(job)).deleteDir()
     }
 
     void writeToFileAsJson(job) {
@@ -59,20 +59,20 @@ class JobStoreService {
         getFile(getJsonPathForId(job.uuid)).write(job.toJsonString())
     }
 
-    private String getDir(job) {
-        getDirForId(job.uuid)
+    private String getPath(job) {
+        getPathForId(job.uuid)
     }
 
-    private String getDirForId(jobId) {
+    private String getPathForId(jobId) {
         "${grailsApplication.config.worker.outputPath}${File.separator}${jobId}"
     }
 
     private String getAggrPathForId(jobId) {
-        "${getDirForId(jobId)}${File.separator}${grailsApplication.config.worker.outputFilename}"
+        "${getPathForId(jobId)}${File.separator}${grailsApplication.config.worker.outputFilename}"
     }
 
     String getJsonPathForId(jobId) {
-        "${getDirForId(jobId)}${File.separator}job.json"
+        "${getPathForId(jobId)}${File.separator}job.json"
     }
 
     List<String> listUuids() {

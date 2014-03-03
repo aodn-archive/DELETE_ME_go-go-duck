@@ -31,7 +31,7 @@ class JobStoreServiceSpec extends Specification {
         ]
 
         expect:
-        service.getDir(job) == 'jobsDirPath/asdf'
+        service.getPath(job) == 'jobsDirPath/asdf'
     }
 
     def "get invalid job"() {
