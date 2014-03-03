@@ -10,7 +10,7 @@ class CleanupJob {
     def jobStoreService
 
     def execute() {
-		log.info("Cleaning up old jobs...")
+        log.info("Cleaning up old jobs...")
         jobStoreService.delete(
             jobStoreService.list().grep {
                 it.createdTimestamp.plusDays(grailsApplication.config.job.cleanup.daysToKeep).isBefore(DateTime.now())
