@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html>
   <body>
-    Welcome to go-go-duck!<br>
-    v${ grailsApplication.metadata['app.version'] }
+    Welcome to go-go-duck!
   </body>
 </html>
