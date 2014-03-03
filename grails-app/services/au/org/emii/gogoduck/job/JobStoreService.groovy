@@ -21,7 +21,7 @@ class JobStoreService {
     }
 
     void delete(jobs) {
-        jobs.grep { it }.each {
+        jobs.grep { it != null }.each {
             log.info("Deleting job: ${it.toString()}")
             rmDir(it)
         }
@@ -31,7 +31,7 @@ class JobStoreService {
         listUuids().collect {
             get(it)
         }.grep {
-            it
+            it != null
         }
     }
 
