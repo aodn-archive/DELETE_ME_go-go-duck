@@ -21,18 +21,18 @@ class JobStoreService {
     }
 
     void delete(jobs) {
-        jobs.grep { it != null }.each {
+        removeNulls(jobs).each {
             log.info("Deleting job: ${it.toString()}")
             rmDir(it)
         }
     }
 
     List<Job> list() {
-        listUuids().collect {
-            get(it)
-        }.grep {
-            it != null
-        }
+        removeNulls(
+            listUuids().collect {
+                get(it)
+            }
+        )
     }
 
     String getAggrPath(job) {
@@ -81,5 +81,9 @@ class JobStoreService {
 
     File getFile(path) {
         new File(path)
+    }
+
+    List<Job> removeNulls(jobs) {
+        jobs.grep {  it != null }
     }
 }
