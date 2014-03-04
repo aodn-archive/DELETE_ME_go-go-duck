@@ -84,6 +84,6 @@ class JobStoreService {
     }
 
     List<Job> removeNulls(jobs) {
-        jobs.grep {  it != null }
+        jobs.grep { it != null }
     }
 }
