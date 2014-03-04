@@ -1,3 +1,4 @@
+import au.org.emii.gogoduck.job.CleanupJob
 import au.org.emii.gogoduck.job.Job
 
 class BootStrap {
@@ -8,6 +9,8 @@ class BootStrap {
         Job.metaClass.getServerURL = {
             grailsApplication.config.grails.serverURL
         }
+
+        CleanupJob.schedule(grailsApplication.config.job.cleanup.trigger)
     }
 
     def destroy = {

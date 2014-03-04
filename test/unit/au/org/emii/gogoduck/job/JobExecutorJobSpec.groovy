@@ -31,13 +31,12 @@ class JobExecutorJobSpec extends Specification {
         }
     }
 
-    def "makes job dir, writes job as json to file"() {
+    def "saves job"() {
         when:
         jobExecutorJob.run(job)
 
         then:
-        1 * jobStoreService.makeDir(job)
-        1 * jobStoreService.writeToFileAsJson(job)
+        1 * jobStoreService.save(job)
     }
 
     def "runs worker"() {

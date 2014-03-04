@@ -21,7 +21,7 @@ class AggrControllerSpec extends Specification {
         def job = TestHelper.createJob()
         def jobId = 'asdf'
         job.uuid = jobId
-        1 * jobStoreService.getJob(jobId) >> job
+        1 * jobStoreService.get(jobId) >> job
         1 * jobStoreService.getAggrFile(job) >> tempFile
 
         def bytes

@@ -3,6 +3,8 @@
 package au.org.emii.gogoduck.json
 
 import grails.web.*
+import org.joda.time.DateTime
+import org.joda.time.format.ISODateTimeFormat
 
 class JSONSerializer {
 
@@ -23,7 +25,10 @@ class JSONSerializer {
 
         obj.properties.each {propName, propValue ->
 
-            if (!['class', 'metaClass', 'errors', 'constraints', 'grailsApplication', 'aggrUrl', 'serverURL'].contains(propName)) {
+            if (propValue instanceof DateTime) {
+                setProperty(propName, ISODateTimeFormat.dateTime().print(propValue))
+            }
+            else if (!['class', 'metaClass', 'errors', 'constraints', 'grailsApplication', 'aggrUrl', 'serverURL'].contains(propName)) {
 
                 if (isSimple(propValue)) {
                     // It seems "propName = propValue" doesn't work when propName is dynamic so we need to

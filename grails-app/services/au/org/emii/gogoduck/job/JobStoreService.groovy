@@ -3,14 +3,36 @@ package au.org.emii.gogoduck.job
 class JobStoreService {
     def grailsApplication
 
-    Job getJob(uuid) {
-        log.debug("file: ${getJsonPathForId(uuid)}, text: ${new File(getJsonPathForId(uuid)).text}")
-        Job.fromJsonString(new File(getJsonPathForId(uuid)).text)
+    Job get(uuid) {
+        try {
+            log.debug("file: ${getJsonPathForId(uuid)}, text: ${getFile(getJsonPathForId(uuid)).text}")
+            return Job.fromJsonString(getFile(getJsonPathForId(uuid)).text)
+        }
+        catch (Exception e) {
+            log.warn("Invalid or corrupt job with ID: ${uuid}", e)
+            return null
+        }
     }
 
-    void makeDir(job) {
-        log.debug("Making directory: ${getDir(job)}")
-        new File(getDir(job)).mkdirs()
+    void save(job) {
+        log.info("Saving job: ${job.toString()}")
+        makeDir(job)
+        writeToFileAsJson(job)
+    }
+
+    void delete(jobs) {
+        removeNulls(jobs).each {
+            log.info("Deleting job: ${it.toString()}")
+            rmDir(it)
+        }
+    }
+
+    List<Job> list() {
+        removeNulls(
+            listUuids().collect {
+                get(it)
+            }
+        )
     }
 
     String getAggrPath(job) {
@@ -19,27 +41,49 @@ class JobStoreService {
 
     File getAggrFile(job) {
         log.debug("File path: ${getAggrPath(job)}")
-        new File(getAggrPath(job))
+        getFile(getAggrPath(job))
+    }
+
+    void makeDir(job) {
+        log.debug("Making directory: ${getPath(job)}")
+        getFile(getPath(job)).mkdirs()
+    }
+
+    void rmDir(job) {
+        log.debug("Removing directory: ${getPath(job)}")
+        getFile(getPath(job)).deleteDir()
     }
 
     void writeToFileAsJson(job) {
         log.debug("Job: ${job.toJsonString()}")
-        new File(getJsonPathForId(job.uuid)).write(job.toJsonString())
+        getFile(getJsonPathForId(job.uuid)).write(job.toJsonString())
     }
 
-    private String getDir(job) {
-        getDirForId(job.uuid)
+    private String getPath(job) {
+        getPathForId(job.uuid)
     }
 
-    private String getDirForId(jobId) {
+    private String getPathForId(jobId) {
         "${grailsApplication.config.worker.outputPath}${File.separator}${jobId}"
     }
 
     private String getAggrPathForId(jobId) {
-        "${getDirForId(jobId)}${File.separator}${grailsApplication.config.worker.outputFilename}"
+        "${getPathForId(jobId)}${File.separator}${grailsApplication.config.worker.outputFilename}"
     }
 
-    private String getJsonPathForId(jobId) {
-        "${getDirForId(jobId)}${File.separator}job.json"
+    String getJsonPathForId(jobId) {
+        "${getPathForId(jobId)}${File.separator}job.json"
+    }
+
+    List<String> listUuids() {
+        new File(grailsApplication.config.worker.outputPath).list().toList()
+    }
+
+    File getFile(path) {
+        new File(path)
+    }
+
+    List<Job> removeNulls(jobs) {
+        jobs.grep { it != null }
     }
 }
