@@ -37,17 +37,12 @@ grails.project.dependency.resolution = {
     }
 
     dependencies {
-        test "org.spockframework:spock-grails-support:0.7-groovy-2.0"
     }
 
     plugins {
         compile ':cache:1.0.1'
-        compile ":joda-time:1.4"
-        compile ":mail:1.0.1"
-        compile ':quartz:1.0.1'
 
         runtime ":database-migration:1.2.1"
-        runtime ":hibernate:$grailsVersion"
         runtime ":jquery:1.8.3"
         runtime ":resources:1.1.6"
 

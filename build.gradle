@@ -1,0 +1,36 @@
+buildscript {
+    repositories {
+        maven { url 'http://repo.grails.org/grails/repo' }
+    }
+    dependencies {
+        classpath "org.grails:grails-gradle-plugin:2.0.0-SNAPSHOT"
+    }
+}
+
+repositories {
+    maven { url 'http://repo.grails.org/grails/repo' }
+    maven { url 'http://repo1.maven.org/maven2/' }
+}
+
+apply plugin: "grails"
+
+group "example"
+
+grails {
+    grailsVersion '2.2.0'
+}
+
+dependencies {
+    compile "org.grails:grails-plugin-tomcat:$grails.grailsVersion"
+    compile "joda-time:joda-time:2.3"
+    compile 'org.grails.plugins:quartz:1.0.1'
+    compile "org.grails.plugins:mail:1.0.1"
+    test "org.spockframework:spock-grails-support:0.7-groovy-2.0"
+    runtime "org.grails.plugins:hibernate:$grails.grailsVersion"
+}
+
+import org.grails.gradle.plugin.GrailsTask
+task unitTest(type: GrailsTask) {
+    command "test-app"
+    args "unit:"
+}
