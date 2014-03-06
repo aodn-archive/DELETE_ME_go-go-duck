@@ -2,6 +2,20 @@
 
 [![Build Status](https://travis-ci.org/aodn/go-go-duck.png?branch=master)](https://travis-ci.org/aodn/go-go-duck)
 
+## Development
+
+Grails commands are wrapped by gradle, e.g. to `run-app`:
+
+```
+$ ./gradlew grails-run-app
+```
+
+or to `test-app`:
+
+```
+$ ./gradlew grails-test-app -PgrailsArgs="unit:"
+```
+
 ## Usage
 
 ### Request a new job
