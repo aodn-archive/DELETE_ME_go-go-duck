@@ -21,12 +21,19 @@ grails {
 }
 
 dependencies {
-    compile "org.grails:grails-plugin-tomcat:$grails.grailsVersion"
+    bootstrap "org.grails:grails-plugin-tomcat:$grails.grailsVersion"
+
     compile "joda-time:joda-time:2.3"
     compile 'org.grails.plugins:quartz:1.0.1'
     compile "org.grails.plugins:mail:1.0.1"
-    test "org.spockframework:spock-grails-support:0.7-groovy-2.0"
+
     runtime "org.grails.plugins:hibernate:$grails.grailsVersion"
+
+    test "org.grails:grails-test:${grails.grailsVersion}"
+    test('org.grails.plugins:spock:0.7') {
+        exclude group: 'org.spockframework', module: 'spock-grails-support'
+    }
+    test 'org.spockframework:spock-grails-support:0.7-groovy-2.0'
 }
 
 import org.grails.gradle.plugin.GrailsTask
