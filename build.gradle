@@ -1,5 +1,6 @@
 buildscript {
     repositories {
+        mavenCentral()
         maven { url 'http://repo.grails.org/grails/repo' }
     }
     dependencies {
@@ -40,4 +41,9 @@ import org.grails.gradle.plugin.GrailsTask
 task unitTest(type: GrailsTask) {
     command "test-app"
     args "unit:"
+}
+
+task integrationTest(type: GrailsTask) {
+    command "test-app"
+    args "integration:"
 }
