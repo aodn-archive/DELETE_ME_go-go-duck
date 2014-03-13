@@ -10,7 +10,7 @@ class BootStrap {
         log.info("App version: ${grailsApplication.metadata['app.version']}, " +
                  "build number: ${grailsApplication.metadata['app.buildNumber']}")
 
-        Job.metaClass.getServerURL = {
+        Job.metaClass.getServerUrl = {
             grailsApplication.config.grails.serverURL
         }
 
