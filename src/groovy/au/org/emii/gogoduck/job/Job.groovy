@@ -32,7 +32,7 @@ class Job {
     }
 
     URL getAggrUrl() {
-        new URL("${serverURL}${File.separator}aggr${File.separator}${uuid}")
+        new URL("$serverUrl/aggr/$uuid")
     }
 
     public String toJsonString() {

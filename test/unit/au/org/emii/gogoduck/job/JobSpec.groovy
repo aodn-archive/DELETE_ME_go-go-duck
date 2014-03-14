@@ -66,7 +66,6 @@ class JobSpec extends Specification {
         def job = TestHelper.createJob()
         job.uuid = '1234'
 
-
         expect:
         job.toJsonString() == jobAsJson
     }
@@ -91,6 +90,6 @@ class JobSpec extends Specification {
         job.uuid = jobUuid
 
         expect:
-        job.getAggrUrl().toString() == "${job.serverURL}/aggr/${jobUuid}"
+        job.getAggrUrl().toString() == "${job.serverUrl}/aggr/${jobUuid}"
     }
 }
