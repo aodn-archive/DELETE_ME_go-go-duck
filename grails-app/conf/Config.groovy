@@ -50,7 +50,7 @@ grails.serverURL = "http://localhost:8080/go-go-duck"
 grails {
     mail {
         'default' {
-            from = "gogduck@emii.org.au"
+            from = "gogoduck@emii.org.au"
         }
 
         // Configurable mail properties: see http://grails.org/plugin/mail
