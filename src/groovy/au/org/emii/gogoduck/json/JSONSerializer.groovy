@@ -28,7 +28,7 @@ class JSONSerializer {
             if (propValue instanceof DateTime) {
                 setProperty(propName, ISODateTimeFormat.dateTime().print(propValue))
             }
-            else if (!['class', 'metaClass', 'errors', 'constraints', 'grailsApplication', 'aggrUrl', 'serverURL'].contains(propName)) {
+            else if (!['class', 'metaClass', 'errors', 'constraints', 'grailsApplication', 'aggrUrl', 'serverUrl'].contains(propName)) {
 
                 if (isSimple(propValue)) {
                     // It seems "propName = propValue" doesn't work when propName is dynamic so we need to

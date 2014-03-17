@@ -8,6 +8,8 @@ class JobController {
 
     def save(Job job) {
         if (job.hasErrors()) {
+            log.info "Could not register job ($job). Errors: ${job.errors}"
+
             render(status: 400, template: "error", model: [job: job])
         }
         else {
