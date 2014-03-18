@@ -30,13 +30,13 @@ Supposing you have a JSON document such as the one at [doc/example_job_request.j
 then a job cab be requested like this:
 
 ```
-curl -v --data @doc/example_job_request.json --header "Content-Type: application/json" http://localhost:8080/go-go-duck/job
+curl -v --data @doc/example_job_request.json --header "Content-Type: application/json" http://localhost:8300/go-go-duck/job
 ```
 
 ### Download an aggregation from a previous Job
 
 ```
-curl -v -O -J --get http://localhost:8080/go-go-duck/aggr/8d0ed017
+curl -v -O -J --get http://localhost:8300/go-go-duck/aggr/8d0ed017
 ```
 
 where `8d0ed017` is the job ID.
