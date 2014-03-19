@@ -28,14 +28,14 @@ class JSONSerializer {
             if (propValue instanceof DateTime) {
                 setProperty(propName, ISODateTimeFormat.dateTime().print(propValue))
             }
-            else if (!['class', 'metaClass', 'errors', 'constraints', 'grailsApplication', 'aggrUrl', 'serverUrl'].contains(propName)) {
+            else if (shouldSerialiseProperty(propName)) {
 
                 if (isSimple(propValue)) {
                     // It seems "propName = propValue" doesn't work when propName is dynamic so we need to
                     // set the property on the builder using this syntax instead
                     setProperty(propName, propValue)
-                } else {
-
+                }
+                else {
                     // create a nested JSON object and recursively call this function to serialize it
                     Closure nestedObject = {
                         buildJSON(propValue)
@@ -58,5 +58,12 @@ class JSONSerializer {
         // to render in JSON as a nested object. If we run into this issue, replace the test below with an test
         // for whether propValue is an instanceof Number, String, Boolean, Char, etc.
         propValue instanceof Serializable || propValue == null
+    }
+
+    def shouldSerialiseProperty(property) {
+
+        def propertiesNotToSerialise = ['class', 'metaClass', 'errors', 'constraints', 'grailsApplication', 'aggrUrl', 'serverUrl', 'dateFormatValidator', 'longitudeConstraints', 'latitudeConstraints']
+
+        return !propertiesNotToSerialise.contains(property)
     }
 }
