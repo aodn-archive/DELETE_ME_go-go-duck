@@ -47,14 +47,14 @@ class WorkerSpec extends Specification {
         }
 
         worker.job.subsetDescriptor.spatialExtent = new SpatialExtent(
-            north: "90",
-            south: "-90",
-            east:  "180",
-            west:  "-180"
+            north:  90,
+            south: -90,
+            east:  180,
+            west: -180
         )
 
         expect:
-        worker.getCmd() == "gogoduck.sh -p some_layer -s TIME,2013-11-20T00:30:00.000Z,2013-11-20T10:30:00.000Z;LATITUDE,-90,90;LONGITUDE,-180,180 -o output.nc -l 123"
+        worker.getCmd() == "gogoduck.sh -p some_layer -s TIME,2013-11-20T00:30:00.000Z,2013-11-20T10:30:00.000Z;LATITUDE,-90.0,90.0;LONGITUDE,-180.0,180.0 -o output.nc -l 123"
     }
 
     def "runs command"() {
