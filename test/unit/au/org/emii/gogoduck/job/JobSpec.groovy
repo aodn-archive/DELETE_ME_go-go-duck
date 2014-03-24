@@ -113,7 +113,7 @@ class JobSpec extends Specification {
         spatialExtent.validate()
 
         expect:
-        _getProblemFieldNames(job) == ['emailAddress','layerName']
+        _getProblemFieldNames(job) == ['emailAddress', 'layerName']
         _getProblemFieldNames(temporalExtent) == ['start', 'end']
         _getProblemFieldNames(spatialExtent) == ['north', 'south', 'east', 'west']
     }
@@ -122,8 +122,8 @@ class JobSpec extends Specification {
 
         def names = []
 
-        job.errors.each{
-            names.addAll it.fieldErrors.collect{ it.field }.unique()
+        job.errors.each {
+            names.addAll it.fieldErrors.collect { it.field }.unique()
         }
 
         return names
