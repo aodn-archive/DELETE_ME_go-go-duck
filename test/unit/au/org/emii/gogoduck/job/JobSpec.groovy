@@ -14,10 +14,10 @@ class JobSpec extends Specification {
     def jobAsJson = '''{
    "subsetDescriptor": {
       "spatialExtent": {
-         "south": "-33.433849",
-         "north": "-32.150743",
-         "east": "115.741219",
-         "west": "114.15197"
+         "south": -33.433849,
+         "north": -32.150743,
+         "east": 115.741219,
+         "west": 114.15197
       },
       "temporalExtent": {
          "start": "2013-11-20T00:30:00.000Z",
@@ -29,6 +29,23 @@ class JobSpec extends Specification {
    "layerName": "some_layer",
    "uuid": "1234"
 }'''
+
+    def invalidJobValues = [
+        emailAddress: "gogo@duck.com not an email address",
+        layerName: "some_layer some extra text (or shell commands!)",
+        subsetDescriptor: [
+            spatialExtent: [
+                "south": -91,
+                "north": 95,
+                "east": 200,
+                "west": -800000
+            ],
+            temporalExtent: [
+                "start": "2013-11-20T00:30:00.000Z some more text",
+                "end": "2013-99-99T10:30:00.000Z"
+            ]
+        ]
+    ]
 
     def setup() {
         DateTimeUtils.setCurrentMillisFixed(1234)
@@ -79,8 +96,37 @@ class JobSpec extends Specification {
         job.createdTimestamp == DateTime.now()
         job.emailAddress == "gogo@duck.com"
         job.layerName == "some_layer"
-        job.subsetDescriptor.spatialExtent.south == "-33.433849"
+        job.subsetDescriptor.spatialExtent.south == -33.433849
         job.subsetDescriptor.temporalExtent.start == "2013-11-20T00:30:00.000Z"
+    }
+
+    def "validation protects against invalid values"() {
+        given:
+        def job = new Job(invalidJobValues)
+        def subsetDescriptor = job.subsetDescriptor
+        def temporalExtent = subsetDescriptor.temporalExtent
+        def spatialExtent = subsetDescriptor.spatialExtent
+
+        job.validate()
+        subsetDescriptor.validate()
+        temporalExtent.validate()
+        spatialExtent.validate()
+
+        expect:
+        _getProblemFieldNames(job) == ['emailAddress', 'layerName']
+        _getProblemFieldNames(temporalExtent) == ['start', 'end']
+        _getProblemFieldNames(spatialExtent) == ['north', 'south', 'east', 'west']
+    }
+
+    def _getProblemFieldNames(job) {
+
+        def names = []
+
+        job.errors.each {
+            names.addAll it.fieldErrors.collect { it.field }.unique()
+        }
+
+        return names
     }
 
     def "aggr URL"() {

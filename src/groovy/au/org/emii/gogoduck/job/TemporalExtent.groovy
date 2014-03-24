@@ -6,7 +6,7 @@ class TemporalExtent {
     String end
 
     static constraints = {
-        start blank: false
-        end blank: false
+        start validator: DateFormatValidator.isValid
+        end   validator: DateFormatValidator.isValid
     }
 }

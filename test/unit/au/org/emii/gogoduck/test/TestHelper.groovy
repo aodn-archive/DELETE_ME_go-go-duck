@@ -13,10 +13,10 @@ class TestHelper {
                     end:   '2013-11-20T10:30:00.000Z'
                 ],
                 spatialExtent: [
-                    north: '-32.150743',
-                    south: '-33.433849',
-                    east:  '115.741219',
-                    west:  '114.15197'
+                    north: -32.150743,
+                    south: -33.433849,
+                    east:  115.741219,
+                    west:  114.15197
                 ]
             ]
         )

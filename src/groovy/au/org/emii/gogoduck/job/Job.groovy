@@ -18,7 +18,7 @@ class Job {
 
     static constraints = {
         emailAddress email: true
-        layerName blank: false
+        layerName blank: false, validator: { it ==~ /^[\w]+$/ }
         subsetDescriptor nullable: false
     }
 
