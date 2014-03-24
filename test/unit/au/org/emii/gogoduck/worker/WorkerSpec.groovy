@@ -1,5 +1,6 @@
 package au.org.emii.gogoduck.worker
 
+import au.org.emii.gogoduck.job.SpatialExtent
 import org.apache.commons.io.IOUtils
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -31,6 +32,29 @@ class WorkerSpec extends Specification {
 
         expect:
         worker.getCmd() == "gogoduck.sh -p some_layer -s TIME,2013-11-20T00:30:00.000Z,2013-11-20T10:30:00.000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219 -o output.nc -l 123"
+    }
+
+    def "generates command line from job with no whitespace"() {
+        given:
+        def worker = new Worker(
+            shellCmd: { "gogoduck.sh ${it}" },
+            job: testJob,
+            outputFilename: 'output.nc',
+            fileLimit: 123
+        )
+        worker.metaClass.getFullOutputFilename = {
+            "output.nc"
+        }
+
+        worker.job.subsetDescriptor.spatialExtent = new SpatialExtent(
+            north: "90",
+            south: "-90",
+            east:  "180",
+            west:  "-180"
+        )
+
+        expect:
+        worker.getCmd() == "gogoduck.sh -p some_layer -s TIME,2013-11-20T00:30:00.000Z,2013-11-20T10:30:00.000Z;LATITUDE,-90,90;LONGITUDE,-180,180 -o output.nc -l 123"
     }
 
     def "runs command"() {
