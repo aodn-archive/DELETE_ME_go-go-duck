@@ -2,7 +2,7 @@ package au.org.emii.gogoduck.aggr
 
 class AggrController {
 
-    static allowedMethods = [ show: "GET" ]
+    static allowedMethods = [show: "GET"]
     def jobStoreService
 
     def show() {
@@ -10,7 +10,6 @@ class AggrController {
 
         def job = jobStoreService.get(params.uuid)
         log.debug("job: ${job}")
-
 
         def aggrFile = jobStoreService.getAggrFile(job)
 
