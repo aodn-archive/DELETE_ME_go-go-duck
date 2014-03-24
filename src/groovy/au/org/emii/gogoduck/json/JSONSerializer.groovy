@@ -62,8 +62,8 @@ class JSONSerializer {
 
     def shouldSerialiseProperty(property) {
 
-        def propertiesNotToSerialise = ['class', 'metaClass', 'errors', 'constraints', 'grailsApplication', 'aggrUrl', 'serverUrl', 'dateFormatValidator', 'longitudeConstraints', 'latitudeConstraints']
+        def propertiesToOmit = ['class', 'metaClass', 'errors', 'constraints', 'grailsApplication', 'aggrUrl', 'serverUrl', 'longitudeConstraints', 'latitudeConstraints']
 
-        return !propertiesNotToSerialise.contains(property)
+        return !propertiesToOmit.contains(property)
     }
 }
