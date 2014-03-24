@@ -14,7 +14,6 @@ class NotificationServiceSpec extends Specification {
     def job
     def mailService
     def messageSource
-    def worker
 
     def setup() {
         job = TestHelper.createJob()
@@ -107,6 +106,27 @@ class NotificationServiceSpec extends Specification {
         1 * messageSource.getMessage(
             'job.failure.body',
             ['1234', errMsg].toArray(),
+            LocaleContextHolder.locale
+        )
+    }
+
+    def "failure notification body when no error message"() {
+        given:
+        def errMsg = ''
+
+        when:
+        service.getFailureNotificationBody(job, errMsg)
+
+        then:
+        1 * messageSource.getMessage(
+            'job.failure.defaultMessage',
+            [].toArray(),
+            LocaleContextHolder.locale
+        ) >> 'default message'
+
+        1 * messageSource.getMessage(
+            'job.failure.body',
+            ['1234', 'default message'].toArray(),
             LocaleContextHolder.locale
         )
     }

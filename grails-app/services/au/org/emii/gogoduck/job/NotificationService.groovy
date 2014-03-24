@@ -51,10 +51,13 @@ class NotificationService {
     }
 
     def getFailureNotificationBody(job, errMsg) {
-        getMessage('job.failure.body', [job.uuid, errMsg])
+
+        def errMsgReplacement = errMsg ?: getMessage('job.failure.defaultMessage')
+
+        getMessage('job.failure.body', [job.uuid, errMsgReplacement])
     }
 
-    def getMessage(messageKey, messageParams) {
+    def getMessage(messageKey, messageParams = []) {
         messageSource.getMessage(
             messageKey,
             messageParams.toArray(),
