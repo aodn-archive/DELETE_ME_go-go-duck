@@ -35,8 +35,10 @@ class Worker {
 
         def temporalExtent = job.subsetDescriptor.temporalExtent
         def spatialExtent = job.subsetDescriptor.spatialExtent
+        def creationTime = new Date()
+        def formattedFilename = String.format("%s%s.nc", outputFilename, creationTime.format("dd-MM-YYYY-HH:mm:ss"))
         def cmdOptions = String.format(
-            '-p %s -s TIME,%s,%s;LATITUDE,%s,%s;LONGITUDE,%s,%s -o %s -l %s',
+            "-p %s -s TIME,%s,%s;LATITUDE,%s,%s;LONGITUDE,%s,%s -o %s -l %s",
             job.layerName,
             temporalExtent.start,
             temporalExtent.end,
@@ -44,9 +46,11 @@ class Worker {
             spatialExtent.north,
             spatialExtent.west,
             spatialExtent.east,
-            outputFilename,
+            formattedFilename,
             fileLimit
         )
+
+        log.info("Command options: '${cmdOptions}'")
 
         shellCmd.call(cmdOptions)
     }
