@@ -23,15 +23,20 @@ class WorkerSpec extends Specification {
         def worker = new Worker(
             shellCmd: { "gogoduck.sh ${it}" },
             job: testJob,
-            outputFilename: 'output.nc',
+            outputFilename: "IMOS-aggregation-",
             fileLimit: 123
         )
         worker.metaClass.getFullOutputFilename = {
-            "output.nc"
+            "IMOS-aggregation-"
         }
 
+        def command = worker.getCmd()
+
         expect:
-        worker.getCmd() == "gogoduck.sh -p some_layer -s TIME,2013-11-20T00:30:00.000Z,2013-11-20T10:30:00.000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219 -o output.nc -l 123"
+        command.indexOf('gogoduck.sh -p some_layer -s TIME,2013-11-20T00:30:00.000Z,2013-11-20T10:30:00.000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219 -o') > -1
+        command.indexOf('IMOS-aggregation-') > -1
+        command.indexOf('.nc') > -1 
+
     }
 
     def "generates command line from job with no whitespace"() {
@@ -39,11 +44,11 @@ class WorkerSpec extends Specification {
         def worker = new Worker(
             shellCmd: { "gogoduck.sh ${it}" },
             job: testJob,
-            outputFilename: 'output.nc',
+            outputFilename: "IMOS-aggregation-",
             fileLimit: 123
         )
         worker.metaClass.getFullOutputFilename = {
-            "output.nc"
+            "IMOS-aggregation-"
         }
 
         worker.job.subsetDescriptor.spatialExtent = new SpatialExtent(
@@ -53,8 +58,12 @@ class WorkerSpec extends Specification {
             west:  -1
         )
 
+        def command = worker.getCmd()
+
         expect:
-        worker.getCmd() == "gogoduck.sh -p some_layer -s TIME,2013-11-20T00:30:00.000Z,2013-11-20T10:30:00.000Z;LATITUDE,-1.0,1.0;LONGITUDE,-1.0,1.0 -o output.nc -l 123"
+        command.indexOf('gogoduck.sh -p some_layer -s TIME,2013-11-20T00:30:00.000Z,2013-11-20T10:30:00.000Z;LATITUDE,-1.0,1.0;LONGITUDE,-1.0,1.0 -o') > -1
+        command.indexOf('IMOS-aggregation-') > -1
+        command.indexOf('.nc') > -1
     }
 
     def "runs command"() {

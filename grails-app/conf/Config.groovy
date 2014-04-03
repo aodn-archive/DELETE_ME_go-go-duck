@@ -69,7 +69,7 @@ job {
 
 worker {
     fileLimit = 100
-    outputFilename = 'output.nc'
+    outputFilename = "IMOS-aggregation-"
     cmd = {
         "web-app/resources/worker/gogoduck.sh ${it}"
     }
@@ -82,7 +82,7 @@ environments {
         grails.mail.disabled=true
         worker {
             cmd = {
-                def filename = (it =~ /-o ([a-zA-Z0-9\/\.]+)/)[0][1]
+                def filename = filenameExtractorExpression // Extracts filename from the options added to the gogoduck shell command
                 [ 'bash', '-c', "echo bytes > ${filename}" ]
                 // "test/resources/error.sh" // Uncomment this to test error handling.
             }
@@ -125,6 +125,8 @@ catch (e) {
 }
 
 def log4jConversionPattern = '%d [%t] %-5p %c - %m%n'
+
+def filenameExtractorExpression = (it =~ /-o ([a-zA-Z0-9\/\.:-]+)/)[0][1]
 
 log4j = {
     appenders {
