@@ -81,8 +81,13 @@ environments {
         grails.logging.jul.usebridge = true
         grails.mail.disabled=true
         worker {
+
+            extractFilenameFromCommandLine = {
+                (it =~ /-o ([a-zA-Z0-9\/\.:-]+)/)[0][1]
+            }
+
             cmd = {
-                def filename = (it =~ /-o ([a-zA-Z0-9\/\.:-]+)/)[0][1] // Extracts filename from the options added to the gogoduck shell command
+                def filename =  extractFilenameFromCommandLine(it)
                 [ 'bash', '-c', "echo bytes > ${filename}" ]
                 // "test/resources/error.sh" // Uncomment this to test error handling.
             }

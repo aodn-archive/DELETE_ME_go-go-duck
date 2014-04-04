@@ -26,16 +26,13 @@ class WorkerSpec extends Specification {
             outputFilename: "IMOS-aggregation-",
             fileLimit: 123
         )
-        worker.metaClass.getFullOutputFilename = {
-            "IMOS-aggregation-"
-        }
 
         def command = worker.getCmd()
 
         expect:
-        command.indexOf('gogoduck.sh -p some_layer -s TIME,2013-11-20T00:30:00.000Z,2013-11-20T10:30:00.000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219 -o') > -1
-        command.indexOf('IMOS-aggregation-') > -1
-        command.indexOf('.nc') > -1 
+        command.contains('gogoduck.sh -p some_layer -s TIME,2013-11-20T00:30:00.000Z,2013-11-20T10:30:00.000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219 -o')
+        command.contains('IMOS-aggregation-')
+        command.contains('.nc')
 
     }
 
@@ -47,9 +44,6 @@ class WorkerSpec extends Specification {
             outputFilename: "IMOS-aggregation-",
             fileLimit: 123
         )
-        worker.metaClass.getFullOutputFilename = {
-            "IMOS-aggregation-"
-        }
 
         worker.job.subsetDescriptor.spatialExtent = new SpatialExtent(
             north:  1,
@@ -61,9 +55,9 @@ class WorkerSpec extends Specification {
         def command = worker.getCmd()
 
         expect:
-        command.indexOf('gogoduck.sh -p some_layer -s TIME,2013-11-20T00:30:00.000Z,2013-11-20T10:30:00.000Z;LATITUDE,-1.0,1.0;LONGITUDE,-1.0,1.0 -o') > -1
-        command.indexOf('IMOS-aggregation-') > -1
-        command.indexOf('.nc') > -1
+        command.contains('gogoduck.sh -p some_layer -s TIME,2013-11-20T00:30:00.000Z,2013-11-20T10:30:00.000Z;LATITUDE,-1.0,1.0;LONGITUDE,-1.0,1.0 -o')
+        command.contains('IMOS-aggregation-')
+        command.contains('.nc')
     }
 
     def "runs command"() {

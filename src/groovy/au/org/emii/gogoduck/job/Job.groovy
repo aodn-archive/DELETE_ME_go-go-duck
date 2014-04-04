@@ -37,7 +37,7 @@ class Job {
 
     def getSubsetCommandString() {
         return String.format(
-            "-p %s -s ${subsetDescriptor.getSubsetCommandString()}",
+            "-p %s -s ${subsetDescriptor.subsetCommandString}",
             layerName
         )
     }

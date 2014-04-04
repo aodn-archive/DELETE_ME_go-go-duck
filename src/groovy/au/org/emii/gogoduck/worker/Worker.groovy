@@ -32,10 +32,9 @@ class Worker {
     }
 
     def getCmd() {
-        def formattedFilename = String.format("%s%s.nc", outputFilename, new Date().format("dd-MM-YYYY-HH:mm:ss"))
         def cmdOptions = String.format(
-            "${job.getSubsetCommandString()} -o %s -l %s",
-            formattedFilename,
+            "${job.subsetCommandString} -o %s -l %s",
+            WorkerOutputFile.outputFilename(outputFilename),
             fileLimit
         )
 
