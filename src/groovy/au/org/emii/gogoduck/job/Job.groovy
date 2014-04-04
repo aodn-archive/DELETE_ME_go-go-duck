@@ -35,6 +35,13 @@ class Job {
         new URL("$serverUrl/aggr/$uuid")
     }
 
+    def getSubsetCommandString() {
+        return String.format(
+            "-p %s -s ${subsetDescriptor.subsetCommandString}",
+            layerName
+        )
+    }
+
     public String toJsonString() {
         // Groovy 2.0. whatever grails 2.2.0 uses has a bug:
         // http://stackoverflow.com/questions/14406981/why-do-i-get-a-stackoverflowerror-on-when-groovy-jsonbuilder-tries-to-serialize

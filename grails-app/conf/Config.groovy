@@ -69,7 +69,7 @@ job {
 
 worker {
     fileLimit = 100
-    outputFilename = 'output.nc'
+    outputFilename = "IMOS-aggregation-"
     cmd = {
         "web-app/resources/worker/gogoduck.sh ${it}"
     }
@@ -81,8 +81,13 @@ environments {
         grails.logging.jul.usebridge = true
         grails.mail.disabled=true
         worker {
+
+            extractFilenameFromCommandLine = {
+                (it =~ /-o ([a-zA-Z0-9\/\.:-]+)/)[0][1]
+            }
+
             cmd = {
-                def filename = (it =~ /-o ([a-zA-Z0-9\/\.]+)/)[0][1]
+                def filename =  extractFilenameFromCommandLine(it)
                 [ 'bash', '-c', "echo bytes > ${filename}" ]
                 // "test/resources/error.sh" // Uncomment this to test error handling.
             }

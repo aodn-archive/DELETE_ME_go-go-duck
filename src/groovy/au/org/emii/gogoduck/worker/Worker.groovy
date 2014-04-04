@@ -32,21 +32,13 @@ class Worker {
     }
 
     def getCmd() {
-
-        def temporalExtent = job.subsetDescriptor.temporalExtent
-        def spatialExtent = job.subsetDescriptor.spatialExtent
         def cmdOptions = String.format(
-            '-p %s -s TIME,%s,%s;LATITUDE,%s,%s;LONGITUDE,%s,%s -o %s -l %s',
-            job.layerName,
-            temporalExtent.start,
-            temporalExtent.end,
-            spatialExtent.south,
-            spatialExtent.north,
-            spatialExtent.west,
-            spatialExtent.east,
-            outputFilename,
+            "${job.subsetCommandString} -o %s -l %s",
+            WorkerOutputFile.outputFilename(outputFilename),
             fileLimit
         )
+
+        log.info("Command options: '${cmdOptions}'")
 
         shellCmd.call(cmdOptions)
     }

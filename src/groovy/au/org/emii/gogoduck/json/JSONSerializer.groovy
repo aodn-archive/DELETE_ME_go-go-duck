@@ -81,7 +81,8 @@ class JSONSerializer {
             'aggrUrl',
             'serverUrl',
             'longitudeConstraints',
-            'latitudeConstraints'
+            'latitudeConstraints',
+            'subsetCommandString'
         ]
 
         return !propertiesToOmit.contains(property)
