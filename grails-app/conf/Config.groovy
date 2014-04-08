@@ -82,11 +82,13 @@ environments {
         grails.mail.disabled=true
         worker {
 
-            extractFilenameFromCommandLine = {
-                (it =~ /-o ([a-zA-Z0-9\/\.:-]+)/)[0][1]
-            }
-
             cmd = {
+
+                def extractFilenameFromCommandLine = {
+                    s ->
+                    (s =~ /-o ([a-zA-Z0-9\/\.:-]+)/)[0][1]
+                }
+
                 def filename =  extractFilenameFromCommandLine(it)
                 [ 'bash', '-c', "echo bytes > ${filename}" ]
                 // "test/resources/error.sh" // Uncomment this to test error handling.
