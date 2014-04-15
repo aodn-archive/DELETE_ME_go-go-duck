@@ -63,7 +63,8 @@ _enforce_file_limit() {
     local -i limit=$1; shift
     local -i num_urls=`cat $url_list | wc -l`
     if [ $num_urls -gt $limit ]; then
-        logger_warn "Cannot process '$num_urls' urls, you are allowed only '$limit'"
+        logger_warn "Cannot process '$num_urls' files, we allow only '$limit'"
+        logger_user "Cannot process '$num_urls' files, we allow only '$limit'"
         return 1
     else
         return 0
@@ -142,9 +143,11 @@ _apply_subset() {
     local subset_cmd=`source $profile_module && get_subset_command $profile $subset`
 
     local file
+    logger_user "Applying subset '$subset'"
     for file in $dir/*; do
         local tmp_file=`mktemp`
         logger_info "Applying subset '$subset_cmd' to '$file'"
+        logger_user "Processing file '"`basename $file`"'"
         ncks -a -4 -O $subset_cmd $file $tmp_file
 
         # overwrite original file
@@ -237,6 +240,7 @@ gogoduck_main() {
 
     mv $tmp_result_file $output
     logger_info "Result saved at '$output'"
+    logger_user "GoGoDuck aggregation successful"
 }
 
 # prints usage and exit
@@ -248,7 +252,8 @@ Options:
   -s, --subset               Subset to apply, semi-colon separated.
   -p, --profile              Profile to apply.
   -o, --output               Output file to use.
-  -l, --limit                Maximum amount of file to allow processing of."
+  -l, --limit                Maximum amount of file to allow processing of.
+  -u, --user-log             Output file for user logging."
     exit 3
 }
 
@@ -257,13 +262,14 @@ Options:
 # "$@" - parameters, see usage
 main() {
     # parse options with getopt
-    local tmp_getops=`getopt -o hs:p:o:l: --long help,subset:,profile:,output:,limit: -- "$@"`
+    local tmp_getops=`getopt -o hs:p:o:l:u: --long help,subset:,profile:,output:,limit:,user-log: -- "$@"`
     [ $? != 0 ] && usage
 
     eval set -- "$tmp_getops"
     local url subset output
     local profile=default # set default profile
     local -i limit=100 # allow up to 100 files to be processed by default
+    local user_log
 
     # parse the options
     while true ; do
@@ -273,6 +279,7 @@ main() {
             -p|--profile) profile="$2"; shift 2;;
             -o|--output) output="$2"; shift 2;;
             -l|--limit) limit="$2"; shift 2;;
+            -u|--user-log) user_log="$2"; shift 2;;
             --) shift; break;;
             *) usage;;
         esac
@@ -283,6 +290,11 @@ main() {
 
     # make sure user specified output file
     [ x"$profile" = x ] && usage
+
+    # check if user logging is required
+    if [ x"$user_log" != x ]; then
+        set_user_log_file $user_log || usage
+    fi
 
     gogoduck_main $limit "$profile" "$subset" "$output"
 }
