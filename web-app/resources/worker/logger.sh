@@ -13,7 +13,9 @@ set_user_log_file() {
 # logs a message for the end user
 # "$@" - message to log
 logger_user() {
-    test -f $USER_LOG_FILE && echo "$@" >> $USER_LOG_FILE
+    [ x"$USER_LOG_FILE" != x ] && \
+        test -f $USER_LOG_FILE && \
+        echo "$@" >> $USER_LOG_FILE
 }
 
 # logs an info message
