@@ -24,7 +24,7 @@ class JobStoreServiceSpec extends Specification {
         service.grailsApplication = [
             config: [
                 worker: [
-                    outputFilename: 'aggr.nc',
+                    outputFilename: 'aggr-',
                     outputPath: 'jobsDirPath'
                 ]
             ]
@@ -32,6 +32,22 @@ class JobStoreServiceSpec extends Specification {
 
         expect:
         service.getPath(job) == 'jobsDirPath/asdf'
+    }
+
+    def "get job report path"() {
+        given:
+        job.uuid = 'asdf'
+        service.grailsApplication = [
+            config: [
+                worker: [
+                    outputFilename: 'aggr-',
+                    outputPath: 'jobsDirPath'
+                ]
+            ]
+        ]
+
+        expect:
+        service.getReportFile(job).path == 'jobsDirPath/asdf/aggr-report.txt'
     }
 
     def "get invalid job"() {

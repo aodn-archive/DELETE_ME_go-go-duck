@@ -55,7 +55,9 @@ class WorkerSpec extends Specification {
         def command = worker.getCmd()
 
         expect:
-        command.contains('gogoduck.sh -p some_layer -s TIME,2013-11-20T00:30:00.000Z,2013-11-20T10:30:00.000Z;LATITUDE,-1.0,1.0;LONGITUDE,-1.0,1.0 -o')
+        command.contains('gogoduck.sh -p some_layer -s TIME,2013-11-20T00:30:00.000Z,2013-11-20T10:30:00.000Z;LATITUDE,-1.0,1.0;LONGITUDE,-1.0,1.0')
+        command.contains(' -o ')
+        command.contains(' -u ')
         command.contains('IMOS-aggregation-')
         command.contains('.nc')
     }
