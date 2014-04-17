@@ -5,6 +5,7 @@ import org.springframework.context.i18n.LocaleContextHolder
 class NotificationService {
     def mailService
     def messageSource
+    def jobStoreService
 
     def sendJobRegisteredNotification(job) {
         sendMailAndLog {
@@ -23,10 +24,13 @@ class NotificationService {
     }
 
     def sendJobSuccessNotification(job) {
+        def jobAggregationReport = jobStoreService.getReportFile(job)
         sendMailAndLog {
+            multipart true
             to job.emailAddress.toString()
             subject getSuccessNotificationSubject(job)
             body getSuccessNotificationBody(job)
+            attachBytes "aggregation_report.txt", "text/plain", jobAggregationReport.readBytes()
         }
     }
 
