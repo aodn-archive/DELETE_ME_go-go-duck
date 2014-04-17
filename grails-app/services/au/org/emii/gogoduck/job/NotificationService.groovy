@@ -43,10 +43,13 @@ class NotificationService {
     }
 
     def sendJobFailureNotification(job, errMsg) {
+        def jobAggregationReport = jobStoreService.getReportFile(job)
         sendMailAndLog {
+            multipart true
             to job.emailAddress.toString()
             subject getFailureNotificationSubject(job)
             body getFailureNotificationBody(job, errMsg)
+            attachBytes "aggregation_report.txt", "text/plain", jobAggregationReport.readBytes()
         }
     }
 
