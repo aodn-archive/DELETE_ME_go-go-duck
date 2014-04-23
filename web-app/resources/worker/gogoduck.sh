@@ -205,9 +205,17 @@ gogoduck_main() {
         logger_fatal "Failed getting list of URLs"
     fi
 
+    if grep -q 'ServiceExceptionReport' $tmp_url_list; then
+        rm -f $tmp_url_list
+        logger_user "Failed to get list of URLs for '$profile'"
+        logger_user "GoGoDuck aggregation failed"
+        logger_fatal "Could not obtain list of URLs for '$profile'"
+    fi
+
     # enforce number of URLs limit
     if ! _enforce_file_limit $tmp_url_list $limit; then
         rm -f $tmp_url_list
+        logger_user "GoGoDuck aggregation failed"
         logger_fatal "Not allowed to process that many files"
     fi
 
