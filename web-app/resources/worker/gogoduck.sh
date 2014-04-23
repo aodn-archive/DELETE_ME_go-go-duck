@@ -80,7 +80,7 @@ _is_gzipped() {
 
 # downloads all files (or link them)
 # $1 - directory to download files to
-# $2 - file containing liste of URLs to download
+# $2 - file containing list of URLs to download
 _get_files() {
     local dir=$1; shift
     local url_file=$1; shift
@@ -119,6 +119,26 @@ _get_files() {
             fi
         fi
     done
+}
+
+# returns 0 if list of URLs is sane, 1 otherwise
+# $1 - file containing list of URLs
+_is_list_of_urls_sane() {
+    local url_file=$1; shift
+
+    # check for ServiceExceptionReport - usually if the layer doesn't exist
+    if grep -q 'ServiceExceptionReport' $url_file; then
+        logger_user "Could not obtain list of URLs, does the layer exist?"
+        logger_warn "Could not obtain list of URLs, server returned ServiceExceptionReport"
+        return 1
+    fi
+
+    # check if it's an empty file
+    if [ `cat $url_file | wc -l` -eq 0 ]; then
+        logger_user "List of URLs obtained is empty, are your subseting parameters sane?"
+        logger_warn "Could not obtain list of URLs, URL list is empty!"
+        return 1
+    fi
 }
 
 # applies subset to every netcdf file in directory
@@ -205,9 +225,11 @@ gogoduck_main() {
         logger_fatal "Failed getting list of URLs"
     fi
 
-    if grep -q 'ServiceExceptionReport' $tmp_url_list; then
+    # check for sanity of URL list
+    if ! _is_list_of_urls_sane $tmp_url_list; then
         rm -f $tmp_url_list
         logger_user "Failed to get list of URLs for '$profile'"
+        logger_user "Subset parameters '$subset'"
         logger_user "GoGoDuck aggregation failed"
         logger_fatal "Could not obtain list of URLs for '$profile'"
     fi
