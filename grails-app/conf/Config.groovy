@@ -89,8 +89,15 @@ environments {
                     (s =~ /-o ([a-zA-Z0-9\/\.:-]+)/)[0][1]
                 }
 
+                def extractOutputFilenameFromCommandLine = {
+                    s ->
+                    (s =~ /-u ([a-zA-Z0-9\/\.:-]+)/)[0][1]
+                }
+
                 def filename =  extractFilenameFromCommandLine(it)
+                def outputFilename =  extractOutputFilenameFromCommandLine(it)
                 [ 'bash', '-c', "echo bytes > ${filename}" ]
+                [ 'bash', '-c', "echo 'here be report' > ${outputFilename}" ]
                 // "test/resources/error.sh" // Uncomment this to test error handling.
             }
             outputPath = 'jobs'
