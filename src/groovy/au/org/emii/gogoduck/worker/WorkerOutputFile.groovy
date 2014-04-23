@@ -12,4 +12,8 @@ class WorkerOutputFile {
     static def outputFilename(outputFilename) {
         String.format("%s%s.nc", outputFilename, new Date().format("dd-MM-YYYY-HH:mm:ss"))
     }
+
+    static def aggReportOutputFilename(outputFilename) {
+        String.format("%sreport.txt", outputFilename, new Date().format("dd-MM-YYYY-HH:mm:ss"))
+    }
 }

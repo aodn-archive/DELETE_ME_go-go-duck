@@ -16,6 +16,22 @@
 # GNU General Public License for more details.
 #
 
+# test user logging
+test_user_logger() {
+    source $GOGODUCK_NO_MAIN
+    logger_user "this should not be logged anywhere"
+
+    local tmp_log=`mktemp`
+    set_user_log_file $tmp_log >& /dev/null
+    logger_user "this should be logged"
+
+    local log_content=`cat $tmp_log`
+    assertTrue 'profiles/acorn_uga_booga -> profiles/acorn' \
+        "[ '$log_content' = 'this should be logged' ]"
+
+    rm -f $tmp_log
+}
+
 # test for .gz suffix in file
 test_is_gzip() {
     source $GOGODUCK_NO_MAIN

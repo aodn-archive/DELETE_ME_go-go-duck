@@ -63,7 +63,8 @@ _enforce_file_limit() {
     local -i limit=$1; shift
     local -i num_urls=`cat $url_list | wc -l`
     if [ $num_urls -gt $limit ]; then
-        logger_warn "Cannot process '$num_urls' urls, you are allowed only '$limit'"
+        logger_warn "Cannot process '$num_urls' files, we allow only '$limit'"
+        logger_user "Cannot process '$num_urls' files, we allow only '$limit'"
         return 1
     else
         return 0
@@ -79,7 +80,7 @@ _is_gzipped() {
 
 # downloads all files (or link them)
 # $1 - directory to download files to
-# $2 - file containing liste of URLs to download
+# $2 - file containing list of URLs to download
 _get_files() {
     local dir=$1; shift
     local url_file=$1; shift
@@ -120,6 +121,26 @@ _get_files() {
     done
 }
 
+# returns 0 if list of URLs is sane, 1 otherwise
+# $1 - file containing list of URLs
+_is_list_of_urls_sane() {
+    local url_file=$1; shift
+
+    # check for ServiceExceptionReport - usually if the layer doesn't exist
+    if grep -q 'ServiceExceptionReport' $url_file; then
+        logger_user "Could not obtain list of URLs, does the layer exist?"
+        logger_warn "Could not obtain list of URLs, server returned ServiceExceptionReport"
+        return 1
+    fi
+
+    # check if it's an empty file
+    if [ `cat $url_file | wc -l` -eq 0 ]; then
+        logger_user "List of URLs obtained is empty, are your subseting parameters sane?"
+        logger_warn "Could not obtain list of URLs, URL list is empty!"
+        return 1
+    fi
+}
+
 # applies subset to every netcdf file in directory
 # $1 - profile module
 # $2 - profile
@@ -142,9 +163,11 @@ _apply_subset() {
     local subset_cmd=`source $profile_module && get_subset_command $profile $subset`
 
     local file
+    logger_user "Applying subset '$subset'"
     for file in $dir/*; do
         local tmp_file=`mktemp`
         logger_info "Applying subset '$subset_cmd' to '$file'"
+        logger_user "Processing file '"`basename $file`"'"
         ncks -a -4 -O $subset_cmd $file $tmp_file
 
         # overwrite original file
@@ -202,9 +225,19 @@ gogoduck_main() {
         logger_fatal "Failed getting list of URLs"
     fi
 
+    # check for sanity of URL list
+    if ! _is_list_of_urls_sane $tmp_url_list; then
+        rm -f $tmp_url_list
+        logger_user "Failed to get list of URLs for '$profile'"
+        logger_user "Subset parameters '$subset'"
+        logger_user "GoGoDuck aggregation failed"
+        logger_fatal "Could not obtain list of URLs for '$profile'"
+    fi
+
     # enforce number of URLs limit
     if ! _enforce_file_limit $tmp_url_list $limit; then
         rm -f $tmp_url_list
+        logger_user "GoGoDuck aggregation failed"
         logger_fatal "Not allowed to process that many files"
     fi
 
@@ -237,6 +270,7 @@ gogoduck_main() {
 
     mv $tmp_result_file $output
     logger_info "Result saved at '$output'"
+    logger_user "GoGoDuck aggregation successful"
 }
 
 # prints usage and exit
@@ -248,7 +282,8 @@ Options:
   -s, --subset               Subset to apply, semi-colon separated.
   -p, --profile              Profile to apply.
   -o, --output               Output file to use.
-  -l, --limit                Maximum amount of file to allow processing of."
+  -l, --limit                Maximum amount of file to allow processing of.
+  -u, --user-log             Output file for user logging."
     exit 3
 }
 
@@ -257,13 +292,14 @@ Options:
 # "$@" - parameters, see usage
 main() {
     # parse options with getopt
-    local tmp_getops=`getopt -o hs:p:o:l: --long help,subset:,profile:,output:,limit: -- "$@"`
+    local tmp_getops=`getopt -o hs:p:o:l:u: --long help,subset:,profile:,output:,limit:,user-log: -- "$@"`
     [ $? != 0 ] && usage
 
     eval set -- "$tmp_getops"
     local url subset output
     local profile=default # set default profile
     local -i limit=100 # allow up to 100 files to be processed by default
+    local user_log
 
     # parse the options
     while true ; do
@@ -273,6 +309,7 @@ main() {
             -p|--profile) profile="$2"; shift 2;;
             -o|--output) output="$2"; shift 2;;
             -l|--limit) limit="$2"; shift 2;;
+            -u|--user-log) user_log="$2"; shift 2;;
             --) shift; break;;
             *) usage;;
         esac
@@ -283,6 +320,11 @@ main() {
 
     # make sure user specified output file
     [ x"$profile" = x ] && usage
+
+    # check if user logging is required
+    if [ x"$user_log" != x ]; then
+        set_user_log_file $user_log || usage
+    fi
 
     gogoduck_main $limit "$profile" "$subset" "$output"
 }

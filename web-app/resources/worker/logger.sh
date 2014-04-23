@@ -1,5 +1,23 @@
 #!/bin/bash
 
+# sets user log file, logger_user function will log to that file
+# $1 - user log file
+set_user_log_file() {
+    local user_log_file="$1"; shift
+    # truncate user log file
+    cat /dev/null > "$user_log_file" || logger_fatal "Could not create user log file '$user_log_file'"
+    logger_info "User logging will be kept at '$user_log_file'"
+    export USER_LOG_FILE=$user_log_file
+}
+
+# logs a message for the end user
+# "$@" - message to log
+logger_user() {
+    [ x"$USER_LOG_FILE" != x ] && \
+        test -f $USER_LOG_FILE && \
+        echo "$@" >> $USER_LOG_FILE
+}
+
 # logs an info message
 # "$@" - message to log
 logger_info() {

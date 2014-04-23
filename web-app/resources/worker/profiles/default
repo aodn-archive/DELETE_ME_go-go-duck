@@ -20,7 +20,9 @@ format_output_file() {
 
     # post process file, see if filesystem is mounted?
     local sample_file=`head -1 $file`
-    if can_access_via_fs $sample_file; then
+    if [ -z "$sample_file" ]; then
+        logger_warn "Sample file is an empty string"
+    elif can_access_via_fs $sample_file; then
         # if the first file exists on disk, append a file:// prefix
         # this will use the linking method which is faster
         logger_info "Using linking method, could find '$sample_file' in its location"
