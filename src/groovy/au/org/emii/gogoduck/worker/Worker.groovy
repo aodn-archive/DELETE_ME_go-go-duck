@@ -1,5 +1,7 @@
 package au.org.emii.gogoduck.worker
 
+import au.org.emii.gogoduck.job.JobExecutorJob
+import au.org.emii.gogoduck.job.JobStoreService
 import org.apache.commons.io.IOUtils
 
 import au.org.emii.gogoduck.job.Job
@@ -7,9 +9,9 @@ import au.org.emii.gogoduck.job.Job
 class Worker {
     Job job
     Closure shellCmd
+    String creationTime
     String outputFilename
     Integer fileLimit
-    def jobStoreService
 
     void run(successHandler, failureHandler) {
 
@@ -35,7 +37,7 @@ class Worker {
     def getCmd() {
         def cmdOptions = String.format(
             "${job.subsetCommandString} -o %s -u %s -l %s",
-            WorkerOutputFile.outputFilename(outputFilename),
+            outputFilename,
             WorkerOutputFile.aggReportOutputFilename(outputFilename),
             fileLimit
         )

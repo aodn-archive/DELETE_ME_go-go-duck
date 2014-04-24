@@ -75,7 +75,8 @@ class JobStoreService {
     }
 
     private String getAggrPathForId(jobId) {
-        "${getPathForId(jobId)}${File.separator}${grailsApplication.config.worker.outputFilename}"
+        def outputFileName = WorkerOutputFile.outputFilename(grailsApplication.config.worker.outputFilename,grailsApplication.config.worker.creationTime)
+        "${getPathForId(jobId)}${File.separator}${outputFileName}"
     }
 
     String getJsonPathForId(jobId) {

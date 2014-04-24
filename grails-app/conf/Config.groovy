@@ -1,3 +1,5 @@
+
+
 import javax.naming.InitialContext
 
 grails.project.groupId = appName // change this to alter the default package name and Maven publishing destination
@@ -69,6 +71,7 @@ job {
 
 worker {
     fileLimit = 100
+    creationTime = new Date().format("dd-MM-yyyyHH:mm:ss")
     outputFilename = "IMOS-aggregation-"
     cmd = {
         "web-app/resources/worker/gogoduck.sh ${it}"
@@ -96,9 +99,8 @@ environments {
 
                 def filename =  extractFilenameFromCommandLine(it)
                 def outputFilename =  extractOutputFilenameFromCommandLine(it)
-                [ 'bash', '-c', "echo bytes > ${filename}" ]
-                [ 'bash', '-c', "echo 'here be report' > ${outputFilename}" ]
-                // "test/resources/error.sh" // Uncomment this to test error handling.
+                // "test/resources/error.sh" // return this to test error handling.
+                [ 'bash', '-c', "echo bytes > ${filename}; echo 'here be report' > ${outputFilename}" ]
             }
             outputPath = 'jobs'
         }
