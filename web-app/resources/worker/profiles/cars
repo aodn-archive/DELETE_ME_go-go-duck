@@ -7,10 +7,12 @@ declare -r CARS_DATA="/mnt/imos-t3/climatology/CARS/2009/eMII-product/CARS2009_W
 
 # this function takes a subset and should output the list of urls to the given
 # file
-# $1 - profile
-# $2 - output file
-# $3 - subset
+# $1 - geoserver
+# $2 - profile
+# $3 - output file
+# $4 - subset
 get_list_of_urls() {
+    local geoserver=$1; shift # unused
     local profile=$1; shift
     local output_file=$1; shift
     local subset="$1"; shift
