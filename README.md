@@ -12,6 +12,7 @@ Supposing you have a JSON document such as the one at [doc/example_job_request.j
 {
   layerName: 'acorn_hourly_avg_rot_qc_timeseries_url',
   emailAddress: 'gogo@duck.com',
+  geoserver: 'http://geoserver-123.aodn.org.au/geoserver'
   subsetDescriptor: {
     temporalExtent: {
       start: '2013-11-20T00:30:00.000Z',
