@@ -10,6 +10,7 @@ class Job {
     String uuid
     String emailAddress
     String layerName
+    String geoserver
     DateTime createdTimestamp
 
     // Need to instantiate nested objects, otherwise they are not bound.
@@ -19,6 +20,7 @@ class Job {
     static constraints = {
         emailAddress email: true
         layerName blank: false, validator: { it ==~ /^[\w]+$/ }
+        geoserver nullable: true
         subsetDescriptor nullable: false
     }
 
@@ -36,10 +38,19 @@ class Job {
     }
 
     def getSubsetCommandString() {
-        return String.format(
-            "-p %s -s ${subsetDescriptor.subsetCommandString}",
-            layerName
-        )
+        def subsetCommandString = ""
+
+        subsetCommandString +=
+            String.format(
+               "-p %s -s ${subsetDescriptor.subsetCommandString}",
+                layerName
+            )
+
+        if (geoserver) {
+            subsetCommandString += String.format(" -g %s", geoserver)
+        }
+
+        return subsetCommandString
     }
 
     public String toJsonString() {
