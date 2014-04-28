@@ -1,7 +1,6 @@
 package au.org.emii.gogoduck.job
 
 import grails.converters.JSON
-import org.joda.time.DateTime
 
 import au.org.emii.gogoduck.json.JSONSerializer
 
@@ -10,7 +9,6 @@ class Job {
     String uuid
     String emailAddress
     String layerName
-    DateTime createdTimestamp
 
     // Need to instantiate nested objects, otherwise they are not bound.
     // See: http://grails.1312388.n4.nabble.com/How-to-bind-data-to-a-command-object-that-has-an-non-domain-object-as-property-tp4021559p4328826.html
@@ -24,7 +22,6 @@ class Job {
 
     Job() {
         uuid = UUID.randomUUID().toString()[0..7]
-        createdTimestamp = DateTime.now()
     }
 
     String toString() {
@@ -46,10 +43,6 @@ class Job {
         // Groovy 2.0. whatever grails 2.2.0 uses has a bug:
         // http://stackoverflow.com/questions/14406981/why-do-i-get-a-stackoverflowerror-on-when-groovy-jsonbuilder-tries-to-serialize
         new JSONSerializer(target: this).getJSON()
-    }
-
-    void setCreatedTimestamp(String tsAsString) {
-        this.createdTimestamp = new DateTime(tsAsString)
     }
 
     static Job fromJsonString(jobAsJson) {

@@ -24,7 +24,6 @@ class JobSpec extends Specification {
          "end": "2013-11-20T10:30:00.000Z"
       }
    },
-   "createdTimestamp": "1970-01-01T11:00:01.234+11:00",
    "emailAddress": "gogo@duck.com",
    "layerName": "some_layer",
    "uuid": "1234"
@@ -69,14 +68,6 @@ class JobSpec extends Specification {
         }
     }
 
-    def "initialised with a timestamp"() {
-        given:
-        DateTimeUtils.setCurrentMillisFixed(1234)
-        def job = new Job()
-
-        expect:
-        job.createdTimestamp == DateTime.now()
-    }
 
     def "to JSON"() {
         given:
@@ -93,7 +84,6 @@ class JobSpec extends Specification {
 
         expect:
         job.uuid == '1234'
-        job.createdTimestamp == DateTime.now()
         job.emailAddress == "gogo@duck.com"
         job.layerName == "some_layer"
         job.subsetDescriptor.spatialExtent.south == -33.433849
