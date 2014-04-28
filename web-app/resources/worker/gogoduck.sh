@@ -12,6 +12,9 @@ source `dirname $0`/logger.sh
 # relative path to where all profiles (plugins) are installed
 declare -r PROFILES_DIR=profiles
 
+# default geoserver to use
+declare -r DEFAULT_GEOSERVER=http://geoserver-123.aodn.org.au/geoserver
+
 # finds the correct profile to run for the given layer, starts with:
 # acorn_hourly_avg_sag_nonqc_timeseries_url
 # acorn_hourly_avg_sag_nonqc_timeseries
@@ -42,16 +45,18 @@ _get_profile_module() {
 }
 
 # returns a list of URLs from the given GeoServer URL
-# $1 - profile module
-# $2 - profile
-# $3 - output (result) file
-# $4 - subset
+# $1 - geoserver
+# $2 - profile module
+# $3 - profile
+# $4 - output (result) file
+# $5 - subset
 _get_list_of_urls() {
+    local geoserver=$1; shift
     local profile_module=$1; shift
     local profile=$1; shift
     local output_file=$1; shift
     local subset="$1"; shift
-    (source $profile_module && get_list_of_urls $profile $output_file "$subset")
+    (source $profile_module && get_list_of_urls $geoserver $profile $output_file "$subset")
 }
 
 # enforce file limit, if the file given has more lines than the limit given, we
@@ -205,11 +210,13 @@ _update_header() {
 }
 
 # gogoduck logic
-# $1 - maximum amount of files to allow processing of
-# $2 - profile to apply
-# $3 - subset to apply
-# $4 - output file
+# $1 - geoserver
+# $2 - maximum amount of files to allow processing of
+# $3 - profile to apply
+# $4 - subset to apply
+# $5 - output file
 gogoduck_main() {
+    local geoserver="$1"; shift
     local -i limit=$1; shift
     local profile="$1"; shift
     local subset="$1"; shift
@@ -220,7 +227,7 @@ gogoduck_main() {
     local profile_module=`_get_profile_module $profile`
 
     # get a list of relevant URLs we'll work with
-    if ! _get_list_of_urls $profile_module $profile $tmp_url_list "$subset"; then
+    if ! _get_list_of_urls $geoserver $profile_module $profile $tmp_url_list "$subset"; then
         rm -f $tmp_url_list
         logger_fatal "Failed getting list of URLs"
     fi
@@ -279,6 +286,8 @@ usage() {
     echo "Subsets and aggregates NetCDF files."
     echo "
 Options:
+  -g, --geoserver            Geoserver to get list of URLs from. Default is
+                             http://geoserver-123.aodn.org.au/geoserver
   -s, --subset               Subset to apply, semi-colon separated.
   -p, --profile              Profile to apply.
   -o, --output               Output file to use.
@@ -292,10 +301,11 @@ Options:
 # "$@" - parameters, see usage
 main() {
     # parse options with getopt
-    local tmp_getops=`getopt -o hs:p:o:l:u: --long help,subset:,profile:,output:,limit:,user-log: -- "$@"`
+    local tmp_getops=`getopt -o hg:s:p:o:l:u: --long help,geoserver:,subset:,profile:,output:,limit:,user-log: -- "$@"`
     [ $? != 0 ] && usage
 
     eval set -- "$tmp_getops"
+    local geoserver=$DEFAULT_GEOSERVER
     local url subset output
     local profile=default # set default profile
     local -i limit=100 # allow up to 100 files to be processed by default
@@ -305,6 +315,7 @@ main() {
     while true ; do
         case "$1" in
             -h|--help) usage;;
+            -g|--geoserver) geoserver="$2"; shift 2;;
             -s|--subset) subset="$2"; shift 2;;
             -p|--profile) profile="$2"; shift 2;;
             -o|--output) output="$2"; shift 2;;
@@ -326,7 +337,7 @@ main() {
         set_user_log_file $user_log || usage
     fi
 
-    gogoduck_main $limit "$profile" "$subset" "$output"
+    gogoduck_main $geoserver $limit "$profile" "$subset" "$output"
 }
 
 main "$@"

@@ -6,6 +6,7 @@ class TestHelper {
     static Job createJob() {
         def job = new Job(
             layerName: 'some_layer',
+            geoserver: 'geoserver_address',
             emailAddress: 'gogo@duck.com',
             subsetDescriptor: [
                 temporalExtent: [

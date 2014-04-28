@@ -3,7 +3,6 @@
 # when downloading stuff from GeoServer we'll need to do some manipulation!
 declare -r URL_PREFIX_PATTERN=/mnt/imos-t3/
 declare -r URL_PREFIX_REPLACE=http://data.aodn.org.au/
-declare -r GEOSERVER_URL=http://geoserver-123.aodn.org.au/geoserver
 
 # returns 0 if given file can be accessed by filesystem, 1 otherwise
 # $1 - file to check
@@ -36,10 +35,12 @@ format_output_file() {
 
 # this function takes a subset and should output the list of urls to the given
 # file
-# $1 - profile
-# $2 - output file
-# $3 - subset
+# $1 - geoserver
+# $2 - profile
+# $3 - output file
+# $4 - subset
 get_list_of_urls() {
+    local geoserver=$1; shift
     local profile=$1; shift
     local output_file=$1; shift
     local subset="$1"; shift
@@ -51,9 +52,10 @@ get_list_of_urls() {
     time_coverage_end=`grep "^TIME," $tmp_attrs | cut -d, -f3`
     rm -f $tmp_attrs
 
-    local url="$GEOSERVER_URL/wfs?typeName=$profile&SERVICE=WFS&outputFormat=csv&REQUEST=GetFeature&VERSION=1.0.0"
+    local url="$geoserver/wfs?typeName=$profile&SERVICE=WFS&outputFormat=csv&REQUEST=GetFeature&VERSION=1.0.0"
     local parameters="CQL_FILTER=time >= $time_coverage_start and time <= $time_coverage_end"
 
+    logger_info "Getting list of URLs from '$url' with parameters '$parameters'"
     # get list of files from geoserver
     curl -s "$url" --get --data-urlencode "$parameters" |\
         tail -n+2 | cut -d',' -f3 > $output_file

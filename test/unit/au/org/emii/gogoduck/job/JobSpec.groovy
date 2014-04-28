@@ -25,6 +25,7 @@ class JobSpec extends Specification {
       }
    },
    "createdTimestamp": "1970-01-01T11:00:01.234+11:00",
+   "geoserver": "geoserver_address",
    "emailAddress": "gogo@duck.com",
    "layerName": "some_layer",
    "uuid": "1234"

@@ -16,6 +16,9 @@
 # GNU General Public License for more details.
 #
 
+# run tests in front of geoserver-123
+declare -r GEOSERVER=http://geoserver-123.aodn.org.au/geoserver
+
 # test user logging
 test_user_logger() {
     source $GOGODUCK_NO_MAIN
@@ -70,7 +73,14 @@ test_get_profile_module() {
 test_get_files_acorn() {
     source $GOGODUCK_NO_MAIN
     local tmp_file=`mktemp`
-    _get_list_of_urls profiles/default acorn_hourly_avg_sag_nonqc_timeseries_url $tmp_file "TIME,2013-12-21T00:30:00.000Z,2013-12-21T04:30:00.000Z;LATITUDE,-36.375741295316,-35.683114342188;LONGITUDE,134.60681553516,136.11743565234" acorn_hourly_avg_sag_nonqc_timeseries_url
+    _get_list_of_urls \
+        $GEOSERVER \
+        profiles/default \
+        acorn_hourly_avg_sag_nonqc_timeseries_url \
+        $tmp_file \
+        "TIME,2013-12-21T00:30:00.000Z,2013-12-21T04:30:00.000Z;LATITUDE,-36.375741295316,-35.683114342188;LONGITUDE,134.60681553516,136.11743565234" \
+        acorn_hourly_avg_sag_nonqc_timeseries_url \
+            >& /dev/null
 
     # expect 5 urls
     assertTrue '5 urls returned for acorn_hourly_avg_sag_nonqc_timeseries_url 21/12/2013 00:30-04:30' \
@@ -152,6 +162,7 @@ test_aggregation_acorn_file_size() {
     source $GOGODUCK_NO_MAIN
     local tmp_output_file=`mktemp`
     gogoduck_main \
+        $GEOSERVER \
         100 \
         "acorn_hourly_avg_rot_qc_timeseries_url" \
         "TIME,2013-11-20T00:30:00.000Z,2013-11-20T10:30:00.000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219" \
@@ -170,6 +181,7 @@ test_aggregation_gsla() {
     source $GOGODUCK_NO_MAIN
     local tmp_output_file=`mktemp`
     gogoduck_main \
+        $GEOSERVER \
         100 \
         "gsla_nrt00_timeseries_url" \
         "TIME,2011-10-10T00:00:00.000Z,2011-10-20T00:00:00.000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219" \
