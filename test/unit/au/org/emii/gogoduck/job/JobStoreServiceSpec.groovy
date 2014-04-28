@@ -16,6 +16,7 @@ class JobStoreServiceSpec extends Specification {
     def setup() {
         job = TestHelper.createJob()
         service = Spy(JobStoreService)
+
     }
 
     def "get job directory path"() {
@@ -25,6 +26,7 @@ class JobStoreServiceSpec extends Specification {
             config: [
                 worker: [
                     outputFilename: 'aggr-',
+                    outputExtension: '.nc',
                     outputPath: 'jobsDirPath'
                 ]
             ]
@@ -40,21 +42,23 @@ class JobStoreServiceSpec extends Specification {
         service.grailsApplication = [
             config: [
                 worker: [
-                    outputFilename: 'aggr-',
+                    creationTime: 'now',
+                    outputFilename: 'IMOS-aggregation-',
+                    outputExtension: '.nc',
                     outputPath: 'jobsDirPath'
                 ]
             ]
         ]
 
         expect:
-        service.getReportFile(job).path == 'jobsDirPath/asdf/aggr-report.txt'
+        service.getReportFile(job).path == 'jobsDirPath/asdf/IMOS-aggregation-nowreport.txt'
     }
 
     def "get invalid job"() {
         given:
         service.getJsonPathForId('1234') >> 'jobs/1234/job.json'
         1 * service.getFile('jobs/1234/job.json') >> {
-            throw new FileNotFoundException('jobs/1234/job.json (Not asda directory)')
+            throw new FileNotFoundException('jobs/1234/job.json (Not a directory)')
         }
 
         when:

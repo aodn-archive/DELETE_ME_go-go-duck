@@ -47,8 +47,13 @@ class JobStoreService {
     }
 
     File getReportFile(job) {
-        log.debug("Job path: ${getAggrPath(job)}")
-        getFile(WorkerOutputFile.aggReportOutputFilename(getAggrPath(job)))
+        log.debug("Job report path: ${getAggrPath(job)}")
+        def aggrPath  = stripExtension(getAggrPath(job))
+        getFile(WorkerOutputFile.aggReportOutputFilename(aggrPath))
+    }
+
+    private String stripExtension(filePath) {
+        filePath.replaceFirst(~/\.[^\.]+$/, '') // http://stackoverflow.com/questions/1569547/does-groovy-have-an-easy-way-to-get-a-filename-without-the-extension
     }
 
     void makeDir(job) {
@@ -75,9 +80,14 @@ class JobStoreService {
     }
 
     private String getAggrPathForId(jobId) {
-        def outputFileName = WorkerOutputFile.outputFilename(grailsApplication.config.worker.outputFilename,grailsApplication.config.worker.creationTime)
+        def outputFileName = WorkerOutputFile.outputFilename(
+            grailsApplication.config.worker.outputFilename,
+            grailsApplication.config.worker.creationTime,
+            grailsApplication.config.worker.outputExtension
+        )
         "${getPathForId(jobId)}${File.separator}${outputFileName}"
     }
+
 
     String getJsonPathForId(jobId) {
         "${getPathForId(jobId)}${File.separator}job.json"

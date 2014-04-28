@@ -25,6 +25,7 @@ class JobExecutorJob {
             shellCmd: grailsApplication.config.worker.cmd,
             job: job,
             outputFilename: jobStoreService.getAggrPath(job),
+            outputExtension: grailsApplication.config.worker.outputExtension,
             fileLimit: grailsApplication.config.worker.fileLimit
         )
     }

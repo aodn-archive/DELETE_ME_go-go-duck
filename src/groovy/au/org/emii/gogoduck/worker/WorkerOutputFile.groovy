@@ -9,8 +9,8 @@ package au.org.emii.gogoduck.worker
 
 class WorkerOutputFile {
 
-    static def outputFilename(outputFilename,jobHash) {
-        String.format("%s%s.nc", outputFilename, jobHash)
+    static def outputFilename(outputFilename,jobHash, extension) {
+        String.format("%s%s%s", outputFilename, jobHash, extension)
     }
 
     static def aggReportOutputFilename(outputFilename) {

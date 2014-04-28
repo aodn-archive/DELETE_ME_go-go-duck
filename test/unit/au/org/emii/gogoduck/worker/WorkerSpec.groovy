@@ -1,5 +1,6 @@
 package au.org.emii.gogoduck.worker
 
+import au.org.emii.gogoduck.job.JobStoreService
 import au.org.emii.gogoduck.job.SpatialExtent
 import org.apache.commons.io.IOUtils
 import spock.lang.Specification
@@ -12,9 +13,23 @@ class WorkerSpec extends Specification {
 
     def testJob
     def worker
+    def testJobStoreService
 
     def setup() {
         testJob = TestHelper.createJob()
+        testJobStoreService = new JobStoreService()
+        testJobStoreService.grailsApplication = [
+            config: [
+                job: [
+                    cleanup: [ daysToKeep: 10 ]
+                ],
+                worker:[
+                    creationTime: "now",
+                    outputFilename: "IMOS-aggregation-",
+                    outputExtension: '.nc'
+                ]
+            ]
+        ]
         worker = new Worker(job: testJob)
     }
 
@@ -23,7 +38,8 @@ class WorkerSpec extends Specification {
         def worker = new Worker(
             shellCmd: { "gogoduck.sh ${it}" },
             job: testJob,
-            outputFilename: "IMOS-aggregation-",
+            outputFilename: testJobStoreService.getAggrPath(testJob),
+            outputExtension: '.nc',
             fileLimit: 123
         )
 
@@ -41,7 +57,8 @@ class WorkerSpec extends Specification {
         def worker = new Worker(
             shellCmd: { "gogoduck.sh ${it}" },
             job: testJob,
-            outputFilename: "IMOS-aggregation-",
+            outputFilename: testJobStoreService.getAggrPath(testJob),
+            outputExtension: '.nc',
             fileLimit: 123
         )
 

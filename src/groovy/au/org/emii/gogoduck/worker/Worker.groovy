@@ -11,6 +11,7 @@ class Worker {
     Closure shellCmd
     String creationTime
     String outputFilename
+    String outputExtension
     Integer fileLimit
 
     void run(successHandler, failureHandler) {
@@ -38,13 +39,17 @@ class Worker {
         def cmdOptions = String.format(
             "${job.subsetCommandString} -o %s -u %s -l %s",
             outputFilename,
-            WorkerOutputFile.aggReportOutputFilename(outputFilename),
+            WorkerOutputFile.aggReportOutputFilename(stripExtension(outputFilename)),
             fileLimit
         )
 
         log.info("Command options: '${cmdOptions}'")
 
         shellCmd.call(cmdOptions)
+    }
+
+    private String stripExtension(filePath) {
+        filePath.replaceFirst(~/\.[^\.]+$/, '') // http://stackoverflow.com/questions/1569547/does-groovy-have-an-easy-way-to-get-a-filename-without-the-extension
     }
 
     Process execute(cmd) {
