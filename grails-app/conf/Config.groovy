@@ -73,6 +73,7 @@ worker {
     fileLimit = 100
     creationTime = new Date().format("dd-MM-yyyyHH:mm:ss")
     outputFilename = "IMOS-aggregation-"
+    outputExtension = ".nc"
     cmd = {
         "web-app/resources/worker/gogoduck.sh ${it}"
     }
