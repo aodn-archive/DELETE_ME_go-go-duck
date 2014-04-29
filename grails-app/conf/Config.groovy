@@ -69,6 +69,7 @@ job {
 
 worker {
     fileLimit = 100
+    outputFilenamePrefixForUser = "IMOS-Aggregation-"
     outputFilename = "output.nc"
     reportFilename = "report.txt"
     cmd = {

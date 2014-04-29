@@ -6,6 +6,7 @@ class AggrController {
 
     static allowedMethods = [show: "GET"]
     def jobStoreService
+    def grailsApplication
 
     def show() {
         log.debug("params: ${params}")
@@ -17,7 +18,7 @@ class AggrController {
 
         if (aggrFile) {
             response.setContentType("application/octet-stream")
-            response.setHeader("Content-disposition", "filename=${getFilenameToServe(job)}")
+            response.setHeader("Content-disposition", "filename=${filenameToServe(job)}")
             response.outputStream.write(aggrFile.bytes)
             response.outputStream.flush()
         }
@@ -26,9 +27,13 @@ class AggrController {
         }
     }
 
-    def getFilenameToServe(job) {
+    String filenameToServe(job) {
         DateTime jobDateTime = new DateTime(job.createdTimestamp)
         String jobDateTimeFormattedForFilename = ISODateTimeFormat.basicDateTime().print(jobDateTime)
-        return "IMOS-aggregation-" + jobDateTimeFormattedForFilename + ".nc"
+        return String.format(
+            "%s%s.nc",
+            grailsApplication.config.worker.outputFilenamePrefixForUser,
+            jobDateTimeFormattedForFilename
+        )
     }
 }
