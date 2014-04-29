@@ -29,6 +29,6 @@ class AggrController {
     def getFilenameToServe(job) {
         DateTime jobDateTime = new DateTime(job.createdTimestamp)
         String jobDateTimeFormattedForFilename = ISODateTimeFormat.basicDateTime().print(jobDateTime)
-        "IMOS-aggregation-" + jobDateTimeFormattedForFilename + ".nc"
+        return "IMOS-aggregation-" + jobDateTimeFormattedForFilename + ".nc"
     }
 }

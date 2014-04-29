@@ -70,6 +70,7 @@ job {
 worker {
     fileLimit = 100
     outputFilename = "output.nc"
+    reportFilename = "report.txt"
     cmd = {
         "web-app/resources/worker/gogoduck.sh ${it}"
     }

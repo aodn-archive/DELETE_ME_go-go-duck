@@ -39,7 +39,19 @@ class AggrControllerSpec extends Specification {
 
         then:
         response.contentType == "application/octet-stream"
-        response.header("Content-disposition") == "filename=IMOS-aggregation-20140429T144407.913+1000.nc"
         bytes == tempFile.bytes
+    }
+
+    def "filename contains date"() {
+        given:
+
+        def jobStoreService = Mock(JobStoreService)
+        controller.jobStoreService = jobStoreService
+
+        def job = TestHelper.createJob()
+        job.createdTimestamp = "2014-04-29T14:44:07.913+10:00"
+
+        expect:
+        controller.getFilenameToServe(job) == "IMOS-aggregation-20140429T144407.913+1000.nc"
     }
 }

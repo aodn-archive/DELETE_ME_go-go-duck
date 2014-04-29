@@ -48,7 +48,7 @@ class JobStoreServiceSpec extends Specification {
         ]
 
         expect:
-        service.getReportFile(job).path == 'jobsDirPath/asdf/report.txt'
+        service.getReportPath(job) == 'jobsDirPath/asdf/report.txt'
     }
 
     def "get invalid job"() {

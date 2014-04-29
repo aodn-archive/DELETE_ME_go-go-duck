@@ -44,9 +44,10 @@ class JobStoreService {
         getFile(getAggrPath(job))
     }
 
-    File getReportFile(job) {
-        log.debug("Job path: ${getAggrPath(job)}")
-        getFile(getPath(job) + File.separator + "report.txt")
+    String getReportPath(job) {
+        String reportFilePath = "${getPath(job)}${File.separator}${grailsApplication.config.worker.reportFilename}"
+        log.debug("Report file path: ${reportFilePath}")
+        return reportFilePath
     }
 
     void makeDir(job) {
