@@ -1,7 +1,5 @@
 package au.org.emii.gogoduck.job
 
-import au.org.emii.gogoduck.worker.WorkerOutputFile
-
 class JobStoreService {
     def grailsApplication
 
@@ -48,7 +46,7 @@ class JobStoreService {
 
     File getReportFile(job) {
         log.debug("Job path: ${getAggrPath(job)}")
-        getFile(WorkerOutputFile.aggReportOutputFilename(getAggrPath(job)))
+        getFile(getPath(job) + File.separator + "report.txt")
     }
 
     void makeDir(job) {

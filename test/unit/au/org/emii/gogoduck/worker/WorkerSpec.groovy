@@ -23,16 +23,13 @@ class WorkerSpec extends Specification {
         def worker = new Worker(
             shellCmd: { "gogoduck.sh ${it}" },
             job: testJob,
-            outputFilename: "IMOS-aggregation-",
+            outputFilename: "output.nc",
+            reportFilename: "report.txt",
             fileLimit: 123
         )
 
-        def command = worker.getCmd()
-
         expect:
-        command.contains('gogoduck.sh -p some_layer -s TIME,2013-11-20T00:30:00.000Z,2013-11-20T10:30:00.000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219 -g geoserver_address -o')
-        command.contains('IMOS-aggregation-')
-        command.contains('.nc')
+        worker.getCmd() == "gogoduck.sh -p some_layer -s TIME,2013-11-20T00:30:00.000Z,2013-11-20T10:30:00.000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219 -g geoserver_address -o output.nc -u report.txt -l 123"
     }
 
     def "generates command line from job when geoserver is null"() {
@@ -42,16 +39,13 @@ class WorkerSpec extends Specification {
         def worker = new Worker(
             shellCmd: { "gogoduck.sh ${it}" },
             job: testJob,
-            outputFilename: "IMOS-aggregation-",
+            outputFilename: "output.nc",
+            reportFilename: "report.txt",
             fileLimit: 123
         )
 
-        def command = worker.getCmd()
-
         expect:
-        command.contains('gogoduck.sh -p some_layer -s TIME,2013-11-20T00:30:00.000Z,2013-11-20T10:30:00.000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219 -o')
-        command.contains('IMOS-aggregation-')
-        command.contains('.nc')
+        worker.getCmd() == "gogoduck.sh -p some_layer -s TIME,2013-11-20T00:30:00.000Z,2013-11-20T10:30:00.000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219 -o output.nc -u report.txt -l 123"
     }
 
     def "generates command line from job when geoserver is empty string"() {
@@ -61,42 +55,13 @@ class WorkerSpec extends Specification {
         def worker = new Worker(
             shellCmd: { "gogoduck.sh ${it}" },
             job: testJob,
-            outputFilename: "IMOS-aggregation-",
+            outputFilename: "output.nc",
+            reportFilename: "report.txt",
             fileLimit: 123
         )
 
-        def command = worker.getCmd()
-
         expect:
-        command.contains('gogoduck.sh -p some_layer -s TIME,2013-11-20T00:30:00.000Z,2013-11-20T10:30:00.000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219 -o')
-        command.contains('IMOS-aggregation-')
-        command.contains('.nc')
-    }
-
-    def "generates command line from job with no whitespace"() {
-        given:
-        def worker = new Worker(
-            shellCmd: { "gogoduck.sh ${it}" },
-            job: testJob,
-            outputFilename: "IMOS-aggregation-",
-            fileLimit: 123
-        )
-
-        worker.job.subsetDescriptor.spatialExtent = new SpatialExtent(
-            north:  1,
-            south: -1,
-            east:   1,
-            west:  -1
-        )
-
-        def command = worker.getCmd()
-
-        expect:
-        command.contains('gogoduck.sh -p some_layer -s TIME,2013-11-20T00:30:00.000Z,2013-11-20T10:30:00.000Z;LATITUDE,-1.0,1.0;LONGITUDE,-1.0,1.0')
-        command.contains(' -o ')
-        command.contains(' -u ')
-        command.contains('IMOS-aggregation-')
-        command.contains('.nc')
+        worker.getCmd() == "gogoduck.sh -p some_layer -s TIME,2013-11-20T00:30:00.000Z,2013-11-20T10:30:00.000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219 -o output.nc -u report.txt -l 123"
     }
 
     def "runs command"() {

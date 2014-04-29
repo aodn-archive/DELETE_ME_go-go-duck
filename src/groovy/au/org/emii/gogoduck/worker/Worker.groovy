@@ -8,8 +8,8 @@ class Worker {
     Job job
     Closure shellCmd
     String outputFilename
+    String reportFilename
     Integer fileLimit
-    def jobStoreService
 
     void run(successHandler, failureHandler) {
 
@@ -35,8 +35,8 @@ class Worker {
     def getCmd() {
         def cmdOptions = String.format(
             "${job.subsetCommandString} -o %s -u %s -l %s",
-            WorkerOutputFile.outputFilename(outputFilename),
-            WorkerOutputFile.aggReportOutputFilename(outputFilename),
+            outputFilename,
+            reportFilename,
             fileLimit
         )
 

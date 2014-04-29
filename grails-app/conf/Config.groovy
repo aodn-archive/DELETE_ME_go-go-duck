@@ -69,7 +69,7 @@ job {
 
 worker {
     fileLimit = 100
-    outputFilename = "IMOS-aggregation-"
+    outputFilename = "output.nc"
     cmd = {
         "web-app/resources/worker/gogoduck.sh ${it}"
     }
@@ -83,21 +83,10 @@ environments {
         worker {
 
             cmd = {
-
-                def extractFilenameFromCommandLine = {
-                    s ->
-                    (s =~ /-o ([a-zA-Z0-9\/\.:-]+)/)[0][1]
-                }
-
-                def extractOutputFilenameFromCommandLine = {
-                    s ->
-                    (s =~ /-u ([a-zA-Z0-9\/\.:-]+)/)[0][1]
-                }
-
-                def filename =  extractFilenameFromCommandLine(it)
-                def outputFilename =  extractOutputFilenameFromCommandLine(it)
+                def filename = (it =~ /-o ([a-zA-Z0-9\/\.]+)/)[0][1]
+                def reportFilename = (it =~ /-o ([a-zA-Z0-9\/\.]+)/)[0][1]
                 [ 'bash', '-c', "echo bytes > ${filename}" ]
-                [ 'bash', '-c', "echo 'here be report' > ${outputFilename}" ]
+                [ 'bash', '-c', "echo 'here be report' > ${reportFilename}" ]
                 // "test/resources/error.sh" // Uncomment this to test error handling.
             }
             outputPath = 'jobs'

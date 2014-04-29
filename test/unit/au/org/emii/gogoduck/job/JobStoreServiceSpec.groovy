@@ -40,14 +40,15 @@ class JobStoreServiceSpec extends Specification {
         service.grailsApplication = [
             config: [
                 worker: [
-                    outputFilename: 'aggr-',
+                    outputFilename: 'output.nc',
+                    reportFilename: 'report.txt',
                     outputPath: 'jobsDirPath'
                 ]
             ]
         ]
 
         expect:
-        service.getReportFile(job).path == 'jobsDirPath/asdf/aggr-report.txt'
+        service.getReportFile(job).path == 'jobsDirPath/asdf/report.txt'
     }
 
     def "get invalid job"() {
