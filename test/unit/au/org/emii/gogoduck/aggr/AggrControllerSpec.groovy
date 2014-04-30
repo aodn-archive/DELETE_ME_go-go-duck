@@ -19,6 +19,7 @@ class AggrControllerSpec extends Specification {
         tempFile << "some bytes"
 
         def job = TestHelper.createJob()
+        job.createdTimestamp = "2014-04-29T14:44:07.913+10:00"
         def jobId = 'asdf'
         job.uuid = jobId
         1 * jobStoreService.get(jobId) >> job
@@ -38,7 +39,21 @@ class AggrControllerSpec extends Specification {
 
         then:
         response.contentType == "application/octet-stream"
-        response.header("Content-disposition") == "filename=${tempFile.name}"
         bytes == tempFile.bytes
+    }
+
+    def "filename contains date"() {
+        given:
+
+        grailsApplication.config.worker.outputFilenamePrefixForUser = "user-prefix-"
+
+        def jobStoreService = Mock(JobStoreService)
+        controller.jobStoreService = jobStoreService
+
+        def job = TestHelper.createJob()
+        job.createdTimestamp = "2014-04-29T14:44:07.913+10:00"
+
+        expect:
+        controller.filenameToServe(job) == "user-prefix-20140429T144407.913+1000.nc"
     }
 }

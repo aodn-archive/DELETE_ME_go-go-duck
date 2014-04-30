@@ -24,7 +24,9 @@ class NotificationService {
     }
 
     def sendJobSuccessNotification(job) {
-        def jobAggregationReport = jobStoreService.getReportFile(job)
+        def jobAggregationReport = new File(jobStoreService.getReportPath(job))
+        log.info("Sending success email to '${job.emailAddress.toString()}' with report from '${jobAggregationReport.path}'")
+
         sendMailAndLog {
             multipart true
             to job.emailAddress.toString()
@@ -43,7 +45,9 @@ class NotificationService {
     }
 
     def sendJobFailureNotification(job, errMsg) {
-        def jobAggregationReport = jobStoreService.getReportFile(job)
+        def jobAggregationReport = new File(jobStoreService.getReportPath(job))
+        log.info("Sending failure email to '${job.emailAddress.toString()}' with report from '${jobAggregationReport.path}'")
+
         sendMailAndLog {
             multipart true
             to job.emailAddress.toString()
