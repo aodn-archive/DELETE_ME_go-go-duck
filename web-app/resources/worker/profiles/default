@@ -72,7 +72,7 @@ get_list_of_urls() {
 
     logger_info "Getting list of URLs from '$url' with parameters '$parameters'"
     # get list of files from geoserver
-    curl -s "$url" --get --data-urlencode "$parameters" |\
+    curl $CURL_OPTS -s "$url" --get --data-urlencode "$parameters" |\
         tail -n+2 | cut -d',' -f3 > $output_file
 
     format_output_file $output_file

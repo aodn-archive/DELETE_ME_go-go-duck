@@ -15,6 +15,9 @@ declare -r PROFILES_DIR=profiles
 # default geoserver to use
 declare -r DEFAULT_GEOSERVER=http://geoserver-123.aodn.org.au/geoserver
 
+# set a timeout of 10 seconds
+declare -r CURL_OPTS="--connect-timeout 10"
+
 # finds the correct profile to run for the given layer, starts with:
 # acorn_hourly_avg_sag_nonqc_timeseries_url
 # acorn_hourly_avg_sag_nonqc_timeseries
@@ -112,7 +115,7 @@ _get_files() {
 
         else
             logger_info "Downloading file: '$url'"
-            if ! (cd $dir && curl -s -O "$url"); then
+            if ! (cd $dir && curl $CURL_OPTS -s -O "$url"); then
                 logger_warn "Failed downloading: '$url'"
                 return 1
             fi
