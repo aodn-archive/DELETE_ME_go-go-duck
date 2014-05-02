@@ -11,6 +11,21 @@ can_access_via_fs() {
     test -f $file
 }
 
+# removes attribute from a given subset
+# $1 - subset
+# $1 - attribute to remove
+remove_attribute() {
+    local subset=$1; shift
+    local attribute=$1; shift
+
+    local tmp_subset=`mktemp`
+    echo "$subset" | tr -s ";" "\n" > $tmp_subset
+    subset=`cat $tmp_subset | grep -v "^$attribute," | tr -s "\n" ";" | sed -e 's/;$//g'`
+    rm -f $tmp_subset
+
+    echo $subset
+}
+
 # formats output file with either a file:// prefix or http://data.aodn.org.au/
 # prefix, depending if we can or cannot access the files locally
 # $1 - list of urls file
@@ -71,6 +86,10 @@ get_list_of_urls() {
 get_subset_command() {
     local profile=$1; shift
     local subset="$1"; shift
+
+    # https://github.com/aodn/aodn-portal/issues/1093
+    subset=`remove_attribute $subset TIME`
+
     # LATITUDE,-33.433849,-30.150743;LONGTITUDE,113.15197,115.741219 becomes:
     # -d LATITUDE,-33.433849,-30.150743 -d LONGTITUDE,113.15197,115.741219
     local ncks_arguments="-d "`echo $subset | sed -e 's/;$//' -e 's/;/ -d /g'`

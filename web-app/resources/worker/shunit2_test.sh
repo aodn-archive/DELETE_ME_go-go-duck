@@ -89,6 +89,21 @@ test_get_files_acorn() {
     rm -f $tmp_file
 }
 
+# test the remove_attribute function in profiles/default
+test_remove_attribute() {
+    source profiles/default
+    local subset="TIME,2014-04-14T03:00:00.000Z,2014-04-14T07:00:00.000Z;LATITUDE,-90.0,90.0;LONGITUDE,-180.0,180.0"
+
+    local subset_tmp=`remove_attribute $subset TIME`
+    assertTrue 'remove TIME' "[ '$subset_tmp' = 'LATITUDE,-90.0,90.0;LONGITUDE,-180.0,180.0' ]"
+
+    local subset_tmp=`remove_attribute $subset LATITUDE`
+    assertTrue 'remove LATITUDE' "[ '$subset_tmp' = 'TIME,2014-04-14T03:00:00.000Z,2014-04-14T07:00:00.000Z;LONGITUDE,-180.0,180.0' ]"
+
+    local subset_tmp=`remove_attribute $subset LONGITUDE`
+    assertTrue 'remove LONGITUDE' "[ '$subset_tmp' = 'TIME,2014-04-14T03:00:00.000Z,2014-04-14T07:00:00.000Z;LATITUDE,-90.0,90.0' ]"
+}
+
 # test file limit in gogoduck, not allowing processing of too many files
 test_file_limit() {
     source $GOGODUCK_NO_MAIN
