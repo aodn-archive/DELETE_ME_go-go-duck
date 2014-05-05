@@ -16,7 +16,7 @@ declare -r PROFILES_DIR=profiles
 declare -r DEFAULT_GEOSERVER=http://geoserver-123.aodn.org.au/geoserver
 
 # set a timeout of 10 seconds
-declare -r CURL_OPTS="--connect-timeout 10"
+declare -r CURL_OPTS="--connect-timeout 10 --max-time 30"
 
 # finds the correct profile to run for the given layer, starts with:
 # acorn_hourly_avg_sag_nonqc_timeseries_url
