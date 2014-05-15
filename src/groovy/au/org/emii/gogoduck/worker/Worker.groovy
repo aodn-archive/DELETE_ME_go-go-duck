@@ -49,6 +49,7 @@ class Worker {
         log.info("Executing command: '${cmd}'")
 
         def proc = cmd.execute()
+        proc.consumeProcessOutput(System.out, System.err)
         proc.waitFor()
 
         return proc
