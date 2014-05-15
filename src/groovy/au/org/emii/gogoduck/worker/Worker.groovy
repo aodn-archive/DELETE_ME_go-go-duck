@@ -10,6 +10,7 @@ class Worker {
     String outputFilename
     String reportFilename
     Integer fileLimit
+    Integer maxGogoduckTimeMinutes
 
     void run(successHandler, failureHandler) {
 
@@ -50,7 +51,7 @@ class Worker {
 
         def proc = cmd.execute()
         proc.consumeProcessOutput(System.out, System.err)
-        proc.waitFor()
+        proc.waitForOrKill(maxGogoduckTimeMinutes * 60 * 1000) // Convert to ms
 
         return proc
     }

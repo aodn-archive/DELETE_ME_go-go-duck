@@ -26,6 +26,7 @@ class JobExecutorJob {
             job: job,
             outputFilename: jobStoreService.getAggrPath(job),
             reportFilename: jobStoreService.getReportPath(job),
+            maxGogoduckTimeMinutes: grailsApplication.config.worker.maxGogoduckTimeMinutes,
             fileLimit: grailsApplication.config.worker.fileLimit
         )
     }
