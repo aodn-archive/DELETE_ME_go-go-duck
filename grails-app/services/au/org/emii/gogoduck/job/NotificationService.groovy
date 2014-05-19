@@ -44,7 +44,7 @@ class NotificationService {
         getMessage('job.success.body', [job.uuid, job.aggrUrl])
     }
 
-    def sendJobFailureNotification(job, errMsg) {
+    def sendJobFailureNotification(job) {
         def jobAggregationReport = new File(jobStoreService.getReportPath(job))
         log.info("Sending failure email to '${job.emailAddress.toString()}' with report from '${jobAggregationReport.path}'")
 
@@ -52,7 +52,7 @@ class NotificationService {
             multipart true
             to job.emailAddress.toString()
             subject getFailureNotificationSubject(job)
-            body getFailureNotificationBody(job, errMsg)
+            body getFailureNotificationBody(job)
             attachBytes "aggregation_report.txt", "text/plain", jobAggregationReport.readBytes()
         }
     }
@@ -61,11 +61,8 @@ class NotificationService {
         getMessage('job.failure.subject', [job.uuid])
     }
 
-    def getFailureNotificationBody(job, errMsg) {
-
-        def errMsgReplacement = errMsg ?: getMessage('job.failure.defaultMessage')
-
-        getMessage('job.failure.body', [job.uuid, errMsgReplacement])
+    def getFailureNotificationBody(job) {
+        getMessage('job.failure.body', [job.uuid])
     }
 
     def getMessage(messageKey, messageParams = []) {
