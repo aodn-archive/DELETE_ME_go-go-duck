@@ -38,6 +38,6 @@ class JobExecutorJob {
 
     def failureHandler = {
         job, errMsg ->
-        notificationService.sendJobFailureNotification(job, errMsg)
+        notificationService.sendJobFailureNotification(job)
     }
 }
