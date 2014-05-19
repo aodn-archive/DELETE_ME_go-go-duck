@@ -96,37 +96,16 @@ class NotificationServiceSpec extends Specification {
     }
 
     def "failure notification body"() {
-        given:
-        def errMsg = 'something died'
-
         when:
-        service.getFailureNotificationBody(job, errMsg)
+        job.metaClass.getAggrUrl = {
+            "http://thejob/1234"
+        }
+        service.getFailureNotificationBody(job)
 
         then:
         1 * messageSource.getMessage(
             'job.failure.body',
-            ['1234', errMsg].toArray(),
-            LocaleContextHolder.locale
-        )
-    }
-
-    def "failure notification body when no error message"() {
-        given:
-        def errMsg = ''
-
-        when:
-        service.getFailureNotificationBody(job, errMsg)
-
-        then:
-        1 * messageSource.getMessage(
-            'job.failure.defaultMessage',
-            [].toArray(),
-            LocaleContextHolder.locale
-        ) >> 'default message'
-
-        1 * messageSource.getMessage(
-            'job.failure.body',
-            ['1234', 'default message'].toArray(),
+            ['1234', 'http://thejob/1234'].toArray(),
             LocaleContextHolder.locale
         )
     }

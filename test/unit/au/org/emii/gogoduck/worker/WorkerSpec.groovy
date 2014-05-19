@@ -103,11 +103,10 @@ class WorkerSpec extends Specification {
 
         def failureCalled = false
         def failureHandler = {
-            Job job, String anErrMsg ->
+            Job job ->
 
-            assertEquals job, testJob
-            assertEquals expectErrMsg, anErrMsg
-            failureCalled = true
+                assertEquals job, testJob
+                failureCalled = true
         }
 
         worker.metaClass.execute = {
@@ -138,9 +137,9 @@ class WorkerSpec extends Specification {
         failureCalled != expectSuccessCalled
 
         where:
-        exitValue | executeException              |  expectErrMsg             | expectSuccessCalled
-        0         | null                          |  null                     | true
-        1         | null                          | 'some error'              | false
-        0         | new IOException('cannot run') | 'cannot run'              | false
+        exitValue | executeException              | expectSuccessCalled
+        0         | null                          | true
+        1         | null                          | false
+        0         | new IOException('cannot run') | false
     }
 }
