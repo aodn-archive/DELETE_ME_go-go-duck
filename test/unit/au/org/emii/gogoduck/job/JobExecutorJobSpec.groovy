@@ -56,13 +56,10 @@ class JobExecutorJobSpec extends Specification {
     }
 
     def "failure handler sends 'job failed' notification"() {
-        given:
-        def errMsg = 'something died'
-
         when:
-        jobExecutorJob.failureHandler.call(job, errMsg)
+        jobExecutorJob.failureHandler.call(job)
 
         then:
-        1 * notificationService.sendJobFailureNotification(job, errMsg)
+        1 * notificationService.sendJobFailureNotification(job)
     }
 }

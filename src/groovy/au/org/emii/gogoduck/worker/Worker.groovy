@@ -22,14 +22,11 @@ class Worker {
                 successHandler(job)
             }
             else {
-                String errMsg = IOUtils.toString(process.getErrorStream(), 'UTF-8').trim()
-                log.error("Worker failed: ${errMsg}")
-                failureHandler(job, errMsg)
+                failureHandler(job)
             }
         }
         catch (IOException e) {
-            log.error('Worker failed', e)
-            failureHandler(job, e.message)
+            failureHandler(job)
         }
     }
 
