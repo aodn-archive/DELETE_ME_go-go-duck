@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# use the cars profile, just override the data
+source profiles/cars
+declare -r CARS_DATA="/mnt/imos-t3/climatology/CARS/2009/eMII-product/CARS2009_World_monthly.nc"

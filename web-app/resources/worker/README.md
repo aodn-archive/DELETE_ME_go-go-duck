@@ -35,12 +35,12 @@ if it runs when opendap is mounted, things will be significantly faster.
 
 Running on CARS data:
 ```
-./gogoduck.sh -g 'http://geoserver-123.aodn.org.au/geoserver' -p cars -s "TIME,2009-01-01T00:00:00.000Z,2009-12-25T23:04:00.000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219" -o output.nc
+./gogoduck.sh -g 'http://geoserver-123.aodn.org.au/geoserver' -p cars_world_monthly -s "TIME,2009-01-01T00:00:00.000Z,2009-12-25T23:04:00.000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219" -o output.nc
 ```
 
 Running on CARS data with depth (notice the floating point for the depth parameter):
 ```
-./gogoduck.sh -g 'http://geoserver-123.aodn.org.au/geoserver' -p cars -s "TIME,2009-01-01T00:00:00.000Z,2009-12-25T23:04:00.000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219;DEPTH,0.0,100.0" -o output.nc
+./gogoduck.sh -g 'http://geoserver-123.aodn.org.au/geoserver' -p cars_world_monthly -s "TIME,2009-01-01T00:00:00.000Z,2009-12-25T23:04:00.000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219;DEPTH,0.0,100.0" -o output.nc
 ```
 
 ## Unit Tests
