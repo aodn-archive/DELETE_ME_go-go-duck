@@ -3,8 +3,6 @@
 # overriding the default profile a bit
 source profiles/default
 
-declare -r CARS_DATA="/mnt/imos-t3/climatology/CARS/2009/eMII-product/CARS2009_World_monthly.nc"
-
 # this function takes a subset and should output the list of urls to the given
 # file
 # $1 - geoserver
