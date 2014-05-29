@@ -99,8 +99,10 @@ environments {
                 def outputFilename = extractOutputFilenameFromCommandLine(it)
                 def reportFilename = extractReportFilenameFromCommandLine(it)
 
-                [ 'bash', '-c', "echo bytes > ${outputFilename}" ]
-                [ 'bash', '-c', "echo 'here be report' > ${reportFilename}" ]
+                [
+                    'bash', '-c',
+                    "echo bytes > ${outputFilename}; echo 'here be report' > ${reportFilename}"
+                ]
                 // "test/resources/error.sh" // Uncomment this to test error handling.
             }
             outputPath = 'jobs'
