@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # overriding the default profile a bit
-source profiles/default
+source $PROFILES_DIR/default
 
 # this function takes a subset and should output the list of urls to the given
 # file

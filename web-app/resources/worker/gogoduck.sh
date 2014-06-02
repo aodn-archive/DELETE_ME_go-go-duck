@@ -9,8 +9,9 @@ export TMPDIR=/tmp
 # load the logging library
 source `dirname $0`/logger.sh
 
-# relative path to where all profiles (plugins) are installed
-declare -r PROFILES_DIR=profiles
+# absolute path to where all profiles (plugins) are installed
+declare -r GOGODUCK_EXECUTABLE=`readlink -f $0`
+declare -r PROFILES_DIR=`dirname $GOGODUCK_EXECUTABLE`"/profiles"
 
 # default geoserver to use
 declare -r DEFAULT_GEOSERVER=http://geoserver-123.aodn.org.au/geoserver
@@ -30,7 +31,7 @@ declare -r CURL_OPTS="--connect-timeout 10 --max-time 30"
 # $1 - profile name
 _get_profile_module() {
     local profile_name=$1; shift
-    local profile_base_dir=`dirname $0`"/$PROFILES_DIR"
+    local profile_base_dir=$PROFILES_DIR
     local profile_plugin=$profile_name
 
     # if the plugin exists - simply go with it
