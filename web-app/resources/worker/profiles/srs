@@ -15,10 +15,34 @@ get_list_of_urls() {
     local output_file=$1; shift
     local subset="$1"; shift
 
+    # L3P
     #find /home/dan/Work/IMOS/files/srs-from-csiro/L3P-2013/2013040?-*.nc4 -type f > $output_file
-    find /home/dan/Work/IMOS/files/srs-from-csiro/L3P-2013/*.nc4 -type f > $output_file
+    #find /home/dan/Work/IMOS/files/srs-from-csiro/L3P-2013/*.nc4 -type f > $output_file
+
+    #local srs_dir=/home/dan/Work/IMOS/files/srs-from-csiro/sst_ghrsst_L3S-03day_night_2013.monotonic
+    local srs_dir=/home/dan/Work/IMOS/files/srs-from-csiro/sst_ghrsst_L3S-03day_night_2013
+    ls -1 $srs_dir/201301{28,29,30,31}*.nc4 > $output_file
+    ls -1 $srs_dir/201302{01,02,03,04,05,06,07}*.nc4 >> $output_file
 
     format_output_file $output_file
+}
+
+# this function takes a file as an argument and should fix the file in place if
+# needed. mostly useful for bogus non-monotonic SRS files. see the srs
+# implementation for an example
+pre_process() {
+    local file=$1; shift
+
+    # for most SRS layers, we'll need to normalize the 'lon' axis, that is by
+    # adding 360 to records below 0 degrees
+    tmp_file=`mktemp`
+    logger_info "Fixing lon dimension in '$file'"
+    ncap2 -O -s 'where(lon < 0) lon=lon+360' $file $tmp_file
+
+    # don't just overwrite $file, as it may be a link, we'll need to be safe
+    # here...
+    rm -f $file
+    mv $tmp_file $file
 }
 
 # this function takes a semicolon separated subset and should produce viable
@@ -55,7 +79,7 @@ update_header() {
     local subset="$1"; shift
 
     # do the regular attributes anyway
-    (source $PROFILES_DIR/default && update_header unused "$aggregated_file" "$subset")
+    (source $PROFILES_DIR/default && update_header srs "$aggregated_file" "$subset")
 
     # remove attributes in SRS files
     local attributes_to_delete="start_date start_time stop_date stop_time"

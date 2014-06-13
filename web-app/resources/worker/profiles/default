@@ -78,6 +78,13 @@ get_list_of_urls() {
     format_output_file $output_file
 }
 
+# this function takes a file as an argument and should fix the file in place if
+# needed. mostly useful for bogus non-monotonic SRS files. see the srs
+# implementation for an example
+pre_process() {
+    local file=$1; shift
+}
+
 # this function takes a semicolon separated subset and should produce viable
 # parameters for the ncks command
 # for the default implementation we just subset on all given parameters

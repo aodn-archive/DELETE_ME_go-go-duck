@@ -176,6 +176,10 @@ _apply_subset() {
         local tmp_file=`mktemp`
         logger_info "Applying subset '$subset_cmd' to '$file'"
         logger_user "Processing file '"`basename $file`"'"
+
+        # apply pre processing (such as fixing dimensions etc)
+        (source $profile_module && pre_process $file)
+
         ncks -a -4 -O $subset_cmd $file $tmp_file
 
         # overwrite original file
