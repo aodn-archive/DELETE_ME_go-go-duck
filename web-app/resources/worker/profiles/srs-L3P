@@ -1,0 +1,72 @@
+#!/bin/bash
+
+# overriding the default profile a bit
+source $PROFILES_DIR/default
+
+# this function takes a subset and should output the list of urls to the given
+# file
+# $1 - geoserver
+# $2 - profile
+# $3 - output file
+# $4 - subset
+get_list_of_urls() {
+    local geoserver=$1; shift # unused
+    local profile=$1; shift
+    local output_file=$1; shift
+    local subset="$1"; shift
+
+    #find /home/dan/Work/IMOS/files/srs-from-csiro/L3P-2013/2013040?-*.nc4 -type f > $output_file
+    find /home/dan/Work/IMOS/files/srs-from-csiro/L3P-2013/*.nc4 -type f > $output_file
+
+    format_output_file $output_file
+}
+
+# this function takes a semicolon separated subset and should produce viable
+# parameters for the ncks command
+# for the default implementation we just subset on all given parameters
+# $1 - profile name
+# $2 - subset to apply
+get_subset_command() {
+    local profile=$1; shift
+    local subset="$1"; shift
+
+    # https://github.com/aodn/aodn-portal/issues/1093
+    subset=`remove_attribute $subset TIME`
+
+    # for CARS layers, we'll need to change 'TIME', to be 'DAY_OF_YEAR'
+    subset=`echo $subset | sed -e 's#\bLATITUDE\b#lat##';`
+    subset=`echo $subset | sed -e 's#\bLONGITUDE\b#lon##';`
+
+    # LATITUDE,-33.433849,-30.150743;LONGTITUDE,113.15197,115.741219 becomes:
+    # -d LATITUDE,-33.433849,-30.150743 -d LONGTITUDE,113.15197,115.741219
+    # we need --mk_rec_dmn so we can concatenate time later on the time axis
+    local ncks_arguments="--mk_rec_dmn time -d "`echo $subset | sed -e 's/;$//' -e 's/;/ -d /g'`
+    echo $ncks_arguments
+}
+
+# this function takes a semicolon separated subset and an aggregated file and
+# should update its header (metadata)
+# $1 - profile name
+# $2 - aggregated file
+# $3 - subset applied (semicolon separated)
+update_header() {
+    local profile=$1; shift
+    local aggregated_file="$1"; shift
+    local subset="$1"; shift
+
+    # do the regular attributes anyway
+    (source $PROFILES_DIR/default && update_header unused "$aggregated_file" "$subset")
+
+    # remove attributes in SRS files
+    local attributes_to_delete="start_date start_time stop_date stop_time"
+    attributes_to_delete="$attributes_to_delete northernmost_latitude southernmost_latitude"
+    attributes_to_delete="$attributes_to_delete easternmost_longitude westernmost_longitude"
+
+    local attr
+    for attr in $attributes_to_delete; do
+        ncatted -O -h -a $attr,global,d,c,"" "$aggregated_file"
+    done
+
+    # if we didn't update the header - don't spoil the aggregation :)
+    true
+}
