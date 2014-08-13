@@ -72,8 +72,10 @@ _enforce_file_limit() {
     local -i limit=$1; shift
     local -i num_urls=`cat $url_list | wc -l`
     if [ $num_urls -gt $limit ]; then
+        logger_user "Sorry we cannot process this request due to the amount of files requiring processing."
+        logger_user "The file limit is '$limit' and this aggregation job requires '$num_urls' files."
+        logger_user "Please recreate a download request that will require less files to aggregate."
         logger_warn "Cannot process '$num_urls' files, we allow only '$limit'"
-        logger_user "Cannot process '$num_urls' files, we allow only '$limit'"
         return 1
     else
         return 0
@@ -137,14 +139,14 @@ _is_list_of_urls_sane() {
 
     # check for ServiceExceptionReport - usually if the layer doesn't exist
     if grep -q 'ServiceExceptionReport' $url_file; then
-        logger_user "Could not obtain list of URLs, does the layer exist?"
+        logger_user "We could not obtain list of URLs, does the collection still exist?"
         logger_warn "Could not obtain list of URLs, server returned ServiceExceptionReport"
         return 1
     fi
 
     # check if it's an empty file
     if [ `cat $url_file | wc -l` -eq 0 ]; then
-        logger_user "List of URLs obtained is empty, are your subseting parameters sane?"
+        logger_user "The list of URLs obtained was empty, were your subseting parameters OK?"
         logger_warn "Could not obtain list of URLs, URL list is empty!"
         return 1
     fi
@@ -239,16 +241,14 @@ gogoduck_main() {
     # check for sanity of URL list
     if ! _is_list_of_urls_sane $tmp_url_list; then
         rm -f $tmp_url_list
-        logger_user "Failed to get list of URLs for '$profile'"
-        logger_user "Subset parameters '$subset'"
-        logger_user "GoGoDuck aggregation failed"
+        logger_user "The collection name was '$profile'"
+        logger_user "The subset parameters were '$subset'"
         logger_fatal "Could not obtain list of URLs for '$profile'"
     fi
 
     # enforce number of URLs limit
     if ! _enforce_file_limit $tmp_url_list $limit; then
         rm -f $tmp_url_list
-        logger_user "GoGoDuck aggregation failed"
         logger_fatal "Not allowed to process that many files"
     fi
 
@@ -281,7 +281,7 @@ gogoduck_main() {
 
     mv $tmp_result_file $output
     logger_info "Result saved at '$output'"
-    logger_user "GoGoDuck aggregation successful"
+    logger_user "\nYour aggregation was successful!"
 }
 
 # prints usage and exit
