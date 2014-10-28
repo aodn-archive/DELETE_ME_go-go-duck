@@ -25,13 +25,6 @@ class AggrControllerSpec extends Specification {
         1 * jobStoreService.get(jobId) >> job
         1 * jobStoreService.getAggrFile(job) >> tempFile
 
-        def bytes
-        controller.response.outputStream.metaClass.write = {
-            byte[] b ->
-
-            bytes = b
-        }
-
         when:
         controller.params.uuid = jobId
 
@@ -39,7 +32,7 @@ class AggrControllerSpec extends Specification {
 
         then:
         response.contentType == "application/octet-stream"
-        bytes == tempFile.bytes
+        tempFile.length() == response.text.length()
     }
 
     def "filename contains date"() {
