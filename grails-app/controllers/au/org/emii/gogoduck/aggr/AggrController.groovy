@@ -19,8 +19,7 @@ class AggrController {
         if (aggrFile) {
             response.setContentType("application/octet-stream")
             response.setHeader("Content-disposition", "filename=${filenameToServe(job)}")
-            response.outputStream.write(aggrFile.bytes)
-            response.outputStream.flush()
+            response.outputStream << aggrFile.newInputStream()
         }
         else {
             render(status: 500, text: "No aggregration file for id '${params.id}'.")
