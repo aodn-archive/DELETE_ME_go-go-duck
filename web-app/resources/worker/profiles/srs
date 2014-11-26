@@ -1,0 +1,68 @@
+#!/bin/bash
+
+# overriding the default profile a bit
+source $PROFILES_DIR/default
+
+# this function takes a semicolon separated subset and should produce viable
+# parameters for the ncks command
+# for the default implementation we just subset on all given parameters
+# $1 - profile name
+# $2 - subset to apply
+get_subset_command() {
+    local profile=$1; shift
+    local subset="$1"; shift
+
+    # https://github.com/aodn/aodn-portal/issues/1093
+    subset=`remove_attribute $subset TIME`
+
+    # SRS takes lat and lon instead of LONGITUDE and LATITUDE
+    subset=`echo $subset | sed -e 's#\bLATITUDE\b#lat##';`
+    subset=`echo $subset | sed -e 's#\bLONGITUDE\b#lon##';`
+
+    # LATITUDE,-33.433849,-30.150743;LONGITUDE,113.15197,115.741219 becomes:
+    # -d LATITUDE,-33.433849,-30.150743 -d LONGITUDE,113.15197,115.741219
+    # we need --mk_rec_dmn so we can concatenate time later on the time axis
+    local ncks_arguments="--mk_rec_dmn time -d "`echo $subset | sed -e 's/;$//' -e 's/;/ -d /g'`
+    echo $ncks_arguments
+}
+
+# this function takes a semicolon separated subset and an aggregated file and
+# should update its header (metadata)
+# $1 - profile name
+# $2 - aggregated file
+# $3 - subset applied (semicolon separated)
+update_header() {
+    local profile=$1; shift
+    local aggregated_file="$1"; shift
+    local subset="$1"; shift
+
+    # make attributes greppable!
+    local tmp_attrs=`mktemp`
+    echo "$subset" | tr -s ";" "\n" > $tmp_attrs
+
+    # update title
+    local title=`ncks -M $aggregated_file  | grep "^Global attribute [0-9]\+: title," | grep -o "value = .*" | cut -d' ' -f3-`
+    local title=${title%,*} # trim current time in title
+
+    local southernmost_latitude=`grep "^LATITUDE," $tmp_attrs | cut -d, -f2`
+    local northernmost_latitude=`grep "^LATITUDE," $tmp_attrs | cut -d, -f3`
+    local westernmost_longitude=`grep "^LONGITUDE," $tmp_attrs | cut -d, -f2`
+    local easternmost_longitude=`grep "^LONGITUDE," $tmp_attrs | cut -d, -f3`
+    local start_time=`grep "^TIME," $tmp_attrs | cut -d, -f2`
+    local stop_time=`grep "^TIME," $tmp_attrs | cut -d, -f3`
+
+    rm -f $tmp_attrs
+
+    [ x"$southernmost_latitude" != x ] && ncatted -O -h -a southernmost_latitude,global,o,c,"$southernmost_latitude" "$aggregated_file"
+    [ x"$northernmost_latitude" != x ] && ncatted -O -h -a northernmost_latitude,global,o,c,"$northernmost_latitude" "$aggregated_file"
+    [ x"$westernmost_longitude" != x ] && ncatted -O -h -a westernmost_longitude,global,o,c,"$westernmost_longitude" "$aggregated_file"
+    [ x"$easternmost_longitude" != x ] && ncatted -O -h -a easternmost_longitude,global,o,c,"$easternmost_longitude" "$aggregated_file"
+    [ x"$start_time"            != x ] && ncatted -O -h -a start_time,global,o,c,"$start_time"                       "$aggregated_file"
+    [ x"$start_time"            != x ] && ncatted -O -h -a time_coverage_start,global,o,c,"$start_time"              "$aggregated_file"
+    [ x"$stop_time"             != x ] && ncatted -O -h -a stop_time,global,o,c,"$stop_time"                         "$aggregated_file"
+    [ x"$stop_time"             != x ] && ncatted -O -h -a time_coverage_end,global,o,c,"$stop_time"                 "$aggregated_file"
+    [ x"$title"                 != x ] && ncatted -O -h -a title,global,o,c,"$title, $start_time, $stop_time"        "$aggregated_file"
+
+    # if we didn't update the header - don't spoil the aggregation :)
+    true
+}
