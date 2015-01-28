@@ -111,6 +111,7 @@ _get_files() {
                 if test -f $url; then
                     ln -s $url $dir/
                 else
+                    logger_user "Failed accessing: '$url'"
                     logger_warn "Failed accessing: '$url'"
                     return 1
                 fi
@@ -119,6 +120,7 @@ _get_files() {
         else
             logger_info "Downloading file: '$url'"
             if ! (cd $dir && curl $CURL_OPTS -s -O "$url"); then
+                logger_user "Failed downloading: '$url'"
                 logger_warn "Failed downloading: '$url'"
                 return 1
             fi
@@ -235,6 +237,7 @@ gogoduck_main() {
     # get a list of relevant URLs we'll work with
     if ! _get_list_of_urls $geoserver $profile_module $profile $tmp_url_list "$subset"; then
         rm -f $tmp_url_list
+        logger_user  "Failed getting list of URLs for collection '$profile'"
         logger_fatal "Failed getting list of URLs"
     fi
 
@@ -258,22 +261,25 @@ gogoduck_main() {
 
     if ! _get_files $tmp_dir $tmp_url_list; then
         rm -f $tmp_dir/* $tmp_result_file; rmdir $tmp_dir
+        logger_user  "Failed downloading URLs"
         logger_fatal "Failed downloading URLs"
     fi
 
     if ! _apply_subset $profile_module $profile $tmp_dir "$subset"; then
         rm -f $tmp_dir/* $tmp_result_file; rmdir $tmp_dir
-        logger_fatal "Failed applying subset"
+        logger_fatal "Failed applying subset '$subset'"
     fi
 
     if ! _aggregate $tmp_dir $tmp_result_file; then
         rm -f $tmp_dir/* $tmp_result_file; rmdir $tmp_dir
+        logger_user  "Failed aggregating files"
         logger_fatal "Failed aggregating files"
     fi
 
     if ! _update_header $profile_module $profile $tmp_result_file "$subset"; then
         rm -f $tmp_dir/* $tmp_result_file; rmdir $tmp_dir
-        logger_fatal "Failed updating header"
+        logger_user  "Failed updating metadata header"
+        logger_fatal "Failed updating metadata header"
     fi
 
     # clean up temporary directory
