@@ -48,6 +48,21 @@ _get_profile_module() {
     echo $profile_base_dir/default
 }
 
+# returns a gogoduck score from the given GeoServer URL and subset
+# $1 - geoserver
+# $2 - profile module
+# $3 - profile
+# $4 - output (result) file
+# $5 - subset
+_get_score() {
+    local geoserver=$1; shift
+    local profile_module=$1; shift
+    local profile=$1; shift
+    local output_file=$1; shift
+    local subset="$1"; shift
+    (source $profile_module && get_score $geoserver $profile $output_file "$subset")
+}
+
 # returns a list of URLs from the given GeoServer URL
 # $1 - geoserver
 # $2 - profile module
@@ -217,6 +232,29 @@ _update_header() {
     (source $profile_module && update_header $profile $aggregated_file "$subset")
 }
 
+# returns gogoduck job score (difficulty) depending on subset parameters
+# $1 - geoserver
+# $2 - profile to apply
+# $3 - subset to apply
+# $4 - output file (will contain the score)
+gogoduck_score() {
+    local geoserver="$1"; shift
+    local profile="$1"; shift
+    local subset="$1"; shift
+    local output="$1"; shift
+    local tmp_score=`mktemp`
+
+    # parse profile relative to where the script was ran from
+    local profile_module=`_get_profile_module $profile`
+
+    # get a list of relevant URLs we'll work with
+    if ! _get_score $geoserver $profile_module $profile $output "$subset"; then
+        rm -f $tmp_score
+        logger_user  "Failed getting list of URLs for collection '$profile'"
+        logger_fatal "Failed getting list of URLs"
+    fi
+}
+
 # gogoduck logic
 # $1 - geoserver
 # $2 - maximum amount of files to allow processing of
@@ -296,6 +334,7 @@ usage() {
     echo "Subsets and aggregates NetCDF files."
     echo "
 Options:
+  -S, --score                Only output job score, then quit.
   -g, --geoserver            Geoserver to get list of URLs from. Default is
                              http://geoserver-123.aodn.org.au/geoserver
   -s, --subset               Subset to apply, semi-colon separated.
@@ -311,11 +350,12 @@ Options:
 # "$@" - parameters, see usage
 main() {
     # parse options with getopt
-    local tmp_getops=`getopt -o hg:s:p:o:l:u: --long help,geoserver:,subset:,profile:,output:,limit:,user-log: -- "$@"`
+    local tmp_getops=`getopt -o hSg:s:p:o:l:u: --long help,score,geoserver:,subset:,profile:,output:,limit:,user-log: -- "$@"`
     [ $? != 0 ] && usage
 
     eval set -- "$tmp_getops"
     local geoserver=$DEFAULT_GEOSERVER
+    local -i score=0
     local url subset output
     local profile=default # set default profile
     local -i limit=100 # allow up to 100 files to be processed by default
@@ -325,6 +365,7 @@ main() {
     while true ; do
         case "$1" in
             -h|--help) usage;;
+            -S|--score) score=1; shift 1;;
             -g|--geoserver) geoserver="$2"; shift 2;;
             -s|--subset) subset="$2"; shift 2;;
             -p|--profile) profile="$2"; shift 2;;
@@ -336,7 +377,7 @@ main() {
         esac
     done
 
-    # make sure user specified output file
+    # make sure user specified output file if requiring an actual job
     [ x"$output" = x ] && usage
 
     # make sure user specified output file
@@ -347,7 +388,11 @@ main() {
         set_user_log_file $user_log || usage
     fi
 
-    gogoduck_main $geoserver $limit "$profile" "$subset" "$output"
+    if [ $score -eq 1 ]; then
+        gogoduck_score $geoserver "$profile" "$subset" $output
+    else
+        gogoduck_main $geoserver $limit "$profile" "$subset" "$output"
+    fi
 }
 
 main "$@"
