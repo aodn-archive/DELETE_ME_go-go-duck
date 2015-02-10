@@ -200,7 +200,7 @@ _aggregate() {
     if [ `ls -1 $dir/* | wc -l` -eq 1 ]; then
         mv $dir/* $output_file
     else
-        ncrcat -4 -h -O $dir/* $output_file
+        ncrcat -D2 -4 -h -O $dir/* $output_file
     fi
 }
 
