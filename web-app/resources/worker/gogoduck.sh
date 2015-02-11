@@ -19,6 +19,8 @@ declare -r DEFAULT_GEOSERVER=http://geoserver-123.aodn.org.au/geoserver
 # set a timeout of 10 seconds
 declare -r CURL_OPTS="--connect-timeout 10 --max-time 30"
 
+declare -i -r MAX_PROCS=4
+
 # finds the correct profile to run for the given layer, starts with:
 # acorn_hourly_avg_sag_nonqc_timeseries_url
 # acorn_hourly_avg_sag_nonqc_timeseries
@@ -170,13 +172,9 @@ _is_list_of_urls_sane() {
 }
 
 # applies subset to a single netcdf file
-# $1 - profile module
-# $2 - profile
-# $3 - full path to file
-# $4 - subset command
+# $1 - full path to file
+# $2 - subset command
 _apply_subset_to_file() {
-    local profile_module=$1; shift
-    local profile=$1; shift
     local file=$1; shift
     local subset_cmd="$@"; shift
 
@@ -210,10 +208,9 @@ _apply_subset() {
     # get subset from profile module
     local subset_cmd=`source $profile_module && get_subset_command $profile $subset`
 
-    local file
     logger_user "Applying subset '$subset'"
     export -f _apply_subset_to_file logger_info logger_user _logger _get_color_for_log_level
-    find $dir -type f -o -type l | parallel _apply_subset_to_file "$profile_module" "$profile" "{}" "$subset_cmd"
+    find $dir -type f -o -type l | xargs -P$MAX_PROCS -L1 -I ___FILE___ /bin/bash -c "_apply_subset_to_file ___FILE___ $subset_cmd"
 }
 
 # aggregates netcdf files into one file
