@@ -154,6 +154,33 @@ _is_list_of_urls_sane() {
     fi
 }
 
+# helper function to run GNU parallel and pass environment
+env_parallel() {
+    export parallel_bash_environment="$(echo "shopt -s expand_aliases 2>/dev/null"; alias;typeset -p | grep -vFf <(readonly; echo GROUPS; echo FUNCNAME; echo DIRSTACK; echo _; echo PIPESTATUS; echo USERNAME) | grep -v BASH_;typeset -f)";
+    `which parallel` "$@";
+    unset parallel_bash_environment;
+}
+
+# applies subset to a single netcdf file
+# $1 - profile module
+# $2 - profile
+# $3 - full path to file
+# $4 - subset command
+_apply_subset_to_file() {
+    local profile_module=$1; shift
+    local profile=$1; shift
+    local file=$1; shift
+    local subset_cmd="$@"; shift
+
+    local tmp_file=`mktemp`
+    logger_info "Applying subset '$subset_cmd' to '$file'"
+    logger_user "Processing file '"`basename $file`"'"
+    ncks -a -4 -O $subset_cmd $file $tmp_file
+
+    # overwrite original file
+    mv $tmp_file $file
+}
+
 # applies subset to every netcdf file in directory
 # $1 - profile module
 # $2 - profile
@@ -177,15 +204,8 @@ _apply_subset() {
 
     local file
     logger_user "Applying subset '$subset'"
-    for file in $dir/*; do
-        local tmp_file=`mktemp`
-        logger_info "Applying subset '$subset_cmd' to '$file'"
-        logger_user "Processing file '"`basename $file`"'"
-        ncks -a -4 -O $subset_cmd $file $tmp_file
-
-        # overwrite original file
-        mv $tmp_file $file
-    done
+    export -f _apply_subset_to_file
+    find $dir -type f -o -type l | env_parallel --no-notice _apply_subset_to_file "$profile_module" "$profile" "{}" "$subset_cmd"
 }
 
 # aggregates netcdf files into one file
