@@ -48,6 +48,33 @@ format_output_file() {
     fi
 }
 
+# returns profile weight, which will be a multiplier for the job score
+get_profile_weight() {
+    # by default use 1 - no multiplying
+    echo 1
+}
+
+# this function takes a subset and should output the estimated job score to the
+# given file
+# $1 - geoserver
+# $2 - profile
+# $3 - output file
+# $4 - subset
+get_score() {
+    local geoserver=$1; shift
+    local profile=$1; shift
+    local output_file=$1; shift
+    local subset="$1"; shift
+
+    get_list_of_urls $geoserver $profile $output_file "$subset"
+
+    local -i job_score=`wc -l $output_file | cut -d' ' -f1`
+    local -i profile_weight=`get_profile_weight`
+    local -i job_score=`expr $job_score \* $profile_weight`
+
+    echo $job_score > $output_file
+}
+
 # this function takes a subset and should output the list of urls to the given
 # file
 # $1 - geoserver
