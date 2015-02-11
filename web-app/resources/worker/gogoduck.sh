@@ -169,13 +169,6 @@ _is_list_of_urls_sane() {
     fi
 }
 
-# helper function to run GNU parallel and pass environment
-env_parallel() {
-    export parallel_bash_environment="$(echo "shopt -s expand_aliases 2>/dev/null"; alias;typeset -p | grep -vFf <(readonly; echo GROUPS; echo FUNCNAME; echo DIRSTACK; echo _; echo PIPESTATUS; echo USERNAME) | grep -v BASH_;typeset -f)";
-    `which parallel` "$@";
-    unset parallel_bash_environment;
-}
-
 # applies subset to a single netcdf file
 # $1 - profile module
 # $2 - profile
@@ -219,8 +212,8 @@ _apply_subset() {
 
     local file
     logger_user "Applying subset '$subset'"
-    export -f _apply_subset_to_file
-    find $dir -type f -o -type l | env_parallel --no-notice _apply_subset_to_file "$profile_module" "$profile" "{}" "$subset_cmd"
+    export -f _apply_subset_to_file logger_info logger_user _logger _get_color_for_log_level
+    find $dir -type f -o -type l | parallel _apply_subset_to_file "$profile_module" "$profile" "{}" "$subset_cmd"
 }
 
 # aggregates netcdf files into one file
