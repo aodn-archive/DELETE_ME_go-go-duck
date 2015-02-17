@@ -181,10 +181,21 @@ _apply_subset_to_file() {
     local tmp_file=`mktemp`
     logger_info "Applying subset '$subset_cmd' to '$file'"
     logger_user "Processing file '"`basename $file`"'"
-    ncks -a -4 -O $subset_cmd $file $tmp_file
+    local tmp_ncks_output=`mktemp`
+    ncks -a -4 -O $subset_cmd $file $tmp_file 2> $tmp_ncks_output
+    local -i retval=$?
 
-    # overwrite original file
-    mv $tmp_file $file
+    if [ $retval -ne 0 ]; then
+        logger_warn "Failed applying '$subset_cmd' on file '"`basename $file`"': "`cat $tmp_ncks_output | xargs`
+        rm -f $tmp_file $file
+    else
+        # overwrite original file
+        mv $tmp_file $file
+    fi
+
+    rm -f $tmp_ncks_output
+
+    return $retval
 }
 
 # applies subset to every netcdf file in directory
@@ -209,8 +220,8 @@ _apply_subset() {
     local subset_cmd=`source $profile_module && get_subset_command $profile $subset`
 
     logger_user "Applying subset '$subset'"
-    export -f _apply_subset_to_file logger_info logger_user _logger _get_color_for_log_level
-    find $dir -type f -o -type l | xargs -P$MAX_PROCS -L1 -I ___FILE___ /bin/bash -c "_apply_subset_to_file ___FILE___ $subset_cmd"
+    export -f _apply_subset_to_file logger_warn logger_info logger_user _logger _get_color_for_log_level
+    find $dir -type f -o -type l | xargs -P$MAX_PROCS -L1 -I ___FILE___ /bin/bash -c "_apply_subset_to_file ___FILE___ $subset_cmd || exit 255"
 }
 
 # aggregates netcdf files into one file
