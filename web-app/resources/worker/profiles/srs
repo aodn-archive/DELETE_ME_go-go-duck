@@ -12,6 +12,11 @@ get_subset_command() {
     local profile=$1; shift
     local subset="$1"; shift
 
+    # SRS is bogus, don't include all variables in aggregation
+    local srs_variables="sea_surface_temperature,l2p_flags,quality_level,sses_standard_deviation"
+
+    logger_user "Aggregation will use only the following variables for srs: '$srs_variables', any other variable will be omitted!!"
+
     # https://github.com/aodn/aodn-portal/issues/1093
     subset=`remove_attribute $subset TIME`
 
@@ -23,6 +28,10 @@ get_subset_command() {
     # -d LATITUDE,-33.433849,-30.150743 -d LONGITUDE,113.15197,115.741219
     # we need --mk_rec_dmn so we can concatenate time later on the time axis
     local ncks_arguments="--mk_rec_dmn time -d "`echo $subset | sed -e 's/;$//' -e 's/;/ -d /g'`
+
+    # SRS data is inconsistent, so extract only the following variables
+    ncks_arguments="$ncks_arguments -v $srs_variables"
+
     echo $ncks_arguments
 }
 
