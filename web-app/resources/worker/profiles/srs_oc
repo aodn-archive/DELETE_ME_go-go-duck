@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# overriding the default profile a bit
+source $PROFILES_DIR/srs
+
+# this function takes a semicolon separated subset and should produce viable
+# parameters for the ncks command
+# for the default implementation we just subset on all given parameters
+# $1 - profile name
+# $2 - subset to apply
+get_subset_command() {
+    local profile=$1; shift
+    local subset="$1"; shift
+
+    # https://github.com/aodn/aodn-portal/issues/1093
+    subset=`remove_attribute $subset TIME`
+
+    # SRS takes lat and lon instead of LONGITUDE and LATITUDE
+    subset=`echo $subset | sed -e 's#\bLATITUDE\b#latitude##';`
+    subset=`echo $subset | sed -e 's#\bLONGITUDE\b#longitude##';`
+
+    # LATITUDE,-33.433849,-30.150743;LONGITUDE,113.15197,115.741219 becomes:
+    # -d LATITUDE,-33.433849,-30.150743 -d LONGITUDE,113.15197,115.741219
+    # we need --mk_rec_dmn so we can concatenate time later on the time axis
+    local ncks_arguments="--mk_rec_dmn time -d "`echo $subset | sed -e 's/;$//' -e 's/;/ -d /g'`
+
+    echo $ncks_arguments
+}
