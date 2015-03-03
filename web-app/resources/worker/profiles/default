@@ -123,6 +123,13 @@ get_subset_command() {
     echo $ncks_arguments
 }
 
+# this function takes a file as an argument and should fix the file in place if
+# needed. mostly useful for bogus SRS files. see the srs implementation for an
+# example
+post_process() {
+    local file=$1; shift
+}
+
 # this function takes a semicolon separated subset and an aggregated file and
 # should update its header (metadata)
 # $1 - profile name

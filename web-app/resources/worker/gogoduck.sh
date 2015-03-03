@@ -12,6 +12,7 @@ source `dirname $0`/logger.sh
 # absolute path to where all profiles (plugins) are installed
 declare -r GOGODUCK_EXECUTABLE=`readlink -f $0`
 declare -r PROFILES_DIR=`dirname $GOGODUCK_EXECUTABLE`"/profiles"
+export PROFILES_DIR
 
 # default geoserver to use
 declare -r DEFAULT_GEOSERVER=http://geoserver-123.aodn.org.au/geoserver
@@ -173,9 +174,11 @@ _is_list_of_urls_sane() {
 
 # applies subset to a single netcdf file
 # $1 - full path to file
-# $2 - subset command
+# $2 - profile module
+# $3 - subset command
 _apply_subset_to_file() {
     local file=$1; shift
+    local profile_module=$1; shift
     local subset_cmd="$@"; shift
 
     local tmp_file=`mktemp`
@@ -184,6 +187,10 @@ _apply_subset_to_file() {
     local tmp_ncks_output=`mktemp`
     ncks -a -4 -O $subset_cmd $file $tmp_file 2> $tmp_ncks_output
     local -i retval=$?
+
+    # apply post processing (such as unpacking vars etc)
+    (source $profile_module && post_process $tmp_file)
+    let retval=$retval+$?
 
     if [ $retval -ne 0 ]; then
         logger_warn "Failed applying '$subset_cmd' on file '"`basename $file`"': "`cat $tmp_ncks_output | xargs`
@@ -221,7 +228,7 @@ _apply_subset() {
 
     logger_user "Applying subset '$subset'"
     export -f _apply_subset_to_file logger_warn logger_info logger_user _logger _get_color_for_log_level
-    find $dir -type f -o -type l | xargs -P$MAX_PROCS -L1 -I ___FILE___ /bin/bash -c "_apply_subset_to_file ___FILE___ $subset_cmd || exit 255"
+    find $dir -type f -o -type l | xargs -P$MAX_PROCS -L1 -I ___FILE___ /bin/bash -c "_apply_subset_to_file ___FILE___ $profile_module $subset_cmd || exit 255"
 }
 
 # aggregates netcdf files into one file
