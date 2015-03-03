@@ -35,6 +35,20 @@ get_subset_command() {
     echo $ncks_arguments
 }
 
+# this function takes a file as an argument and should fix the file in place if
+# needed. mostly useful for bogus SRS files. see the srs implementation for an
+# example
+post_process() {
+    local file=$1; shift
+
+    # for most SRS layers, we'll need to unpack variables as they will contain
+    # scale_factor and add_offset packed variables
+    local tmp_file=`mktemp`
+    logger_info "Unpacking file '$file'"
+    ncpdq -O -U $file $tmp_file && \
+    mv $tmp_file $file
+}
+
 # this function takes a semicolon separated subset and an aggregated file and
 # should update its header (metadata)
 # $1 - profile name
