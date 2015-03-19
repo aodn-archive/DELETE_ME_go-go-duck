@@ -38,4 +38,18 @@ class JobExecutorServiceSpec extends Specification {
         then:
         1 * jobStoreService.save(job)
     }
+
+    // TODO: cannot get this (or something like it) to work.
+    // Leaving it here for now in case someone else wants to have a try, otherwise,
+    // I'll make sure it's gone before this current parcel of work is complete.
+    // def "register queues job"() {
+    //     given:
+    //     JobExecutorService.JOB_QUEUE = Mock(BlockingQueue)
+
+    //     when:
+    //     service.register(job)
+
+    //     then:
+    //     1 * JobExecutorService.JOB_QUEUE.offer(job)
+    // }
 }
