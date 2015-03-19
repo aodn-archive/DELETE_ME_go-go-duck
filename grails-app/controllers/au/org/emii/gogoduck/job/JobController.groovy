@@ -14,7 +14,7 @@ class JobController {
             render(status: 400, template: "error", model: [job: job])
         }
         else {
-            jobExecutorService.run(job)
+            jobExecutorService.register(job)
             render(status: 200, text: job.toJsonString())
         }
     }
