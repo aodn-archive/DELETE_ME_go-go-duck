@@ -2,9 +2,10 @@ package au.org.emii.gogoduck.job
 
 class JobController {
 
-    static allowedMethods = [ save: "POST" ]
+    static allowedMethods = [ save: "POST", show: "GET" ]
 
     def jobExecutorService
+    def jobStoreService
 
     def save(Job job) {
         if (job.hasErrors()) {
@@ -16,5 +17,9 @@ class JobController {
             jobExecutorService.run(job)
             render(status: 200, text: job.toJsonString())
         }
+    }
+
+    def show() {
+        render jobStoreService.get(params.uuid)
     }
 }
