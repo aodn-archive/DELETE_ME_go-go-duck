@@ -13,7 +13,6 @@ class Worker {
     Integer maxGogoduckTimeMinutes
 
     void run(successHandler, failureHandler) {
-
         try {
             def process = execute(getCmd())
             log.info("worker output: ${IOUtils.toString(process.getInputStream(), 'UTF-8')}")
