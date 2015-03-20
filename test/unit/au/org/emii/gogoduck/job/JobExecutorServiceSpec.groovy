@@ -21,6 +21,9 @@ class JobExecutorServiceSpec extends Specification {
 
         service.jobStoreService = jobStoreService
         service.notificationService = notificationService
+        service.metaClass.newWorker = {
+            [ run: { success, failure -> } ]
+        }
     }
 
     def "register sends 'job registered' notification"() {
@@ -31,25 +34,41 @@ class JobExecutorServiceSpec extends Specification {
         1 * notificationService.sendJobRegisteredNotification(job)
     }
 
-    def "register saves job"() {
+    def "register saves job, sets status to NEW"() {
         when:
         service.register(job)
 
         then:
         1 * jobStoreService.save(job)
+        job.status == Status.NEW
     }
 
-    // TODO: cannot get this (or something like it) to work.
-    // Leaving it here for now in case someone else wants to have a try, otherwise,
-    // I'll make sure it's gone before this current parcel of work is complete.
-    // def "register queues job"() {
-    //     given:
-    //     JobExecutorService.JOB_QUEUE = Mock(BlockingQueue)
+    def "run runs worker, sets status to IN_PROGRESS"() {
+        when:
+        service.run(job)
 
-    //     when:
-    //     service.register(job)
+        then:
+        1 * jobStoreService.save(job)
+        job.status == Status.IN_PROGRESS
+    }
 
-    //     then:
-    //     1 * JobExecutorService.JOB_QUEUE.offer(job)
-    // }
+    def "success handler sends 'job success' notification, sets status to SUCCEEDED"() {
+        when:
+        service.successHandler(job)
+
+        then:
+        1 * notificationService.sendJobSuccessNotification(job)
+        1 * jobStoreService.save(job)
+        job.status == Status.SUCCEEDED
+    }
+
+    def "failed handler sends 'job failure' notification, sets status to FAILED"() {
+        when:
+        service.failureHandler(job)
+
+        then:
+        1 * notificationService.sendJobFailureNotification(job)
+        1 * jobStoreService.save(job)
+        job.status == Status.FAILED
+    }
 }
