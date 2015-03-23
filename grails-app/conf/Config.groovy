@@ -168,9 +168,11 @@ log4j = {
     environments {
         development {
             debug 'grails.app.controllers',
+                  'grails.app.services.au.org.emii.gogoduck.job.JobExecutorService',
                   'grails.app.services.au.org.emii.gogoduck.job.JobStoreService',
                   'grails.app.services.au.org.emii.gogoduck.job.NotificationService',
                   'au.org.emii.gogoduck.job.Job',
+                  'au.org.emii.gogoduck.job.JobExecutorService',
                   'au.org.emii.gogoduck.worker.Worker'
         }
     }
