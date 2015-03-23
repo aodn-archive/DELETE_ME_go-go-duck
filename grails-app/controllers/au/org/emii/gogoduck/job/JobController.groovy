@@ -1,5 +1,7 @@
 package au.org.emii.gogoduck.job
 
+import grails.converters.JSON
+
 class JobController {
 
     static allowedMethods = [ save: "POST", show: "GET" ]
@@ -20,6 +22,13 @@ class JobController {
     }
 
     def show() {
-        render jobStoreService.get(params.uuid)
+        def job = jobStoreService.get(params.uuid)
+
+        if (!job) {
+            render(status: 404)
+            return
+        }
+
+        render(job.properties + [ queuePosition:  jobExecutorService.getQueuePosition(job) ] as JSON)
     }
 }

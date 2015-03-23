@@ -2,7 +2,6 @@ package au.org.emii.gogoduck.job
 
 import grails.test.mixin.*
 import spock.lang.Specification
-import java.util.concurrent.BlockingQueue
 
 import au.org.emii.gogoduck.test.TestHelper
 
