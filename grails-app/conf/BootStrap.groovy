@@ -1,5 +1,6 @@
 import au.org.emii.gogoduck.job.CleanupJob
 import au.org.emii.gogoduck.job.Job
+import grails.converters.JSON
 
 class BootStrap {
 
@@ -14,9 +15,11 @@ class BootStrap {
             grailsApplication.config.grails.serverURL
         }
 
-        CleanupJob.schedule(grailsApplication.config.job.cleanup.trigger)
-    }
+        JSON.registerObjectMarshaller(Enum) {
+            Enum someEnum ->
+            someEnum.toString()
+        }
 
-    def destroy = {
+        CleanupJob.schedule(grailsApplication.config.job.cleanup.trigger)
     }
 }

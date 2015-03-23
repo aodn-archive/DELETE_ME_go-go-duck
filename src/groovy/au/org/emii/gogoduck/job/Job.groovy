@@ -11,7 +11,11 @@ class Job {
     String emailAddress
     String layerName
     String geoserver
+
     DateTime createdTimestamp
+    DateTime startedTimestamp
+    DateTime finishedTimestamp
+    Status status
 
     // Need to instantiate nested objects, otherwise they are not bound.
     // See: http://grails.1312388.n4.nabble.com/How-to-bind-data-to-a-command-object-that-has-an-non-domain-object-as-property-tp4021559p4328826.html
@@ -27,6 +31,7 @@ class Job {
     Job() {
         uuid = UUID.randomUUID().toString()[0..7]
         createdTimestamp = DateTime.now()
+        status = Status.NEW
     }
 
     String toString() {
@@ -37,12 +42,30 @@ class Job {
         new URL("$serverUrl/aggr/$uuid")
     }
 
+    void setStatus(status) {
+        this.status = status
+
+        switch (status) {
+            case Status.IN_PROGRESS:
+                this.startedTimestamp = DateTime.now()
+                break;
+
+            case Status.SUCCEEDED:
+            case Status.FAILED:
+                this.finishedTimestamp = DateTime.now()
+                break;
+
+            default:
+            break;
+        }
+    }
+
     def getSubsetCommandString() {
         def subsetCommandString = ""
 
         subsetCommandString +=
             String.format(
-               "-p %s -s ${subsetDescriptor.subsetCommandString}",
+                "-p %s -s ${subsetDescriptor.subsetCommandString}",
                 layerName
             )
 
@@ -61,6 +84,18 @@ class Job {
 
     void setCreatedTimestamp(String tsAsString) {
         this.createdTimestamp = new DateTime(tsAsString)
+    }
+
+    void setStartedTimestamp(String tsAsString) {
+        if (tsAsString && tsAsString != "null") {
+            this.startedTimestamp = new DateTime(tsAsString)
+        }
+    }
+
+    void setFinishedTimestamp(String tsAsString) {
+        if (tsAsString && tsAsString != "null") {
+            this.finishedTimestamp = new DateTime(tsAsString)
+        }
     }
 
     static Job fromJsonString(jobAsJson) {
