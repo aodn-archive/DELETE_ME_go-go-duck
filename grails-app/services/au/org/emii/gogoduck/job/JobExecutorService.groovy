@@ -47,7 +47,7 @@ class JobExecutorService {
     }
 
     def register(job) {
-        jobStoreService.save(job)  // TODO: add test for this
+        setJobStatusAndSave(job, Status.NEW)
         notificationService.sendJobRegisteredNotification(job)
 
         JOB_QUEUE.offer([job: job, executor: this])
@@ -55,7 +55,7 @@ class JobExecutorService {
     }
 
     def run(job) {
-        log.debug "Running job: ${job}"
+        setJobStatusAndSave(job, Status.IN_PROGRESS)
         newWorker(job).run(successHandler, failureHandler)
     }
 
@@ -72,11 +72,20 @@ class JobExecutorService {
 
     def successHandler = {
         job ->
+
+        setJobStatusAndSave(job, Status.SUCCEEDED)
         notificationService.sendJobSuccessNotification(job)
     }
 
     def failureHandler = {
         job ->
+
+        setJobStatusAndSave(job, Status.FAILED)
         notificationService.sendJobFailureNotification(job)
+    }
+
+    def setJobStatusAndSave(job, status) {
+        job.status = status
+        jobStoreService.save(job)
     }
 }

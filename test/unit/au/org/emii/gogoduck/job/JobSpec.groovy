@@ -1,8 +1,10 @@
 package au.org.emii.gogoduck.job
 
+import grails.converters.JSON
 import grails.test.mixin.*
 import org.joda.time.*
 import spock.lang.Specification
+import spock.lang.Unroll
 
 import au.org.emii.gogoduck.test.TestHelper
 
@@ -25,10 +27,13 @@ class JobSpec extends Specification {
       }
    },
    "createdTimestamp": "1970-01-01T11:00:01.234+11:00",
+   "status": "NEW",
    "geoserver": "geoserver_address",
    "emailAddress": "gogo@duck.com",
    "layerName": "some_layer",
-   "uuid": "1234"
+   "uuid": "1234",
+   "startedTimestamp": null,
+   "finishedTimestamp": null
 }'''
 
     def invalidJobValues = [
@@ -50,6 +55,10 @@ class JobSpec extends Specification {
 
     def setup() {
         DateTimeUtils.setCurrentMillisFixed(1234)
+
+        JSON.registerObjectMarshaller(Enum) { Enum someEnum ->
+            someEnum.toString()
+        }
     }
 
     def cleanup() {
@@ -118,6 +127,27 @@ class JobSpec extends Specification {
         _getProblemFieldNames(temporalExtent) == ['start', 'end']
         _getProblemFieldNames(spatialExtent) == ['north', 'south', 'east', 'west']
     }
+
+    @Unroll
+    def "status change sets corresponding timestamp"() {
+        given:
+        def job = TestHelper.createJob()
+
+        when:
+        job.status = status
+
+        then:
+        job.status == status
+        job[affectedTimestamp] == DateTime.now()
+
+        where:
+        status             | affectedTimestamp
+        Status.NEW         | 'createdTimestamp'
+        Status.IN_PROGRESS | 'startedTimestamp'
+        Status.SUCCEEDED   | 'finishedTimestamp'
+        Status.FAILED      | 'finishedTimestamp'
+    }
+
 
     def _getProblemFieldNames(job) {
 
