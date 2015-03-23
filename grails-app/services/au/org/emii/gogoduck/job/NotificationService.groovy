@@ -16,11 +16,12 @@ class NotificationService {
     }
 
     def getRegisteredNotificationSubject(job) {
+        println job.uuid
         getMessage('job.registered.subject', [job.uuid])
     }
 
     def getRegisteredNotificationBody(job) {
-        getMessage('job.registered.body', [job.uuid])
+        getMessage('job.registered.body', [job.uuid, job.statusUrl])
     }
 
     def sendJobSuccessNotification(job) {

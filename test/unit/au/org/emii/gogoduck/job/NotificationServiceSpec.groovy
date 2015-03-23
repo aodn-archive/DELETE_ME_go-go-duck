@@ -46,12 +46,15 @@ class NotificationServiceSpec extends Specification {
 
     def "registered notification body"() {
         when:
+        job.metaClass.getStatusUrl = {
+            'http://gogoduck/job/1234'
+        }
         service.getRegisteredNotificationBody(job)
 
         then:
         1 * messageSource.getMessage(
             'job.registered.body',
-            ['1234'].toArray(),
+            ['1234', 'http://gogoduck/job/1234'].toArray(),
             LocaleContextHolder.locale
         )
     }
@@ -71,7 +74,7 @@ class NotificationServiceSpec extends Specification {
     def "success notification body"() {
         when:
         job.metaClass.getAggrUrl = {
-            "http://thejob/1234"
+            'http://thejob/1234'
         }
         service.getSuccessNotificationBody(job)
 

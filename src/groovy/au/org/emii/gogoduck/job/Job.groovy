@@ -38,8 +38,13 @@ class Job {
         toJsonString()
     }
 
+    // TODO: move these
     URL getAggrUrl() {
         new URL("$serverUrl/aggr/$uuid")
+    }
+
+    URL getStatusUrl() {
+        new URL("$serverUrl/job/$uuid")
     }
 
     void setStatus(status) {
@@ -58,7 +63,6 @@ class Job {
             default:
             break;
         }
-    }
 
     def getSubsetCommandString() {
         def subsetCommandString = ""
