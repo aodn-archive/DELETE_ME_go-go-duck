@@ -22,7 +22,7 @@ class JobController {
     }
 
     def show() {
-        def job = jobStoreService.get(params.uuid)
+        def job = jobStoreService.get(params.id)
 
         if (!job) {
             render(status: 404)

@@ -79,6 +79,7 @@ class JSONSerializer {
             'constraints',
             'grailsApplication',
             'aggrUrl',
+            'statusUrl',
             'serverUrl',
             'longitudeConstraints',
             'latitudeConstraints',

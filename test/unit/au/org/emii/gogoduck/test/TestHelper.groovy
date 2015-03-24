@@ -21,8 +21,6 @@ class TestHelper {
                 ]
             ]
         )
-        def serverURL = 'http://localhost:8080/gogoduck'
-        job.metaClass.getServerUrl = { serverURL }
 
         return job
     }
