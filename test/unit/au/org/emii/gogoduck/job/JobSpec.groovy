@@ -159,24 +159,4 @@ class JobSpec extends Specification {
 
         return names
     }
-
-    def "aggr URL"() {
-        given:
-        def job = TestHelper.createJob()
-        def jobUuid = '1234'
-        job.uuid = jobUuid
-
-        expect:
-        job.getAggrUrl().toString() == "${job.serverUrl}/aggr/${jobUuid}"
-    }
-
-    def "status URL"() {
-        given:
-        def job = TestHelper.createJob()
-        def jobUuid = '1234'
-        job.uuid = jobUuid
-
-        expect:
-        job.getStatusUrl().toString() == "${job.serverUrl}/job/${jobUuid}"
-    }
 }

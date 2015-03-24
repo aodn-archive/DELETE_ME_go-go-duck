@@ -3,6 +3,7 @@ package au.org.emii.gogoduck.job
 import grails.plugin.mail.MailService
 import grails.test.mixin.*
 import spock.lang.Specification
+import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 import org.springframework.context.MessageSource
 import org.springframework.context.i18n.LocaleContextHolder
 
@@ -12,12 +13,18 @@ import au.org.emii.gogoduck.test.TestHelper
 class NotificationServiceSpec extends Specification {
 
     def job
+    def grailsLinkGenerator
     def mailService
     def messageSource
 
     def setup() {
         job = TestHelper.createJob()
         job.uuid = '1234'
+
+        grailsLinkGenerator = Mock(LinkGenerator)
+        grailsLinkGenerator.link() >> "http://someUrl"
+
+        service.grailsLinkGenerator = grailsLinkGenerator
         mailService = Mock(MailService)
         service.mailService = mailService
         messageSource = Mock(MessageSource)
@@ -46,15 +53,12 @@ class NotificationServiceSpec extends Specification {
 
     def "registered notification body"() {
         when:
-        job.metaClass.getStatusUrl = {
-            'http://gogoduck/job/1234'
-        }
         service.getRegisteredNotificationBody(job)
 
         then:
         1 * messageSource.getMessage(
             'job.registered.body',
-            ['1234', 'http://gogoduck/job/1234'].toArray(),
+            ['1234', service.getJobUrl(job)].toArray(),
             LocaleContextHolder.locale
         )
     }
@@ -73,15 +77,12 @@ class NotificationServiceSpec extends Specification {
 
     def "success notification body"() {
         when:
-        job.metaClass.getAggrUrl = {
-            'http://thejob/1234'
-        }
         service.getSuccessNotificationBody(job)
 
         then:
         1 * messageSource.getMessage(
             'job.success.body',
-            ['1234', 'http://thejob/1234'].toArray(),
+            ['1234', service.getAggrUrl(job)].toArray(),
             LocaleContextHolder.locale
         )
     }
@@ -100,16 +101,23 @@ class NotificationServiceSpec extends Specification {
 
     def "failure notification body"() {
         when:
-        job.metaClass.getAggrUrl = {
-            "http://thejob/1234"
-        }
         service.getFailureNotificationBody(job)
 
         then:
         1 * messageSource.getMessage(
             'job.failure.body',
-            ['1234', 'http://thejob/1234'].toArray(),
+            ['1234', service.getAggrUrl(job)].toArray(),
             LocaleContextHolder.locale
         )
+    }
+
+    def "url generation"() {
+        when:
+        service.getJobUrl([uuid: 123])
+        service.getAggrUrl([uuid: 456])
+
+        then:
+        1 * grailsLinkGenerator.link([controller: 'job', action: 'show', id: 123, absolute: true])
+        1 * grailsLinkGenerator.link([controller: 'aggr', action: 'show', id: 456, absolute: true])
     }
 }

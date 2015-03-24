@@ -6,6 +6,7 @@ class NotificationService {
     def mailService
     def messageSource
     def jobStoreService
+    def grailsLinkGenerator
 
     def sendJobRegisteredNotification(job) {
         sendMailAndLog {
@@ -16,12 +17,11 @@ class NotificationService {
     }
 
     def getRegisteredNotificationSubject(job) {
-        println job.uuid
         getMessage('job.registered.subject', [job.uuid])
     }
 
     def getRegisteredNotificationBody(job) {
-        getMessage('job.registered.body', [job.uuid, job.statusUrl])
+        getMessage('job.registered.body', [job.uuid, getJobUrl(job)])
     }
 
     def sendJobSuccessNotification(job) {
@@ -42,7 +42,7 @@ class NotificationService {
     }
 
     def getSuccessNotificationBody(job) {
-        getMessage('job.success.body', [job.uuid, job.aggrUrl])
+        getMessage('job.success.body', [job.uuid, getAggrUrl(job)])
     }
 
     def sendJobFailureNotification(job) {
@@ -63,7 +63,7 @@ class NotificationService {
     }
 
     def getFailureNotificationBody(job) {
-        getMessage('job.failure.body', [job.uuid, job.aggrUrl])
+        getMessage('job.failure.body', [job.uuid, getAggrUrl(job)])
     }
 
     def getMessage(messageKey, messageParams = []) {
@@ -85,5 +85,13 @@ class NotificationService {
 
     def methodMissing(String name, args) {
         log.debug("sending email, ${name}: ${args}")
+    }
+
+    def getJobUrl(job) {
+        return grailsLinkGenerator.link(controller: 'job', action: 'show', id: job.uuid, absolute: true)
+    }
+
+    def getAggrUrl(job) {
+        return grailsLinkGenerator.link(controller: 'aggr', action: 'show', id: job.uuid, absolute: true)
     }
 }

@@ -7,6 +7,7 @@ import au.org.emii.gogoduck.json.JSONSerializer
 
 @grails.validation.Validateable
 class Job {
+
     String uuid
     String emailAddress
     String layerName
@@ -38,15 +39,6 @@ class Job {
         toJsonString()
     }
 
-    // TODO: move these
-    URL getAggrUrl() {
-        new URL("$serverUrl/aggr/$uuid")
-    }
-
-    URL getStatusUrl() {
-        new URL("$serverUrl/job/$uuid")
-    }
-
     void setStatus(status) {
         this.status = status
 
@@ -63,6 +55,7 @@ class Job {
             default:
             break;
         }
+    }
 
     def getSubsetCommandString() {
         def subsetCommandString = ""

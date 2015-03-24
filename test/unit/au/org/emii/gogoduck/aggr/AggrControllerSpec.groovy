@@ -26,7 +26,7 @@ class AggrControllerSpec extends Specification {
         1 * jobStoreService.getAggrFile(job) >> tempFile
 
         when:
-        controller.params.uuid = jobId
+        controller.params.id = jobId
 
         controller.show()
 

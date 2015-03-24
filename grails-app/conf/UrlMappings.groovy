@@ -3,7 +3,7 @@ class UrlMappings {
 
         ["aggr", "job"].each {
             resource ->
-                "/${resource}/$uuid"(resource: resource) {
+                "/${resource}/$id"(resource: resource) {
                     action = [GET: "show"]
                 }
                 "/${resource}"(controller: resource, parseRequest: true) {
