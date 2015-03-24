@@ -2,48 +2,21 @@ package au.org.emii.gogoduck.job
 
 import au.org.emii.gogoduck.worker.Worker
 
-import java.util.concurrent.LinkedBlockingQueue
-import java.util.concurrent.BlockingQueue
-
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 class JobExecutorService {
 
-    static BlockingQueue<Map> JOB_QUEUE
+    static final JobQueue JOB_QUEUE = new JobQueue()
 
     def grailsApplication
     def jobStoreService
     def notificationService
 
     static {
-        // Note: this queue is unbounded - but this is the same as the previous behaviour
-        // using the quartz scheduler.
-        JOB_QUEUE = new LinkedBlockingQueue<Map>()
+        new Thread(JOB_QUEUE).start()
+    }
 
-        final Logger log = LoggerFactory.getLogger(JobExecutorService)
-
-        new Thread(
-            new Runnable() {
-                void run() {
-                    while (true) {
-                        try {
-                            log.debug "Waiting for job..."
-                            def jobContext = JOB_QUEUE.take()
-                            def job = jobContext.job
-                            def executor = jobContext.executor
-
-                            log.debug "Job taken, queue size: ${JOB_QUEUE.size()}"
-
-                            executor.run(job)
-                        }
-                        catch (InterruptedException e) {
-                            log.error("Error handling job", e)
-                        }
-                    }
-                }
-            }
-        ).start()
+    static void clearQueue() {
+        JOB_QUEUE.clear()
     }
 
     def register(job) {
@@ -68,6 +41,10 @@ class JobExecutorService {
             maxGogoduckTimeMinutes: grailsApplication.config.worker.maxGogoduckTimeMinutes,
             fileLimit: grailsApplication.config.worker.fileLimit
         )
+    }
+
+    def getQueuePosition(job) {
+        return JOB_QUEUE.getQueuePosition(job)
     }
 
     def successHandler = {
