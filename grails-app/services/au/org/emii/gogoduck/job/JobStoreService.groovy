@@ -3,7 +3,7 @@ package au.org.emii.gogoduck.job
 class JobStoreService {
     def grailsApplication
 
-    Job get(uuid) {
+    def get(uuid) {
         try {
             log.debug("file: ${getJsonPathForId(uuid)}, text: ${getFile(getJsonPathForId(uuid)).text}")
             return Job.fromJsonString(getFile(getJsonPathForId(uuid)).text)
@@ -40,7 +40,7 @@ class JobStoreService {
     }
 
     File getAggrFile(job) {
-        log.debug("Job path: ${getAggrPath(job)}")
+        log.debug("Aggr path: ${getAggrPath(job)}")
         getFile(getAggrPath(job))
     }
 
@@ -48,6 +48,15 @@ class JobStoreService {
         String reportFilePath = "${getPath(job)}${File.separator}${grailsApplication.config.worker.reportFilename}"
         log.debug("Report file path: ${reportFilePath}")
         return reportFilePath
+    }
+
+    File getReportFile(job) {
+        log.debug("Report path: ${getReportPath(job)}")
+        getFile(getReportPath(job))
+    }
+
+    String getReport(job) {
+        getReportFile(job).text
     }
 
     void makeDir(job) {

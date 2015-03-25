@@ -29,6 +29,6 @@ class JobController {
             return
         }
 
-        render(job.properties + [ queuePosition:  jobExecutorService.getQueuePosition(job) ] as JSON)
+        render new JobPresenter(job, jobExecutorService, jobStoreService, { createLink(it) } ) as JSON
     }
 }
