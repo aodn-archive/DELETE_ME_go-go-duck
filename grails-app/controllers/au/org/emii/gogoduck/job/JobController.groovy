@@ -29,6 +29,6 @@ class JobController {
             return
         }
 
-        render new JobPresenter(job, jobExecutorService, jobStoreService, { createLink(it) } ) as JSON
+        [job: new JobPresenter(job, jobExecutorService, jobStoreService, { createLink(it) } )] 
     }
 }
