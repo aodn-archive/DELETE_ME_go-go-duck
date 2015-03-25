@@ -54,12 +54,12 @@ class JobControllerSpec extends Specification {
 
         when:
         controller.params.id = 123
-        controller.show()
+        def model = controller.show()
 
         then:
-        queuePosition == response.json.queuePosition
-        aggrUrl == response.json.aggrUrl
-        report == response.json.report
+        queuePosition == model.job.queuePosition
+        aggrUrl == model.job.aggrUrl
+        report == model.job.report
 
         where:
         status             | queuePosition | report        | hasAggrUrl
