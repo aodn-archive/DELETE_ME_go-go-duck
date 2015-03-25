@@ -7,16 +7,31 @@ class JobPresenter extends HashMap {
     JobPresenter(job, jobExecutorService, jobStoreService, createLink) {
         super(job.properties)
 
-        if (job.status == Status.NEW) {
-            put('queuePosition', jobExecutorService.getQueuePosition(job))
-        }
+        switch (job.status) {
+            case (Status.NEW):
+                addQueuePosition(job, jobExecutorService)
+                break
 
-        if (job.status == Status.SUCCEEDED) {
-            put('aggrUrl', createLink(controller: 'aggr', action: 'show', id: job.uuid, absolute: true))
-        }
+            case (Status.SUCCEEDED):
+                addAggrUrl(job, createLink)
+                addReport(job, jobStoreService)
+                break
 
-        if (job.status == Status.SUCCEEDED || job.status == Status.FAILED) {
-            put('report', jobStoreService.getReport(job))
+            case (Status.FAILED):
+                addReport(job, jobStoreService)
+                break
         }
+    }
+
+    void addQueuePosition(job, jobExecutorService) {
+        put('queuePosition', jobExecutorService.getQueuePosition(job))
+    }
+
+    void addAggrUrl(job, createLink) {
+        put('aggrUrl', createLink(controller: 'aggr', action: 'show', id: job.uuid, absolute: true))
+    }
+
+    void addReport(job, jobStoreService) {
+        put('report', jobStoreService.getReport(job))
     }
 }
