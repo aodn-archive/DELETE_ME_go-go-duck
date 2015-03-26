@@ -57,7 +57,7 @@ class JobControllerSpec extends Specification {
         def model = controller.show()
 
         then:
-        queuePosition == model.job.queuePosition
+        queuePosition ? queuePosition + 1 : null == model.job.queuePosition
         aggrUrl == model.job.aggrUrl
         report == model.job.report
 
