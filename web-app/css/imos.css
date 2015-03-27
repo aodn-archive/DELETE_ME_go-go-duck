@@ -1,0 +1,23 @@
+body, html, td, p {
+    font-family: arial,sans-serif;
+    color: #4d5b63;
+}
+
+.imosHeader, .jumbotronFooter {
+    padding: 10px 0;
+    background-color: #666;
+}
+
+.jumbotronFooter {
+    padding: 48px 0;
+}
+.jumbotronFooter * {
+    color: #ffffff;
+}
+.jumbotronFooter a{
+    color: #ccc;
+}
+
+dt {
+    padding-top: 10px;
+}
