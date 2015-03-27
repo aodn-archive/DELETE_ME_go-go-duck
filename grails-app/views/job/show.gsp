@@ -17,7 +17,7 @@
             <dl>
                 <g:labelledContent labelCode="job.id.label">${job.uuid}</g:labelledContent>
                 <g:labelledContent labelCode="job.createdTimestamp.label"><joda:format value="${job.createdTimestamp}" /></g:labelledContent>
-                <g:labelledContent labelCode="job.status.label">${job.status}</g:labelledContent>
+                <g:labelledContent labelCode="job.status.label"><g:message code="job.status.${job.status}" default="${job.status.toString()}" /></g:labelledContent>
                 <g:labelledContent if="${job.queuePosition}" labelCode="job.queuePosition.label">${job.queuePosition}</g:labelledContent>
                 <g:labelledContent if="${job.aggrUrl}" labelCode="job.aggrUrl.label">
                     <a href="${job.aggrUrl}">${job.aggrUrl}</a>
