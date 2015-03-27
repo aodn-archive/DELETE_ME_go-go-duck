@@ -24,7 +24,7 @@ class JobPresenter extends HashMap {
     }
 
     void addQueuePosition(job, jobExecutorService) {
-        put('queuePosition', jobExecutorService.getQueuePosition(job))
+        put('queuePosition', jobExecutorService.getQueuePosition(job) + 1)
     }
 
     void addAggrUrl(job, createLink) {
