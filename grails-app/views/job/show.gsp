@@ -7,7 +7,7 @@
     <body>
         <div class="imosHeader">
             <div class="container">
-                <a class="btn" role="button" href="https://imos.aodn.org.au/imos123/home?uuid=8af21108-c535-43bf-8dab-c1f45a26088c">
+                <a class="btn" role="button" href="https://imos.aodn.org.au/imos123/home">
                     <img src="http://static.emii.org.au/images/logo/IMOS-Ocean-Portal-logo.png" alt="IMOS logo">
                 </a>
             </div>
