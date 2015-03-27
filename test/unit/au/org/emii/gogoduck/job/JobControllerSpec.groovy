@@ -49,6 +49,8 @@ class JobControllerSpec extends Specification {
         controller.jobExecutorService.getQueuePosition(_) >> queuePosition
         controller.jobStoreService.getReport(_) >> report
 
+        def presentedQueuePosition = queuePosition ? (queuePosition + 1) : null
+
         def aggrUrl = hasAggrUrl ?
             controller.createLink(controller: 'aggr', action: 'show', id: mockJob.uuid, absolute: true) : null
 
@@ -57,7 +59,7 @@ class JobControllerSpec extends Specification {
         def model = controller.show()
 
         then:
-        queuePosition ? queuePosition + 1 : null == model.job.queuePosition
+        presentedQueuePosition == model.job.queuePosition
         aggrUrl == model.job.aggrUrl
         report == model.job.report
 
