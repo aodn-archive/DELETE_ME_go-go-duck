@@ -13,13 +13,18 @@
             </div>
         </div>
         <div class="container">
+            <h2><g:message code="aggregation.status" default="Aggregation Status"/></h2>
             <dl>
                 <g:labelledContent labelCode="job.id.label">${job.uuid}</g:labelledContent>
                 <g:labelledContent labelCode="job.createdTimestamp.label"><joda:format value="${job.createdTimestamp}" /></g:labelledContent>
                 <g:labelledContent labelCode="job.status.label">${job.status}</g:labelledContent>
                 <g:labelledContent if="${job.queuePosition}" labelCode="job.queuePosition.label">${job.queuePosition}</g:labelledContent>
-                <g:labelledContent if="${job.aggrUrl}" labelCode="job.aggrUrl.label">${job.aggrUrl}</g:labelledContent>
-                <g:labelledContent if="${job.report}" labelCode="job.report.label"><pre>${job.report}</pre></g:labelledContent>
+                <g:labelledContent if="${job.aggrUrl}" labelCode="job.aggrUrl.label">
+                    <a href="${job.aggrUrl}">${job.aggrUrl}</a>
+                </g:labelledContent>
+                <g:labelledContent if="${job.report}" labelCode="job.report.label">
+                    <pre>${job.report}</pre>
+                </g:labelledContent>
             </dl>
         </div>
         <div class="jumbotronFooter voffset5">
