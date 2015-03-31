@@ -8,7 +8,7 @@
         <div class="imosHeader">
             <div class="container">
                 <a class="btn" role="button" href="https://imos.aodn.org.au/imos123/home">
-                    <img src="http://static.emii.org.au/images/logo/IMOS-Ocean-Portal-logo.png" alt="IMOS logo">
+                    <img src="https://static.emii.org.au/images/logo/IMOS-Ocean-Portal-logo.png" alt="IMOS logo">
                 </a>
             </div>
         </div>
