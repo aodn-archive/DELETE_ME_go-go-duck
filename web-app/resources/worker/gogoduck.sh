@@ -353,7 +353,7 @@ gogoduck_main() {
 
     mv $tmp_result_file $output
     logger_info "Result saved at '$output'"
-    logger_user "\nYour aggregation was successful!"
+    logger_user "Your aggregation was successful!"
 }
 
 # prints usage and exit
