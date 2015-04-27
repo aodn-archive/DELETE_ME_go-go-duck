@@ -17,7 +17,8 @@ class JobController {
         }
         else {
             jobExecutorService.register(job)
-            render(status: 200, text: job.toJsonString())
+            def jobPresenter = new JobPresenter(job, jobExecutorService, jobStoreService, { createLink(it) })
+            render status: 200, contentType: "text/json", text: jobPresenter.toJsonString()
         }
     }
 
@@ -29,6 +30,6 @@ class JobController {
             return
         }
 
-        [job: new JobPresenter(job, jobExecutorService, jobStoreService, { createLink(it) } )] 
+        [job: new JobPresenter(job, jobExecutorService, jobStoreService, { createLink(it) } )]
     }
 }

@@ -13,38 +13,34 @@ class JobControllerSpec extends Specification {
     def mockJob
 
     def setup() {
-        controller.jobStoreService =  Mock(JobStoreService)
+        controller.jobStoreService = Mock(JobStoreService)
         mockJob = new Object()
         mockJob.metaClass.uuid = 123
 
         controller.jobStoreService.get(_) >> mockJob
-        controller.jobExecutorService =  Mock(JobExecutorService)
+        controller.jobExecutorService = Mock(JobExecutorService)
     }
 
     def "save with valid request registers job"() {
         given:
         def job = TestHelper.createJob()
-        JobExecutorService jobExecutorService = Mock()
-        controller.jobExecutorService = jobExecutorService
+        controller.jobExecutorService.getQueuePosition(_) >> 1
+
+        def expectedUrl = controller.createLink(controller: 'job', action: 'show', id: job.uuid, absolute: true)
 
         when:
         controller.save(job)
+        def responseJson = JSON.parse(response.text)
 
         then:
         response.status == 200
-        1 * jobExecutorService.register(job)
+        responseJson.url == expectedUrl
+        1 * controller.jobExecutorService.register(job)
     }
 
     @Unroll("show #status job")
     def "show job"() {
         given:
-        controller.jobStoreService =  Mock(JobStoreService)
-        mockJob = new Object()
-        mockJob.metaClass.uuid = 123
-
-        controller.jobStoreService.get(_) >> mockJob
-        controller.jobExecutorService =  Mock(JobExecutorService)
-
         mockJob.metaClass.status = status
         controller.jobExecutorService.getQueuePosition(_) >> queuePosition
         controller.jobStoreService.getReport(_) >> report
