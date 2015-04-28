@@ -45,6 +45,8 @@ grails.exceptionresolver.params.exclude = ['password']
 // configure auto-caching of queries by default (if false you can cache individual queries with 'cache: true')
 grails.hibernate.cache.queries = false
 
+grails.serverURL = "http://${InetAddress.localHost.hostAddress}:${server.port}/$appName"
+
 grails {
     mail {
         'default' {
@@ -106,11 +108,6 @@ environments {
             outputPath = 'jobs'
         }
     }
-
-    test {
-        grails.serverURL = "http://localhost:8080/$appName"
-    }
-
     production {
         grails.logging.jul.usebridge = false
     }
