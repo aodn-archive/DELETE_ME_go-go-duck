@@ -5,8 +5,6 @@ import org.springframework.context.i18n.LocaleContextHolder
 class NotificationService {
     def mailService
     def messageSource
-    def jobStoreService
-    def grailsLinkGenerator
 
     def sendJobRegisteredNotification(job) {
         sendMailAndLog {
@@ -21,19 +19,16 @@ class NotificationService {
     }
 
     def getRegisteredNotificationBody(job) {
-        getMessage('job.registered.body', [job.uuid, getJobUrl(job)])
+        getMessage('job.registered.body', [job.uuid, job.url])
     }
 
     def sendJobSuccessNotification(job) {
-        def jobAggregationReport = new File(jobStoreService.getReportPath(job))
-        log.info("Sending success email to '${job.emailAddress.toString()}' with report from '${jobAggregationReport.path}'")
-
         sendMailAndLog {
             multipart true
             to job.emailAddress.toString()
             subject getSuccessNotificationSubject(job)
             body getSuccessNotificationBody(job)
-            attachBytes "aggregation_report.txt", "text/plain", jobAggregationReport.readBytes()
+            attachBytes "aggregation_report.txt", "text/plain", job.report.bytes
         }
     }
 
@@ -42,19 +37,16 @@ class NotificationService {
     }
 
     def getSuccessNotificationBody(job) {
-        getMessage('job.success.body', [job.uuid, getAggrUrl(job)])
+        getMessage('job.success.body', [job.uuid, job.aggrUrl])
     }
 
     def sendJobFailureNotification(job) {
-        def jobAggregationReport = new File(jobStoreService.getReportPath(job))
-        log.info("Sending failure email to '${job.emailAddress.toString()}' with report from '${jobAggregationReport.path}'")
-
         sendMailAndLog {
             multipart true
             to job.emailAddress.toString()
             subject getFailureNotificationSubject(job)
             body getFailureNotificationBody(job)
-            attachBytes "aggregation_report.txt", "text/plain", jobAggregationReport.readBytes()
+            attachBytes "aggregation_report.txt", "text/plain", job.report.bytes
         }
     }
 
@@ -63,7 +55,7 @@ class NotificationService {
     }
 
     def getFailureNotificationBody(job) {
-        getMessage('job.failure.body', [job.uuid, getAggrUrl(job)])
+        getMessage('job.failure.body', [job.uuid])
     }
 
     def getMessage(messageKey, messageParams = []) {
@@ -85,13 +77,5 @@ class NotificationService {
 
     def methodMissing(String name, args) {
         log.debug("sending email, ${name}: ${args}")
-    }
-
-    def getJobUrl(job) {
-        return grailsLinkGenerator.link(controller: 'job', action: 'show', id: job.uuid, absolute: true)
-    }
-
-    def getAggrUrl(job) {
-        return grailsLinkGenerator.link(controller: 'aggr', action: 'show', id: job.uuid, absolute: true)
     }
 }

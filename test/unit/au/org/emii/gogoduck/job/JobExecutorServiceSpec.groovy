@@ -2,12 +2,14 @@ package au.org.emii.gogoduck.job
 
 import grails.test.mixin.*
 import spock.lang.Specification
+import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 
 import au.org.emii.gogoduck.test.TestHelper
 
 @TestFor(JobExecutorService)
 class JobExecutorServiceSpec extends Specification {
 
+    def grailsLinkGenerator
     def job
     def jobStoreService
     def notificationService
@@ -18,10 +20,17 @@ class JobExecutorServiceSpec extends Specification {
         jobStoreService = Mock(JobStoreService)
         notificationService = Mock(NotificationService)
 
+        grailsLinkGenerator = Mock(LinkGenerator)
+        grailsLinkGenerator.link() >> "http://someUrl"
+
+        service.grailsLinkGenerator = grailsLinkGenerator
         service.jobStoreService = jobStoreService
         service.notificationService = notificationService
         service.metaClass.newWorker = {
             [ run: { success, failure -> } ]
+        }
+        service.metaClass.getPresentedJob = {
+            job
         }
     }
 

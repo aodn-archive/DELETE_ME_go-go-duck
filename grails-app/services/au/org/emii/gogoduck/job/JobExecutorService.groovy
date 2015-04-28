@@ -8,6 +8,7 @@ class JobExecutorService {
     static final JobQueue JOB_QUEUE = new JobQueue()
 
     def grailsApplication
+    def grailsLinkGenerator
     def jobStoreService
     def notificationService
 
@@ -21,7 +22,7 @@ class JobExecutorService {
 
     def register(job) {
         setJobStatusAndSave(job, Status.NEW)
-        notificationService.sendJobRegisteredNotification(job)
+        notificationService.sendJobRegisteredNotification(getPresentedJob(job))
 
         JOB_QUEUE.offer([job: job, executor: this])
         log.debug "job offered, queue size: ${JOB_QUEUE.size()}"
@@ -51,18 +52,22 @@ class JobExecutorService {
         job ->
 
         setJobStatusAndSave(job, Status.SUCCEEDED)
-        notificationService.sendJobSuccessNotification(job)
+        notificationService.sendJobSuccessNotification(getPresentedJob(job))
     }
 
     def failureHandler = {
         job ->
 
         setJobStatusAndSave(job, Status.FAILED)
-        notificationService.sendJobFailureNotification(job)
+        notificationService.sendJobFailureNotification(getPresentedJob(job))
     }
 
     def setJobStatusAndSave(job, status) {
         job.status = status
         jobStoreService.save(job)
+    }
+
+    def getPresentedJob(job) {
+        new JobPresenter(job, this, jobStoreService, { grailsLinkGenerator.link(it) } )
     }
 }

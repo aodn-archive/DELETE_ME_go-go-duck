@@ -13,18 +13,15 @@ import au.org.emii.gogoduck.test.TestHelper
 class NotificationServiceSpec extends Specification {
 
     def job
-    def grailsLinkGenerator
     def mailService
     def messageSource
 
     def setup() {
         job = TestHelper.createJob()
         job.uuid = '1234'
+        job.metaClass.url = 'http://something'
+        job.metaClass.aggrUrl = 'http://something'
 
-        grailsLinkGenerator = Mock(LinkGenerator)
-        grailsLinkGenerator.link() >> "http://someUrl"
-
-        service.grailsLinkGenerator = grailsLinkGenerator
         mailService = Mock(MailService)
         service.mailService = mailService
         messageSource = Mock(MessageSource)
@@ -58,7 +55,7 @@ class NotificationServiceSpec extends Specification {
         then:
         1 * messageSource.getMessage(
             'job.registered.body',
-            ['1234', service.getJobUrl(job)].toArray(),
+            ['1234', job.url],
             LocaleContextHolder.locale
         )
     }
@@ -82,7 +79,7 @@ class NotificationServiceSpec extends Specification {
         then:
         1 * messageSource.getMessage(
             'job.success.body',
-            ['1234', service.getAggrUrl(job)].toArray(),
+            ['1234', job.aggrUrl],
             LocaleContextHolder.locale
         )
     }
@@ -94,7 +91,7 @@ class NotificationServiceSpec extends Specification {
         then:
         1 * messageSource.getMessage(
             'job.failure.subject',
-            ['1234'].toArray(),
+            ['1234'],
             LocaleContextHolder.locale
         )
     }
@@ -106,18 +103,8 @@ class NotificationServiceSpec extends Specification {
         then:
         1 * messageSource.getMessage(
             'job.failure.body',
-            ['1234', service.getAggrUrl(job)].toArray(),
+            ['1234'],
             LocaleContextHolder.locale
         )
-    }
-
-    def "url generation"() {
-        when:
-        service.getJobUrl([uuid: 123])
-        service.getAggrUrl([uuid: 456])
-
-        then:
-        1 * grailsLinkGenerator.link([controller: 'job', action: 'show', id: 123, absolute: true])
-        1 * grailsLinkGenerator.link([controller: 'aggr', action: 'show', id: 456, absolute: true])
     }
 }
