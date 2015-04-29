@@ -14,6 +14,8 @@ class WorkerSpec extends Specification {
     def worker
 
     def setup() {
+        Worker.metaClass.getTempDir { -> "temp_dir" }
+
         testJob = TestHelper.createJob()
         worker = new Worker(job: testJob)
     }
@@ -29,7 +31,7 @@ class WorkerSpec extends Specification {
         )
 
         expect:
-        worker.getCmd() == "gogoduck.sh -p some_layer -s TIME,2013-11-20T00:30:00.000Z,2013-11-20T10:30:00.000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219 -g geoserver_address -o output.nc -u report.txt -l 123"
+        worker.getCmd() == "gogoduck.sh -p some_layer -s TIME,2013-11-20T00:30:00.000Z,2013-11-20T10:30:00.000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219 -g geoserver_address -t temp_dir -o output.nc -u report.txt -l 123"
     }
 
     def "generates command line from job when geoserver is null"() {
@@ -45,7 +47,7 @@ class WorkerSpec extends Specification {
         )
 
         expect:
-        worker.getCmd() == "gogoduck.sh -p some_layer -s TIME,2013-11-20T00:30:00.000Z,2013-11-20T10:30:00.000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219 -o output.nc -u report.txt -l 123"
+        worker.getCmd() == "gogoduck.sh -p some_layer -s TIME,2013-11-20T00:30:00.000Z,2013-11-20T10:30:00.000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219 -t temp_dir -o output.nc -u report.txt -l 123"
     }
 
     def "generates command line from job when geoserver is empty string"() {
@@ -61,7 +63,7 @@ class WorkerSpec extends Specification {
         )
 
         expect:
-        worker.getCmd() == "gogoduck.sh -p some_layer -s TIME,2013-11-20T00:30:00.000Z,2013-11-20T10:30:00.000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219 -o output.nc -u report.txt -l 123"
+        worker.getCmd() == "gogoduck.sh -p some_layer -s TIME,2013-11-20T00:30:00.000Z,2013-11-20T10:30:00.000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219 -t temp_dir -o output.nc -u report.txt -l 123"
     }
 
     def "runs command"() {

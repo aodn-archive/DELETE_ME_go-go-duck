@@ -30,8 +30,11 @@ class Worker {
     }
 
     def getCmd() {
+        log.info "Temporary directory for gogoduck operation '${getTempDir()}'"
+
         def cmdOptions = String.format(
-            "${job.subsetCommandString} -o %s -u %s -l %s",
+            "${job.subsetCommandString} -t %s -o %s -u %s -l %s",
+            getTempDir(),
             outputFilename,
             reportFilename,
             fileLimit
@@ -40,6 +43,10 @@ class Worker {
         log.info("Command options: '${cmdOptions}'")
 
         shellCmd.call(cmdOptions)
+    }
+
+    String getTempDir() {
+        return System.getProperty("java.io.tmpdir")
     }
 
     Process execute(cmd) {
