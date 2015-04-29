@@ -369,7 +369,8 @@ Options:
   -p, --profile              Profile to apply.
   -o, --output               Output file to use.
   -l, --limit                Maximum amount of file to allow processing of.
-  -u, --user-log             Output file for user logging."
+  -u, --user-log             Output file for user logging.
+  -t, --tmp-dir              Set TMPDIR for operation."
     exit 3
 }
 
@@ -378,7 +379,7 @@ Options:
 # "$@" - parameters, see usage
 main() {
     # parse options with getopt
-    local tmp_getops=`getopt -o hSg:s:p:o:l:u: --long help,score,geoserver:,subset:,profile:,output:,limit:,user-log: -- "$@"`
+    local tmp_getops=`getopt -o hSg:s:p:o:l:u:t: --long help,score,geoserver:,subset:,profile:,output:,limit:,user-log:,tmp-dir: -- "$@"`
     [ $? != 0 ] && usage
 
     eval set -- "$tmp_getops"
@@ -400,6 +401,7 @@ main() {
             -o|--output) output="$2"; shift 2;;
             -l|--limit) limit="$2"; shift 2;;
             -u|--user-log) user_log="$2"; shift 2;;
+            -t|--tmp-dir) export TMPDIR="$2"; shift 2;;
             --) shift; break;;
             *) usage;;
         esac
