@@ -349,7 +349,7 @@ gogoduck_main() {
     fi
 
     # clean up temporary directory
-    rm -f $tmp_dir/*; rmdir $tmp_dir
+    rm -f $tmp_url_list $tmp_dir/*; rmdir $tmp_dir
 
     mv $tmp_result_file $output
     logger_info "Result saved at '$output'"
