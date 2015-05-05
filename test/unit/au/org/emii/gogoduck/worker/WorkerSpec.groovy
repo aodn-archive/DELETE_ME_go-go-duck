@@ -4,8 +4,10 @@ import au.org.emii.gogoduck.job.SpatialExtent
 import org.apache.commons.io.IOUtils
 import spock.lang.Specification
 import spock.lang.Unroll
+import org.joda.time.DateTime
 
 import au.org.emii.gogoduck.job.Job
+import au.org.emii.gogoduck.job.Reason
 import au.org.emii.gogoduck.test.TestHelper
 
 class WorkerSpec extends Specification {
@@ -92,6 +94,20 @@ class WorkerSpec extends Specification {
         executedCmd == 'thecommand'
     }
 
+    def "detect timeout"() {
+        given:
+        def startTime = new DateTime("2015-01-01T00:00:00.000Z")
+        def endTime = new DateTime("2015-01-01T02:00:00.000Z")
+
+        expect:
+        worker.timeoutError(startTime, endTime, 120) == true
+        worker.timeoutError(startTime, endTime, 119) == true
+        worker.timeoutError(startTime, endTime, 50) == true
+
+        worker.timeoutError(startTime, endTime, 121) == false
+        worker.timeoutError(startTime, endTime, 122) == false
+    }
+
     @Unroll
     def "calls appropriate handler"() {
         given:
@@ -105,7 +121,7 @@ class WorkerSpec extends Specification {
 
         def failureCalled = false
         def failureHandler = {
-            Job job ->
+            Job job, Reason reason ->
 
                 assertEquals job, testJob
                 failureCalled = true
@@ -130,6 +146,7 @@ class WorkerSpec extends Specification {
         }
 
         worker.metaClass.getCmd = { "the command" }
+        worker.metaClass.getReason = { process, startDate, endDate -> Reason.NONE }
 
         when:
         worker.run(successHandler, failureHandler)
