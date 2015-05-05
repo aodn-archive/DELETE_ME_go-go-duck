@@ -318,7 +318,8 @@ gogoduck_main() {
     # enforce number of URLs limit
     if ! _enforce_file_limit $tmp_url_list $limit; then
         rm -f $tmp_url_list
-        logger_fatal "Not allowed to process that many files"
+        logger_warn "Not allowed to process that many files"
+        return 3 # Indicate too many files
     fi
 
     # temporary directory and temporary result
@@ -422,6 +423,7 @@ main() {
         gogoduck_score $geoserver "$profile" "$subset" $output
     else
         gogoduck_main $geoserver $limit "$profile" "$subset" "$output"
+        return $?
     fi
 }
 
