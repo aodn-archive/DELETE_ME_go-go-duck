@@ -56,14 +56,15 @@ class JobExecutorService {
     }
 
     def failureHandler = {
-        job ->
+        job, reason ->
 
-        setJobStatusAndSave(job, Status.FAILED)
+        setJobStatusAndSave(job, Status.FAILED, reason)
         notificationService.sendJobFailureNotification(getPresentedJob(job))
     }
 
-    def setJobStatusAndSave(job, status) {
+    def setJobStatusAndSave(job, status, reason = Reason.NONE) {
         job.status = status
+        job.reason = reason
         jobStoreService.save(job)
     }
 

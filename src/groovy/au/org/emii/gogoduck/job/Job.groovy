@@ -4,6 +4,7 @@ import grails.converters.JSON
 import org.joda.time.DateTime
 
 import au.org.emii.gogoduck.json.JSONSerializer
+import au.org.emii.gogoduck.job.Reason
 
 @grails.validation.Validateable
 class Job {
@@ -17,6 +18,7 @@ class Job {
     DateTime startedTimestamp
     DateTime finishedTimestamp
     Status status
+    Reason reason
 
     // Need to instantiate nested objects, otherwise they are not bound.
     // See: http://grails.1312388.n4.nabble.com/How-to-bind-data-to-a-command-object-that-has-an-non-domain-object-as-property-tp4021559p4328826.html
@@ -33,6 +35,7 @@ class Job {
         uuid = UUID.randomUUID().toString()[0..7]
         createdTimestamp = DateTime.now()
         status = Status.NEW
+        reason = Reason.NONE
     }
 
     String toString() {

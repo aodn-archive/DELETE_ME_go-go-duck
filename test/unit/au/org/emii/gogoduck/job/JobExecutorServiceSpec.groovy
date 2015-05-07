@@ -49,6 +49,7 @@ class JobExecutorServiceSpec extends Specification {
         then:
         1 * jobStoreService.save(job)
         job.status == Status.NEW
+        job.reason == Reason.NONE
     }
 
     def "run runs worker, sets status to IN_PROGRESS"() {
@@ -58,6 +59,7 @@ class JobExecutorServiceSpec extends Specification {
         then:
         1 * jobStoreService.save(job)
         job.status == Status.IN_PROGRESS
+        job.reason == Reason.NONE
     }
 
     def "success handler sends 'job success' notification, sets status to SUCCEEDED"() {
@@ -68,15 +70,17 @@ class JobExecutorServiceSpec extends Specification {
         1 * notificationService.sendJobSuccessNotification(job)
         1 * jobStoreService.save(job)
         job.status == Status.SUCCEEDED
+        job.reason == Reason.NONE
     }
 
     def "failed handler sends 'job failure' notification, sets status to FAILED"() {
         when:
-        service.failureHandler(job)
+        service.failureHandler(job, Reason.TIMEOUT_EXPIRED)
 
         then:
         1 * notificationService.sendJobFailureNotification(job)
         1 * jobStoreService.save(job)
         job.status == Status.FAILED
+        job.reason == Reason.TIMEOUT_EXPIRED
     }
 }

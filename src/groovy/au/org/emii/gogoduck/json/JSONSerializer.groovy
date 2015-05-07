@@ -20,12 +20,9 @@ class JSONSerializer {
         return json.toString(true)
     }
 
-    private buildJSON = {obj ->
-
-        obj.properties.each {propName, propValue ->
-
+    private buildJSON = { obj ->
+        obj.properties.sort().each {propName, propValue ->
             if (shouldSerialiseProperty(propName)) {
-
                 serialiseProperty.delegate = delegate
                 serialiseProperty(propName, propValue)
             }
