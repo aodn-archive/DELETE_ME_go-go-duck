@@ -102,8 +102,9 @@ environments {
                 [
                     'bash', '-c',
                     "echo bytes > ${outputFilename}; echo 'here be report' > ${reportFilename}"
+                    // Uncomment line to test error handling
+                    // + "; echo 'here be error' >&2; false"
                 ]
-                // "test/resources/error.sh" // Uncomment this to test error handling.
             }
             outputPath = 'jobs'
         }
