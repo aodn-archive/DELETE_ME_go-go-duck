@@ -56,7 +56,13 @@ class JobStoreService {
     }
 
     String getReport(job) {
-        getReportFile(job).text
+        try {
+            return getReportFile(job).text
+        }
+        catch (Exception e) {
+            log.error "Error opening report file for '${job}'"
+            return ""
+        }
     }
 
     void makeDir(job) {
