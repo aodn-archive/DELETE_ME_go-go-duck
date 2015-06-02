@@ -13,6 +13,9 @@ import java.util.ArrayList;
 
 import org.apache.commons.io.FileUtils;
 
+import java.io.IOException;
+import java.util.*;
+
 public class GoGoDuck {
     private final String geoserver;
     private final String profile;
@@ -78,10 +81,8 @@ public class GoGoDuck {
         // All good - keep going :)
     }
 
-    private static void downloadFiles(URIList uriList, Path tmpDir) throws Exception {
+    private static void downloadFiles(URIList uriList, Path tmpDir) throws GoGoDuckException {
         System.out.println(String.format("Downloading %d files", uriList.size()));
-
-        // TODO handle .gz files!!
 
         try {
             for (URI uri : uriList) {
@@ -96,8 +97,7 @@ public class GoGoDuck {
                         System.out.println(String.format("Linking '%s' -> '%s'", src, dst));
                         Files.createSymbolicLink(src, dst);
                     } catch (IOException e) {
-                        System.err.println(e);
-                        throw e;
+                        throw new GoGoDuckException(e.getMessage());
                     }
                 }
                 else {
@@ -105,43 +105,54 @@ public class GoGoDuck {
                     URL url = new URL(uri.toString().replace("/mnt/imos-t3/", "http://data.aodn.org.au/"));
                     System.out.println(String.format("Downloading '%s' -> '%s'", url.toString(), dst));
 
-                    ReadableByteChannel rbc = Channels.newChannel(url.openStream());
-                    FileOutputStream fos = new FileOutputStream(dst.toFile());
-                    fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+                    try {
+                        ReadableByteChannel rbc = Channels.newChannel(url.openStream());
+                        FileOutputStream fos = new FileOutputStream(dst.toFile());
+                        fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+                    }
+                    catch (Exception e) {
+                        throw new GoGoDuckException(e.getMessage());
+                    }
+                }
+
+                if (dst.getFileName().endsWith(".gz")) {
+                    // TODO handle .gz files!!
+                    //gunzip(dst);
                 }
             }
         }
         catch(MalformedURLException e) {
-            System.out.println(e.getStackTrace());
-            throw e;
+            throw new GoGoDuckException(String.format("Could not download NetCDF file: '%s'", e.getMessage()));
         }
     }
 
     private static void applySubset(Path tmpDir, GoGoDuckModule module) throws GoGoDuckException {
         System.out.println(String.format("Applying subset on directory '%s'", tmpDir));
 
+        // TODO parallelize
+
         File[] directoryListing = tmpDir.toFile().listFiles();
-        String ncksSubsetParameters = module.getSubsetParameters().getNcksParameters();
-        String ncksExtraParameters = module.ncksExtraParameters();
+        List<String> ncksSubsetParameters = module.getSubsetParameters().getNcksParameters();
+        List<String> ncksExtraParameters = module.ncksExtraParameters();
 
         System.out.println(String.format("Subset for operation is '%s'", ncksSubsetParameters));
         for (File file : directoryListing) {
             try {
                 File tmpFile = File.createTempFile("tmp", ".nc");
 
-                String command = String.format(
-                        "/usr/bin/ncks -a -4 -O %s %s %s %s",
-                        ncksSubsetParameters,
-                        ncksExtraParameters,
-                        file.getAbsolutePath(),
-                        tmpFile.getAbsolutePath()
-                );
-                System.out.println(String.format("Applying subset '%s' to '%s'", ncksSubsetParameters, file.toPath()));
-                System.out.println(command);
+                List<String> command = new ArrayList<String>();
+                command.add("/usr/bin/ncks"); // TODO hardcoded
+                command.add("-a");
+                command.add("-4");
+                command.add("-O");
+                command.addAll(ncksSubsetParameters);
+                command.addAll(ncksExtraParameters);
 
-                if(0 != Runtime.getRuntime().exec(command).exitValue()) {
-                    throw new GoGoDuckException("ncks exited with non-zero exit value");
-                }
+                command.add(file.getPath());
+                command.add(tmpFile.getPath());
+
+                System.out.println(String.format("Applying subset '%s' to '%s'", ncksSubsetParameters, file.toPath()));
+                execute(command);
 
                 Files.delete(file.toPath());
                 Files.move(tmpFile.toPath(), file.toPath());
@@ -160,7 +171,12 @@ public class GoGoDuck {
     }
 
     private static void aggregate(Path tmpDir, Path outputFile) throws GoGoDuckException {
-        String command = "/usr/bin/ncrcat -D2 -4 -h -O ";
+        List<String> command = new ArrayList<String>();
+        command.add("/usr/bin/ncrcat"); // TODO hardcoded
+        command.add("-D2");
+        command.add("-4");
+        command.add("-h");
+        command.add("-O");
 
         File[] directoryListing = tmpDir.toFile().listFiles();
         if (directoryListing.length == 1) {
@@ -177,17 +193,15 @@ public class GoGoDuck {
         else {
             System.out.println(String.format("Concatenating %d files into '%s'", directoryListing.length, outputFile));
             for (File file : directoryListing) {
-                command += " " + file.getAbsolutePath();
+                command.add(file.getAbsolutePath());
             }
-            command += " " + outputFile;
+            command.add(outputFile.toFile().getAbsolutePath());
 
             // Running ncrcat
             try {
-                if(0 != Runtime.getRuntime().exec(command).exitValue()) {
-                    throw new GoGoDuckException("ncrcat exited with non-zero exit value");
-                }
+                execute(command);
             }
-            catch (IOException e) {
+            catch (Exception e) {
                 throw new GoGoDuckException(String.format("Could not concatenate files into a single file: '%s'", e.getMessage()));
             }
         }
@@ -241,5 +255,32 @@ public class GoGoDuck {
     */
     private static String nextProfile(String profile) {
         return profile.substring(0, profile.lastIndexOf("_"));
+    }
+
+    public static int execute(List<String> command) throws Exception {
+        System.out.println(command);
+        System.out.println(command.size());
+
+        ProcessBuilder builder = new ProcessBuilder(command);
+        Map<String, String> environ = builder.environment();
+
+        final Process process = builder.start();
+        InputStream is = process.getInputStream();
+        InputStreamReader isr = new InputStreamReader(is);
+        BufferedReader br = new BufferedReader(isr);
+        String line;
+        while ((line = br.readLine()) != null) {
+            System.out.println(line);
+        }
+
+        try {
+            process.waitFor();
+        }
+        catch (InterruptedException e) {
+            System.out.println("Interrupted: '%s'");
+            throw e;
+        }
+
+        return process.exitValue();
     }
 }

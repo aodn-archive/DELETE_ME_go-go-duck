@@ -1,6 +1,8 @@
 package au.org.emii.gogoduck.worker;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class SubsetParameters {
@@ -37,10 +39,13 @@ public class SubsetParameters {
         parameters.remove(key);
     }
 
-    public String getNcksParameters() {
-        String ncksParameters = "";
+
+    public List<String> getNcksParameters() {
+        List<String> ncksParameters = new ArrayList<String>();
+
         for (String key : parameters.keySet()) {
-            ncksParameters += String.format(" -d %s,%s,%s", key, parameters.get(key).start, parameters.get(key).end);
+            ncksParameters.add("-d");
+            ncksParameters.add(String.format("%s,%s,%s", key, parameters.get(key).start, parameters.get(key).end));
         }
 
         return ncksParameters;

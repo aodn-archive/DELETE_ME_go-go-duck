@@ -4,6 +4,8 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.List;
 
 public class GoGoDuckModule_srs extends GoGoDuckModule {
     @Override
@@ -20,8 +22,11 @@ public class GoGoDuckModule_srs extends GoGoDuckModule {
     }
 
     @Override
-    public String ncksExtraParameters() {
-        return "--mk_rec_dmn time";
+    public List<String> ncksExtraParameters() {
+        List<String> ncksExtraParameters = new ArrayList<String>();
+        ncksExtraParameters.add("--mk_rec_dmn");
+        ncksExtraParameters.add("time");
+        return ncksExtraParameters;
     }
 
     @Override

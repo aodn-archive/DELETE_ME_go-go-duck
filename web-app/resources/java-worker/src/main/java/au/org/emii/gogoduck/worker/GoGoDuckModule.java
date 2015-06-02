@@ -10,7 +10,9 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class GoGoDuckModule {
@@ -61,7 +63,6 @@ public class GoGoDuckModule {
             conn.setDoOutput(true);
             conn.getOutputStream().write(postDataBytes);
 
-
             InputStream inputStream = conn.getInputStream();
             DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(inputStream));
 
@@ -107,8 +108,9 @@ public class GoGoDuckModule {
         return;
     }
 
-    public String ncksExtraParameters() {
-        return "";
+    public List<String> ncksExtraParameters() {
+        List<String> ncksExtraParameters = new ArrayList<String>();
+        return ncksExtraParameters;
     }
 
     public void updateMetadata(Path outputFile) {
