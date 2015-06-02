@@ -19,6 +19,7 @@ public class GoGoDuck {
     private final String subset;
     private final Path outputFile;
     private final Integer limit;
+    private Path baseTmpDir;
 
     public GoGoDuck(String geoserver, String profile, String subset, String outputFile, Integer limit) {
         this.geoserver = geoserver;
@@ -26,6 +27,11 @@ public class GoGoDuck {
         this.subset = subset;
         this.outputFile = new File(outputFile).toPath();
         this.limit = limit;
+        this.baseTmpDir = new File(System.getProperty("java.io.tmpdir")).toPath();
+    }
+
+    public void setTmpDir(String tmpDir) {
+        this.baseTmpDir = new File(tmpDir).toPath();
     }
 
     public void run() {
@@ -34,7 +40,6 @@ public class GoGoDuck {
         Path tmpDir = null;
 
         try {
-            Path baseTmpDir = new File(System.getProperty("java.io.tmpdir")).toPath();
             tmpDir = Files.createTempDirectory(baseTmpDir, "gogoduck");
 
             URIList URIList = module.getUriList();

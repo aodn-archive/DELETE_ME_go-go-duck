@@ -43,12 +43,16 @@ public class Main {
         if (null == outputFile) { usage(options); }
         if (null == profile) { usage(options); }
 
-        GoGoDuck g = new GoGoDuck(geoserver, profile, subset, outputFile, Integer.parseInt(limit));
+        GoGoDuck ggd = new GoGoDuck(geoserver, profile, subset, outputFile, Integer.parseInt(limit));
+        if(cmd.hasOption("t")) {
+            ggd.setTmpDir(tmpDir);
+        }
+
         if (cmd.hasOption("S")) {
-            g.score();
+            ggd.score();
         }
         else {
-            g.run();
+            ggd.run();
         }
     }
 }
