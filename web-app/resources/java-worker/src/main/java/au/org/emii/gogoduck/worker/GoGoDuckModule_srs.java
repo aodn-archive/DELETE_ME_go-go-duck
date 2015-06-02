@@ -33,9 +33,13 @@ public class GoGoDuckModule_srs extends GoGoDuckModule {
 
             System.out.println(String.format("Unpacking file (ncpdq) '%s' to '%s'", file.toPath(), tmpFile.toPath()));
             System.out.println(command);
-            // TODO execute command
 
-            Files.move(tmpFile.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            if(0 != Runtime.getRuntime().exec(command).exitValue()) {
+                throw new GoGoDuckException("ncpdq exited with non-zero exit value");
+            }
+
+            Files.delete(file.toPath());
+            Files.move(tmpFile.toPath(), file.toPath());
         }
         catch (Exception e) {
             throw new GoGoDuckException(String.format("Could not run ncpdq on file '%s'", file.toPath()));

@@ -27,7 +27,7 @@ public class GoGoDuckModule {
         this.subset = new SubsetParameters(subset);
     }
 
-    public URIList getUriList() {
+    public URIList getUriList() throws GoGoDuckException {
         String timeCoverageStart = subset.get("TIME").start;
         String timeCoverageEnd = subset.get("TIME").end;
 
@@ -60,12 +60,13 @@ public class GoGoDuckModule {
             conn.setRequestProperty("Content-Length", String.valueOf(postDataBytes.length));
             conn.setDoOutput(true);
             conn.getOutputStream().write(postDataBytes);
-            System.out.println(new String(postDataBytes));
+
 
             InputStream inputStream = conn.getInputStream();
             DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(inputStream));
 
-            System.out.println("preparing url");
+            System.out.println(String.format("Getting list of files from '%s'", downloadUrl));
+            System.out.println(String.format("Parameters: '%s'", new String(postDataBytes)));
             String line = null;
             Integer i = 0;
             while ((line = dataInputStream.readLine()) != null) {
@@ -77,7 +78,7 @@ public class GoGoDuckModule {
             }
         }
         catch (Exception e) {
-            System.out.println(e.getCause());
+            throw new GoGoDuckException(String.format("Error getting list of URLs: '%s'", e.getMessage()));
         }
 
         return uriList;
@@ -111,6 +112,7 @@ public class GoGoDuckModule {
     }
 
     public void updateMetadata(Path outputFile) {
+        // TODO IMPLEMENT WITH netcdf utils!!
     }
 
     public SubsetParameters getSubsetParameters() {
