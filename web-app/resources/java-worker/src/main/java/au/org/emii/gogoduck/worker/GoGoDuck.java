@@ -12,9 +12,11 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.zip.GZIPInputStream;
 
 public class GoGoDuck {
     private final String geoserver;
@@ -115,9 +117,10 @@ public class GoGoDuck {
                     }
                 }
 
-                if (dst.getFileName().endsWith(".gz")) {
-                    // TODO handle .gz files!!
-                    //gunzip(dst);
+                String extension = FilenameUtils.getExtension(dst.getFileName().toString());
+
+                if (extension.equals("gz")) {
+                    gunzip(dst.toFile());
                 }
             }
         }
@@ -126,40 +129,68 @@ public class GoGoDuck {
         }
     }
 
-    private static void applySubset(Path tmpDir, GoGoDuckModule module) throws GoGoDuckException {
-        System.out.println(String.format("Applying subset on directory '%s'", tmpDir));
+    private static void gunzip(File file) {
+        try {
+            System.out.println(String.format("Gunzipping '%s'", file));
+            File gunzipped = File.createTempFile("tmp", ".nc");
 
-        // TODO parallelize
+            FileInputStream fis = new FileInputStream(file);
+            GZIPInputStream gis = new GZIPInputStream(fis);
+            FileOutputStream fos = new FileOutputStream(gunzipped);
+            byte[] buffer = new byte[8192];
+            int len;
+            while((len = gis.read(buffer)) != -1){
+                fos.write(buffer, 0, len);
+            }
+            fos.close();
+            gis.close();
 
-        File[] directoryListing = tmpDir.toFile().listFiles();
+            Files.delete(file.toPath());
+            Files.move(gunzipped.toPath(), file.toPath());
+        } catch (IOException e) {
+            throw new GoGoDuckException(String.format("Failed gunzip on '%s': '%s'", file, e.getMessage()));
+        }
+    }
+
+    private static void applySubsetSingleFile(File file, GoGoDuckModule module) {
         List<String> ncksSubsetParameters = module.getSubsetParameters().getNcksParameters();
         List<String> ncksExtraParameters = module.ncksExtraParameters();
 
-        System.out.println(String.format("Subset for operation is '%s'", ncksSubsetParameters));
+        try {
+            File tmpFile = File.createTempFile("tmp", ".nc");
+
+            List<String> command = new ArrayList<String>();
+            command.add("/usr/bin/ncks"); // TODO hardcoded
+            command.add("-a");
+            command.add("-4");
+            command.add("-O");
+            command.addAll(ncksSubsetParameters);
+            command.addAll(ncksExtraParameters);
+
+            command.add(file.getPath());
+            command.add(tmpFile.getPath());
+
+            System.out.println(String.format("Applying subset '%s' to '%s'", ncksSubsetParameters, file.toPath()));
+            execute(command);
+
+            Files.delete(file.toPath());
+            Files.move(tmpFile.toPath(), file.toPath());
+        }
+        catch (Exception e) {
+            throw new GoGoDuckException(String.format("Could not apply subset to file '%s': '%s'", file.getPath(), e.getMessage()));
+        }
+    }
+
+    private static void applySubset(Path tmpDir, GoGoDuckModule module) throws GoGoDuckException {
+        System.out.println(String.format("Applying subset on directory '%s'", tmpDir));
+
+
+
+        File[] directoryListing = tmpDir.toFile().listFiles();
+        System.out.println(String.format("Subset for operation is '%s'", module.getSubsetParameters()));
         for (File file : directoryListing) {
-            try {
-                File tmpFile = File.createTempFile("tmp", ".nc");
-
-                List<String> command = new ArrayList<String>();
-                command.add("/usr/bin/ncks"); // TODO hardcoded
-                command.add("-a");
-                command.add("-4");
-                command.add("-O");
-                command.addAll(ncksSubsetParameters);
-                command.addAll(ncksExtraParameters);
-
-                command.add(file.getPath());
-                command.add(tmpFile.getPath());
-
-                System.out.println(String.format("Applying subset '%s' to '%s'", ncksSubsetParameters, file.toPath()));
-                execute(command);
-
-                Files.delete(file.toPath());
-                Files.move(tmpFile.toPath(), file.toPath());
-            }
-            catch (Exception e) {
-                throw new GoGoDuckException(String.format("Could not apply subset to file '%s': '%s'", file.getPath(), e.getMessage()));
-            }
+            // TODO parallelize
+            applySubsetSingleFile(file, module);
         }
     }
 
