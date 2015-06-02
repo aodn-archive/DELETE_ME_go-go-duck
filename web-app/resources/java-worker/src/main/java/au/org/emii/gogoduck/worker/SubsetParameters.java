@@ -14,7 +14,7 @@ public class SubsetParameters {
         }
     }
 
-    private Map<String, Pair> parameters = null;
+    protected Map<String, Pair> parameters = null;
 
     public SubsetParameters(String subset) {
         parameters = new HashMap<String, Pair>();

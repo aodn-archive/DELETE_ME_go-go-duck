@@ -40,8 +40,9 @@ public class GoGoDuck {
 
             enforceFileLimit(URIList, limit);
             downloadFiles(URIList, tmpDir);
-            applySubset(tmpDir, module.getSubsetParameters());
-            aggregate(module, tmpDir, outputFile);
+            applySubset(tmpDir, module);
+            postProcess(tmpDir, module);
+            aggregate(tmpDir, outputFile);
             updateMetadata(module, outputFile);
         }
         catch (GoGoDuckException e) {
@@ -113,11 +114,13 @@ public class GoGoDuck {
         }
     }
 
-    private static void applySubset(Path tmpDir, SubsetParameters subsetParameters) throws GoGoDuckException {
+    private static void applySubset(Path tmpDir, GoGoDuckModule module) throws GoGoDuckException {
         System.out.println(String.format("Applying subset on directory '%s'", tmpDir));
 
         File[] directoryListing = tmpDir.toFile().listFiles();
-        String ncksSubsetParameters = subsetParameters.getNcksParameters();
+        String ncksSubsetParameters = module.getSubsetParameters().getNcksParameters();
+        String ncksExtraParameters = module.ncksExtraParameters();
+
         System.out.println(String.format("Subset for operation is '%s'", ncksSubsetParameters));
         for (int i = 0; i < directoryListing.length; i++) {
             File file = directoryListing[i];
@@ -125,8 +128,9 @@ public class GoGoDuck {
                 File tmpFile = File.createTempFile("tmp", ".nc");
 
                 String command = String.format(
-                        "ncks -a -4 -O %s %s %s",
+                        "ncks -a -4 -O %s %s %s %s",
                         ncksSubsetParameters,
+                        ncksExtraParameters,
                         file.getAbsolutePath(),
                         tmpFile.getAbsolutePath()
                 );
@@ -142,7 +146,15 @@ public class GoGoDuck {
         }
     }
 
-    private static void aggregate(GoGoDuckModule module, Path tmpDir, Path outputFile) throws GoGoDuckException {
+    private static void postProcess(Path tmpDir, GoGoDuckModule module) throws GoGoDuckException {
+        File[] directoryListing = tmpDir.toFile().listFiles();
+        for (int i = 0; i < directoryListing.length; i++) {
+            File file = directoryListing[i];
+            module.postProcess(file);
+        }
+    }
+
+    private static void aggregate(Path tmpDir, Path outputFile) throws GoGoDuckException {
         //String command = "ncrcat -D2 -4 -h -O " $dir/* $output_file
         String command = "ncrcat -D2 -4 -h -O ";
 
@@ -183,6 +195,41 @@ public class GoGoDuck {
     }
 
     private static GoGoDuckModule getProfileModule(String profile, String geoserver, String subset) {
-        return new GoGoDuckModule(profile, geoserver, subset);
+        //return new GoGoDuckModule(profile, geoserver, subset);
+
+        String thisPackage = GoGoDuckModule.class.getPackage().getName();
+        String classToInstantiate = String.format("GoGoDuckModule_%s", profile);
+
+        GoGoDuckModule module = null;
+        while (null == module && "" != classToInstantiate) {
+            System.out.println(String.format("Trying class '%s.%s'", thisPackage, classToInstantiate));
+            try {
+                Class classz = Class.forName(String.format("%s.%s", thisPackage, classToInstantiate));
+                module = (GoGoDuckModule) classz.newInstance();
+                module.init(profile, geoserver, subset);
+                System.out.println(String.format("Using class '%s.%s'", thisPackage, classToInstantiate));
+                return module;
+            }
+            catch (Exception e) {
+                System.out.println(String.format("Could not find class for '%s.%s'", thisPackage, classToInstantiate));
+            }
+            classToInstantiate = nextProfile(classToInstantiate);
+        }
+
+        throw new GoGoDuckException(String.format("Error initializing class for profile '%s'", profile));
+    }
+
+    /* Finds the correct profile to run for the given layer, starts with:
+       GoGoDuckModule_acorn_hourly_avg_sag_nonqc_timeseries_url
+       GoGoDuckModule_acorn_hourly_avg_sag_nonqc_timeseries
+       GoGoDuckModule_acorn_hourly_avg_sag_nonqc
+       GoGoDuckModule_acorn_hourly_avg_sag
+       GoGoDuckModule_acorn_hourly_avg
+       GoGoDuckModule_acorn_hourly
+       GoGoDuckModule_acorn
+       GoGoDuckModule
+    */
+    private static String nextProfile(String profile) {
+        return profile.substring(0, profile.lastIndexOf("_"));
     }
 }

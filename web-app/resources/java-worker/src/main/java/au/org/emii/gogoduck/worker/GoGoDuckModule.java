@@ -3,6 +3,7 @@ package au.org.emii.gogoduck.worker;
 
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
+import java.io.File;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
@@ -13,13 +14,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class GoGoDuckModule {
-    private final String name;
-    private final String profile;
-    private final String geoserver;
-    private final SubsetParameters subset;
+    protected String profile = null;
+    protected String geoserver = null;
+    protected SubsetParameters subset = null;
 
-    public GoGoDuckModule(String profile, String geoserver, String subset) {
-        this.name = "default";
+    public GoGoDuckModule() {
+    }
+
+    public void init(String profile, String geoserver, String subset) {
         this.profile = profile;
         this.geoserver = geoserver;
         this.subset = new SubsetParameters(subset);
@@ -29,10 +31,10 @@ public class GoGoDuckModule {
         String timeCoverageStart = subset.get("TIME").start;
         String timeCoverageEnd = subset.get("TIME").end;
 
-        URIList URIList = null;
+        URIList uriList = null;
 
         try {
-            URIList = new URIList();
+            uriList = new URIList();
 
             String downloadUrl = String.format("%s/wfs", geoserver);
 
@@ -69,7 +71,7 @@ public class GoGoDuckModule {
             while ((line = dataInputStream.readLine()) != null) {
                 if (i > 0) { // Skip first line - it's the headers
                     String[] lineParts = line.split(",");
-                    URIList.add(new URI(lineParts[2]));
+                    uriList.add(new URI(lineParts[2]));
                 }
                 i++;
             }
@@ -78,7 +80,7 @@ public class GoGoDuckModule {
             System.out.println(e.getCause());
         }
 
-        return URIList;
+        return uriList;
     }
 
     private byte[] encodeMapForPostRequest(Map<String, String> params) {
@@ -100,17 +102,22 @@ public class GoGoDuckModule {
         return postDataBytes;
     }
 
+    public void postProcess(File file) {
+        return;
+    }
+
+    public String ncksExtraParameters() {
+        return "";
+    }
+
     public void updateMetadata(Path outputFile) {
     }
 
     public SubsetParameters getSubsetParameters() {
+        // Remove time parameter as we don't need to subset on it, we already
+        // have only files that are in the correct time range
         SubsetParameters subsetParametersNoTime = new SubsetParameters(subset);
         subsetParametersNoTime.remove("TIME");
         return subsetParametersNoTime;
     }
-
-    public String getName() {
-        return name;
-    }
-
 }
