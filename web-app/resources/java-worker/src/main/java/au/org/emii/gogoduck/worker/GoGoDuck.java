@@ -19,6 +19,9 @@ import java.util.*;
 import java.util.zip.GZIPInputStream;
 
 public class GoGoDuck {
+    private static final String ncksPath = "/usr/bin/ncks";
+    private static final String ncrcatPath = "/usr/bin/ncrcat";
+
     private final String geoserver;
     private final String profile;
     private final String subset;
@@ -152,7 +155,7 @@ public class GoGoDuck {
         }
     }
 
-    private static void applySubsetSingleFile(File file, GoGoDuckModule module) {
+    private static void applySubsetSingleFileNcks(File file, GoGoDuckModule module) {
         List<String> ncksSubsetParameters = module.getSubsetParameters().getNcksParameters();
         List<String> ncksExtraParameters = module.ncksExtraParameters();
 
@@ -160,7 +163,7 @@ public class GoGoDuck {
             File tmpFile = File.createTempFile("tmp", ".nc");
 
             List<String> command = new ArrayList<String>();
-            command.add("/usr/bin/ncks"); // TODO hardcoded
+            command.add(ncksPath);
             command.add("-a");
             command.add("-4");
             command.add("-O");
@@ -181,6 +184,10 @@ public class GoGoDuck {
         }
     }
 
+    private static void applySubsetSingleFileNative(File file, GoGoDuckModule module) {
+        // TODO implement!
+    }
+
     private static void applySubset(Path tmpDir, GoGoDuckModule module) throws GoGoDuckException {
         System.out.println(String.format("Applying subset on directory '%s'", tmpDir));
 
@@ -190,7 +197,7 @@ public class GoGoDuck {
         System.out.println(String.format("Subset for operation is '%s'", module.getSubsetParameters()));
         for (File file : directoryListing) {
             // TODO parallelize
-            applySubsetSingleFile(file, module);
+            applySubsetSingleFileNcks(file, module);
         }
     }
 
@@ -202,8 +209,12 @@ public class GoGoDuck {
     }
 
     private static void aggregate(Path tmpDir, Path outputFile) throws GoGoDuckException {
+        aggregateNcks(tmpDir, outputFile);
+    }
+
+    private static void aggregateNcks(Path tmpDir, Path outputFile) throws GoGoDuckException {
         List<String> command = new ArrayList<String>();
-        command.add("/usr/bin/ncrcat"); // TODO hardcoded
+        command.add(ncrcatPath);
         command.add("-D2");
         command.add("-4");
         command.add("-h");
@@ -236,6 +247,10 @@ public class GoGoDuck {
                 throw new GoGoDuckException(String.format("Could not concatenate files into a single file: '%s'", e.getMessage()));
             }
         }
+    }
+
+    private static void aggregateJava(Path tmpDir, Path outputFile) throws GoGoDuckException {
+        // TODO implmenet!
     }
 
     private static void updateMetadata(GoGoDuckModule module, Path outputFile) {
