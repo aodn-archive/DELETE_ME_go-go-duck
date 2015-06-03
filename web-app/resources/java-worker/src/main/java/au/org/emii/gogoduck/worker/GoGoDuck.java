@@ -19,6 +19,11 @@ import java.util.*;
 import java.util.zip.GZIPInputStream;
 
 public class GoGoDuck {
+    private static final Map<String, String> replacePrefixes = new HashMap<String, String>();
+    static {
+        replacePrefixes.put("/mnt/imos-t3/", "http://data.aodn.org.au/");
+    }
+
     private static final String ncksPath = "/usr/bin/ncks";
     private static final String ncrcatPath = "/usr/bin/ncrcat";
 
@@ -89,46 +94,56 @@ public class GoGoDuck {
     private static void downloadFiles(URIList uriList, Path tmpDir) throws GoGoDuckException {
         System.out.println(String.format("Downloading %d files", uriList.size()));
 
-        try {
-            for (URI uri : uriList) {
-                File srcFile = new File(uriList.get(0).toString());
-                String basename = new File(uri.toString()).getName();
-                Path dst = new File(tmpDir + File.separator + basename).toPath();
+        for (URI uri : uriList) {
+            File srcFile = new File(uriList.get(0).toString());
+            String basename = new File(uri.toString()).getName();
+            Path dst = new File(tmpDir + File.separator + basename).toPath();
 
-                if(srcFile.exists() && !srcFile.isDirectory()) {
-                    Path src = new File(uri.toString()).toPath();
+            if(srcFile.exists() && !srcFile.isDirectory()) {
+                Path src = new File(uri.toString()).toPath();
 
-                    try {
-                        System.out.println(String.format("Linking '%s' -> '%s'", src, dst));
-                        Files.createSymbolicLink(src, dst);
-                    } catch (IOException e) {
-                        throw new GoGoDuckException(e.getMessage());
-                    }
-                }
-                else {
-                    // TODO HARDCODED!!!
-                    URL url = new URL(uri.toString().replace("/mnt/imos-t3/", "http://data.aodn.org.au/"));
-                    System.out.println(String.format("Downloading '%s' -> '%s'", url.toString(), dst));
-
-                    try {
-                        ReadableByteChannel rbc = Channels.newChannel(url.openStream());
-                        FileOutputStream fos = new FileOutputStream(dst.toFile());
-                        fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
-                    }
-                    catch (Exception e) {
-                        throw new GoGoDuckException(e.getMessage());
-                    }
-                }
-
-                String extension = FilenameUtils.getExtension(dst.getFileName().toString());
-
-                if (extension.equals("gz")) {
-                    gunzip(dst.toFile());
+                try {
+                    System.out.println(String.format("Linking '%s' -> '%s'", src, dst));
+                    Files.createSymbolicLink(src, dst);
+                } catch (IOException e) {
+                    throw new GoGoDuckException(e.getMessage());
                 }
             }
+            else {
+                // TODO HARDCODED!!!
+                URL url = fileURItoURL(uri);
+                System.out.println(String.format("Downloading '%s' -> '%s'", url.toString(), dst));
+
+                try {
+                    ReadableByteChannel rbc = Channels.newChannel(url.openStream());
+                    FileOutputStream fos = new FileOutputStream(dst.toFile());
+                    fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+                }
+                catch (IOException e) {
+                    throw new GoGoDuckException(e.getMessage());
+                }
+            }
+
+            String extension = FilenameUtils.getExtension(dst.getFileName().toString());
+
+            if (extension.equals("gz")) {
+                gunzip(dst.toFile());
+            }
         }
-        catch(MalformedURLException e) {
-            throw new GoGoDuckException(String.format("Could not download NetCDF file: '%s'", e.getMessage()));
+    }
+
+    private static URL fileURItoURL(URI uri) {
+        try {
+            String uriStr = uri.toString();
+            for (String key : replacePrefixes.keySet()) {
+                if (uriStr.startsWith(key)) {
+                    uriStr = uriStr.replace(key, replacePrefixes.get(key));
+                }
+            }
+            return new URL(uriStr);
+        }
+        catch (MalformedURLException e) {
+            throw new GoGoDuckException(e.getMessage());
         }
     }
 
