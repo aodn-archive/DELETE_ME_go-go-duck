@@ -320,7 +320,6 @@ public class GoGoDuck {
 
     public static int execute(List<String> command) throws Exception {
         System.out.println(command);
-        System.out.println(command.size());
 
         ProcessBuilder builder = new ProcessBuilder(command);
         Map<String, String> environ = builder.environment();

@@ -1,10 +1,7 @@
 package au.org.emii.gogoduck.worker;
 
 
-import java.io.BufferedInputStream;
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.InputStream;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
@@ -14,6 +11,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import ucar.nc2.Attribute;
+import ucar.nc2.NetcdfFileWriter;
 
 public class GoGoDuckModule {
     protected String profile = null;
@@ -114,7 +114,49 @@ public class GoGoDuckModule {
     }
 
     public void updateMetadata(Path outputFile) {
-        // TODO IMPLEMENT WITH netcdf utils!!
+        try {
+            NetcdfFileWriter nc = NetcdfFileWriter.openExisting(outputFile.toAbsolutePath().toString());
+
+            List<Attribute> newAttributeList = new ArrayList<Attribute>();
+
+            String title = "";
+            try {
+                title = nc.getNetcdfFile().findGlobalAttribute("title").toString();
+
+                // Remove time slice from title ('something_a, something_b, 2013-11-20T03:30:00Z' -> 'something_a, something_b')
+                title = title.substring(0, title.lastIndexOf(","));
+            }
+            catch (NullPointerException e) {
+                // Don't fail because of this bullshit :)
+                System.out.println("Could not find 'title' attribute in result file");
+            }
+
+            newAttributeList.add(new Attribute("title",
+                    String.format("%s, %s, %s",
+                            title,
+                            subset.get("TIME").start,
+                            subset.get("TIME").end)));
+
+            newAttributeList.add(new Attribute("geospatial_lat_min", subset.get("LATITUDE").start));
+            newAttributeList.add(new Attribute("geospatial_lat_max", subset.get("LATITUDE").end));
+
+            newAttributeList.add(new Attribute("geospatial_lon_min", subset.get("LONGITUDE").start));
+            newAttributeList.add(new Attribute("geospatial_lon_max", subset.get("LONGITUDE").end));
+
+            newAttributeList.add(new Attribute("time_coverage_start", subset.get("TIME").start));
+            newAttributeList.add(new Attribute("time_coverage_end", subset.get("TIME").end));
+
+            nc.setRedefineMode(true);
+            for (Attribute newAttr : newAttributeList) {
+                nc.addGroupAttribute(null, newAttr);
+            }
+            nc.setRedefineMode(false);
+            nc.close();
+        }
+        catch (IOException e) {
+            throw new GoGoDuckException(String.format("Failed updating metadata for file '%s': '%s'", outputFile, e.getMessage()));
+
+        }
     }
 
     public SubsetParameters getSubsetParameters() {

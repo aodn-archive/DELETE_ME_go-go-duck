@@ -27,8 +27,9 @@ public class SubsetParameters {
         }
     }
 
+    // Simple copy ctor
     public SubsetParameters(SubsetParameters subset) {
-        this.parameters = subset.parameters;
+        this.parameters = new HashMap<String, Pair>(subset.parameters);
     }
 
     public Pair get(String key) {
@@ -39,6 +40,9 @@ public class SubsetParameters {
         parameters.remove(key);
     }
 
+    public void put(String key, Pair value) {
+        parameters.put(key, value);
+    }
 
     public List<String> getNcksParameters() {
         List<String> ncksParameters = new ArrayList<String>();

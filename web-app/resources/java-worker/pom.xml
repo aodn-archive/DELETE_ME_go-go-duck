@@ -24,7 +24,20 @@
             <artifactId>doxia-core</artifactId>
             <version>1.0-alpha-7</version>
         </dependency>
+        <dependency>
+            <groupId>edu.ucar</groupId>
+            <artifactId>netcdf</artifactId>
+            <version>4.3.22</version>
+        </dependency>
     </dependencies>
+
+    <repositories>
+        <repository>
+            <id>unidata-releases</id>
+            <name>UNIDATA Releases</name>
+            <url>https://artifacts.unidata.ucar.edu/content/repositories/unidata-releases/</url>
+        </repository>
+    </repositories>
 
     <build>
         <plugins>
