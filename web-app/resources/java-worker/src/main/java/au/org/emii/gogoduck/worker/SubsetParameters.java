@@ -36,6 +36,10 @@ public class SubsetParameters {
         return parameters.get(key);
     }
 
+    public boolean containsKey(String key) {
+        return parameters.containsKey(key);
+    }
+
     public void remove(String key) {
         parameters.remove(key);
     }

@@ -39,9 +39,7 @@ public class GoGoDuckModule {
             uriList = new URIList();
 
             String downloadUrl = String.format("%s/wfs", geoserver);
-
             String cqlFilter = String.format("time >= %s and time <= %s", timeCoverageStart, timeCoverageEnd);
-            //downloadUrl += "&CQL_FILTER=" + URLEncoder.encode(cqlFilter, "UTF-8");
 
             Map<String, String> params = new HashMap<String, String>();
             params.put("typeName", profile);
