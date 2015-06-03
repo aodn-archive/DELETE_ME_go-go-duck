@@ -16,6 +16,8 @@ import org.apache.commons.io.FilenameUtils;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TransferQueue;
 import java.util.zip.GZIPInputStream;
 
 public class GoGoDuck {
@@ -33,6 +35,7 @@ public class GoGoDuck {
     private final Path outputFile;
     private final Integer limit;
     private Path baseTmpDir;
+    private int threadCount = 1;
 
     public GoGoDuck(String geoserver, String profile, String subset, String outputFile, Integer limit) {
         this.geoserver = geoserver;
@@ -47,6 +50,11 @@ public class GoGoDuck {
         this.baseTmpDir = new File(tmpDir).toPath();
     }
 
+    public void setThreadCount(int threadCount) {
+        System.out.println(String.format("Setting thread count to %d", threadCount));
+        this.threadCount = threadCount;
+    }
+
     public void run() {
         GoGoDuckModule module = getProfileModule(profile, geoserver, subset);
 
@@ -59,7 +67,7 @@ public class GoGoDuck {
 
             enforceFileLimit(URIList, limit);
             downloadFiles(URIList, tmpDir);
-            applySubset(tmpDir, module);
+            applySubsetMultiThread(tmpDir, module, threadCount);
             postProcess(tmpDir, module);
             aggregate(tmpDir, outputFile);
             updateMetadata(module, outputFile);
@@ -202,15 +210,66 @@ public class GoGoDuck {
         // TODO implement!
     }
 
-    private static void applySubset(Path tmpDir, GoGoDuckModule module) throws GoGoDuckException {
+    private static class ncksRunnable implements Runnable {
+        private String name;
+        private Deque<File> workQueue;
+        private GoGoDuckModule module = null;
+
+        ncksRunnable(String name, Deque<File> workQueue, GoGoDuckModule module) {
+            this.name = name;
+            this.workQueue = workQueue;
+            this.module = module;
+        }
+
+        public void run() {
+            try {
+                File file = null;
+                while ((file = workQueue.pop()) != null) {
+                    applySubsetSingleFileNcks(file, module);
+                }
+            }
+            catch (NoSuchElementException e) {
+                System.out.println(String.format("Thread %s finished successfully", name));
+            }
+        }
+    }
+
+    private static void applySubsetMultiThread(Path tmpDir, GoGoDuckModule module, int threadCount) throws GoGoDuckException {
         System.out.println(String.format("Applying subset on directory '%s'", tmpDir));
-
-
 
         File[] directoryListing = tmpDir.toFile().listFiles();
         System.out.println(String.format("Subset for operation is '%s'", module.getSubsetParameters()));
+
+        Deque<File> workQueue = new ArrayDeque<File>();
         for (File file : directoryListing) {
-            // TODO parallelize
+            workQueue.push(file);
+        }
+
+        try {
+            Thread[] threads = new Thread[threadCount];
+            for (int i = 0; i < threadCount; i++) {
+                String threadName = String.format("Subset_%d", i + 1);
+                threads[i] = new Thread(new ncksRunnable(threadName, workQueue, module));
+            }
+            for (int i = 0; i < threadCount; i++) {
+                threads[i].start();
+            }
+            for (int i = 0; i < threadCount; i++) {
+                threads[i].join();
+            }
+        }
+        catch (InterruptedException e) {
+            throw new GoGoDuckException(String.format("InterruptedException: '%s'", e.getMessage()));
+        }
+    }
+
+    private static void applySubsetSingleThread(Path tmpDir, GoGoDuckModule module) throws GoGoDuckException {
+        System.out.println(String.format("Applying subset on directory '%s'", tmpDir));
+
+        File[] directoryListing = tmpDir.toFile().listFiles();
+        System.out.println(String.format("Subset for operation is '%s'", module.getSubsetParameters()));
+
+        for (File file : directoryListing) {
             applySubsetSingleFileNcks(file, module);
         }
     }

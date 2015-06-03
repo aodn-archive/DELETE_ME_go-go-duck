@@ -16,6 +16,7 @@ public class Main {
 
         options.addOption("g", "geoserver", true, "Geoserver to get list of URLs from. Default is http://geoserver-123.aodn.org.au/geoserver");
         options.addOption("l", "limit", true, "Maximum amount of file to allow processing of.");
+        options.addOption("n", "threads", true, "Set thread count for operation (default is 1).");
         options.addOption("o", "output", true, "Output file to use.");
         options.addOption("p", "profile", true, "Profile to apply");
         options.addOption("s", "subset", true, "Subset to apply, semi-colon separated.");
@@ -34,6 +35,7 @@ public class Main {
 
         String geoserver = cmd.getOptionValue("g", "http://geoserver-123.aodn.org.au/geoserver");
         String limit = cmd.getOptionValue("l", "100");
+        String threadCount = cmd.getOptionValue("n", "1");
         String outputFile = cmd.getOptionValue("o");
         String profile = cmd.getOptionValue("p");
         String subset = cmd.getOptionValue("s", "");
@@ -44,6 +46,11 @@ public class Main {
         if (null == profile) { usage(options); }
 
         GoGoDuck ggd = new GoGoDuck(geoserver, profile, subset, outputFile, Integer.parseInt(limit));
+
+        if(cmd.hasOption("n")) {
+            ggd.setThreadCount(Integer.parseInt(threadCount));
+        }
+
         if(cmd.hasOption("t")) {
             ggd.setTmpDir(tmpDir);
         }
