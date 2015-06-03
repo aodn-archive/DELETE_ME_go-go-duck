@@ -119,7 +119,7 @@ public class GoGoDuckModule {
 
             List<Attribute> newAttributeList = new ArrayList<Attribute>();
 
-            String title = "";
+            String title = profile;
             try {
                 title = nc.getNetcdfFile().findGlobalAttribute("title").toString();
 

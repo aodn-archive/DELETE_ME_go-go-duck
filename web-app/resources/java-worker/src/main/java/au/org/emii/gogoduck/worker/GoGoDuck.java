@@ -92,7 +92,7 @@ public class GoGoDuck {
     }
 
     private static void downloadFiles(URIList uriList, Path tmpDir) throws GoGoDuckException {
-        System.out.println(String.format("Downloading %d files", uriList.size()));
+        System.out.println(String.format("Downloading %d file(s)", uriList.size()));
 
         for (URI uri : uriList) {
             File srcFile = new File(uriList.get(0).toString());
@@ -104,13 +104,12 @@ public class GoGoDuck {
 
                 try {
                     System.out.println(String.format("Linking '%s' -> '%s'", src, dst));
-                    Files.createSymbolicLink(src, dst);
+                    Files.createSymbolicLink(dst, src);
                 } catch (IOException e) {
                     throw new GoGoDuckException(e.getMessage());
                 }
             }
             else {
-                // TODO HARDCODED!!!
                 URL url = fileURItoURL(uri);
                 System.out.println(String.format("Downloading '%s' -> '%s'", url.toString(), dst));
 
@@ -224,10 +223,10 @@ public class GoGoDuck {
     }
 
     private static void aggregate(Path tmpDir, Path outputFile) throws GoGoDuckException {
-        aggregateNcks(tmpDir, outputFile);
+        aggregateNcrcat(tmpDir, outputFile);
     }
 
-    private static void aggregateNcks(Path tmpDir, Path outputFile) throws GoGoDuckException {
+    private static void aggregateNcrcat(Path tmpDir, Path outputFile) throws GoGoDuckException {
         List<String> command = new ArrayList<String>();
         command.add(ncrcatPath);
         command.add("-D2");
@@ -240,11 +239,16 @@ public class GoGoDuck {
             // Special case where we have only 1 file
             File file = directoryListing[0];
             try {
+                if(outputFile.toFile().exists() && outputFile.toFile().isFile()) {
+                    System.out.println(String.format("Deleting '%s'", outputFile));
+                    Files.delete(outputFile);
+                }
                 System.out.println(String.format("Renaming '%s' -> '%s'", file, outputFile));
                 Files.move(file.toPath(), outputFile);
             }
             catch (IOException e) {
-                throw new GoGoDuckException(String.format("Could not concatenate files into a single file: '%s'", e.getMessage()));
+                System.out.println(e);
+                throw new GoGoDuckException(String.format("Could not rename result file: '%s'", e.getMessage()));
             }
         }
         else {
