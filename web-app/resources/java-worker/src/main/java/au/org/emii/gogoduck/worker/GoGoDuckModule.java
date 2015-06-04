@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import ucar.nc2.Attribute;
+import ucar.nc2.NetcdfFile;
 import ucar.nc2.NetcdfFileWriter;
 
 public class GoGoDuckModule {
@@ -110,41 +111,45 @@ public class GoGoDuckModule {
         return ncksExtraParameters;
     }
 
-    public void updateMetadata(Path outputFile) {
+    protected List<Attribute> getGlobalAttributesToUpdate(NetcdfFile nc) {
+        List<Attribute> newAttributeList = new ArrayList<Attribute>();
+
+        String title = profile;
+        try {
+            title = nc.findGlobalAttribute("title").getStringValue();
+
+            // Remove time slice from title ('something_a, something_b, 2013-11-20T03:30:00Z' -> 'something_a, something_b')
+            title = title.substring(0, title.lastIndexOf(","));
+        }
+        catch (Exception e) {
+            // Don't fail because of this bullshit :)
+            System.out.println("Could not find 'title' attribute in result file");
+        }
+
+        newAttributeList.add(new Attribute("title",
+                String.format("%s, %s, %s",
+                        title,
+                        subset.get("TIME").start,
+                        subset.get("TIME").end)));
+
+        newAttributeList.add(new Attribute("geospatial_lat_min", subset.get("LATITUDE").start));
+        newAttributeList.add(new Attribute("geospatial_lat_max", subset.get("LATITUDE").end));
+
+        newAttributeList.add(new Attribute("geospatial_lon_min", subset.get("LONGITUDE").start));
+        newAttributeList.add(new Attribute("geospatial_lon_max", subset.get("LONGITUDE").end));
+
+        newAttributeList.add(new Attribute("time_coverage_start", subset.get("TIME").start));
+        newAttributeList.add(new Attribute("time_coverage_end", subset.get("TIME").end));
+
+        return newAttributeList;
+    }
+
+    public final void updateMetadata(Path outputFile) {
         try {
             NetcdfFileWriter nc = NetcdfFileWriter.openExisting(outputFile.toAbsolutePath().toString());
 
-            List<Attribute> newAttributeList = new ArrayList<Attribute>();
-
-            String title = profile;
-            try {
-                title = nc.getNetcdfFile().findGlobalAttribute("title").toString();
-
-                // Remove time slice from title ('something_a, something_b, 2013-11-20T03:30:00Z' -> 'something_a, something_b')
-                title = title.substring(0, title.lastIndexOf(","));
-            }
-            catch (NullPointerException e) {
-                // Don't fail because of this bullshit :)
-                System.out.println("Could not find 'title' attribute in result file");
-            }
-
-            newAttributeList.add(new Attribute("title",
-                    String.format("%s, %s, %s",
-                            title,
-                            subset.get("TIME").start,
-                            subset.get("TIME").end)));
-
-            newAttributeList.add(new Attribute("geospatial_lat_min", subset.get("LATITUDE").start));
-            newAttributeList.add(new Attribute("geospatial_lat_max", subset.get("LATITUDE").end));
-
-            newAttributeList.add(new Attribute("geospatial_lon_min", subset.get("LONGITUDE").start));
-            newAttributeList.add(new Attribute("geospatial_lon_max", subset.get("LONGITUDE").end));
-
-            newAttributeList.add(new Attribute("time_coverage_start", subset.get("TIME").start));
-            newAttributeList.add(new Attribute("time_coverage_end", subset.get("TIME").end));
-
             nc.setRedefineMode(true);
-            for (Attribute newAttr : newAttributeList) {
+            for (Attribute newAttr : getGlobalAttributesToUpdate(nc.getNetcdfFile())) {
                 nc.addGroupAttribute(null, newAttr);
             }
             nc.setRedefineMode(false);

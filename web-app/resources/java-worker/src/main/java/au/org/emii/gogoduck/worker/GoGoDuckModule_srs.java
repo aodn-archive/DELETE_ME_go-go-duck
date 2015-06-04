@@ -1,6 +1,7 @@
 package au.org.emii.gogoduck.worker;
 
 import ucar.nc2.Attribute;
+import ucar.nc2.NetcdfFile;
 import ucar.nc2.NetcdfFileWriter;
 
 import java.io.File;
@@ -64,45 +65,31 @@ public class GoGoDuckModule_srs extends GoGoDuckModule {
     }
 
     @Override
-    public void updateMetadata(Path outputFile) {
+    protected List<Attribute> getGlobalAttributesToUpdate(NetcdfFile nc) {
+        List<Attribute> newAttributeList = new ArrayList<Attribute>();
+
         try {
-            NetcdfFileWriter nc = NetcdfFileWriter.openExisting(outputFile.toAbsolutePath().toString());
-
-            List<Attribute> newAttributeList = new ArrayList<Attribute>();
-
-            String title = profile;
-            try {
-                title = nc.getNetcdfFile().findGlobalAttribute("title").toString();
-            }
-            catch (NullPointerException e) {
-                // Don't fail because of this bullshit :)
-                System.out.println("Could not find 'title' attribute in result file");
-            }
-
+            String title = title = nc.findGlobalAttribute("title").getStringValue();
             newAttributeList.add(new Attribute("title",
                     String.format("%s, %s, %s",
                             title,
                             subset.get("TIME").start,
                             subset.get("TIME").end)));
-
-            newAttributeList.add(new Attribute("southernmost_latitude", subset.get("LATITUDE").start));
-            newAttributeList.add(new Attribute("northernmost_latitude", subset.get("LATITUDE").end));
-
-            newAttributeList.add(new Attribute("westernmost_longitude", subset.get("LONGITUDE").start));
-            newAttributeList.add(new Attribute("easternmost_longitude", subset.get("LONGITUDE").end));
-
-            newAttributeList.add(new Attribute("start_time", subset.get("TIME").start));
-            newAttributeList.add(new Attribute("stop_time", subset.get("TIME").end));
-
-            nc.setRedefineMode(true);
-            for (Attribute newAttr : newAttributeList) {
-                nc.addGroupAttribute(null, newAttr);
-            }
-            nc.setRedefineMode(false);
-            nc.close();
         }
-        catch (IOException e) {
-            throw new GoGoDuckException(String.format("Failed updating metadata for file '%s': '%s'", outputFile, e.getMessage()));
+        catch (Exception e) {
+            // Don't fail because of this bullshit :)
+            System.out.println("Could not find 'title' attribute in result file");
         }
+
+        newAttributeList.add(new Attribute("southernmost_latitude", subset.get("LATITUDE").start));
+        newAttributeList.add(new Attribute("northernmost_latitude", subset.get("LATITUDE").end));
+
+        newAttributeList.add(new Attribute("westernmost_longitude", subset.get("LONGITUDE").start));
+        newAttributeList.add(new Attribute("easternmost_longitude", subset.get("LONGITUDE").end));
+
+        newAttributeList.add(new Attribute("start_time", subset.get("TIME").start));
+        newAttributeList.add(new Attribute("stop_time", subset.get("TIME").end));
+
+        return newAttributeList;
     }
 }
