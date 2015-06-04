@@ -1,5 +1,7 @@
 package au.org.emii.gogoduck.worker;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ucar.nc2.Attribute;
 import ucar.nc2.NetcdfFile;
 
@@ -9,6 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GoGoDuckModule_srs extends GoGoDuckModule {
+    private static final Logger logger = LoggerFactory.getLogger(GoGoDuckModule_srs.class);
+
     private static final String srsVariables = "time,lat,lon,dt_analysis,l2p_flags,quality_level,satellite_zenith_angle,sea_surface_temperature,sses_bias,sses_count,sses_standard_deviation,sst_dtime,wind_speed,wind_speed_dtime_from_sst";
 
     @Override
@@ -48,7 +52,7 @@ public class GoGoDuckModule_srs extends GoGoDuckModule {
             command.add(file.getAbsolutePath());
             command.add(tmpFile.getAbsolutePath());
 
-            System.out.println(String.format("Unpacking file (ncpdq) '%s' to '%s'", file.toPath(), tmpFile.toPath()));
+            logger.info(String.format("Unpacking file (ncpdq) '%s' to '%s'", file.toPath(), tmpFile.toPath()));
             GoGoDuck.execute(command);
 
             Files.delete(file.toPath());
@@ -73,7 +77,7 @@ public class GoGoDuckModule_srs extends GoGoDuckModule {
         }
         catch (Exception e) {
             // Don't fail because of this bullshit :)
-            System.out.println("Could not find 'title' attribute in result file");
+            logger.warn("Could not find 'title' attribute in result file");
         }
 
         newAttributeList.add(new Attribute("southernmost_latitude", subset.get("LATITUDE").start));

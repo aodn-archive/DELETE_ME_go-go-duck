@@ -12,12 +12,17 @@ import java.util.ArrayList;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.codehaus.plexus.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.zip.GZIPInputStream;
 
 public class GoGoDuck {
+    private static final Logger logger = LoggerFactory.getLogger(GoGoDuck.class);
+
     private static final Map<String, String> replacePrefixes = new HashMap<String, String>();
     static {
         replacePrefixes.put("/mnt/imos-t3/", "https://data.aodn.org.au/");
@@ -52,7 +57,7 @@ public class GoGoDuck {
     }
 
     public void setThreadCount(int threadCount) {
-        System.out.println(String.format("Setting thread count to %d", threadCount));
+        logger.info(String.format("Setting thread count to %d", threadCount));
         this.threadCount = threadCount;
     }
 
@@ -81,7 +86,7 @@ public class GoGoDuck {
         catch (Exception e) {
             userLog.log("Your aggregation failed!");
             userLog.log(String.format("Reason for failure is: '%s'", e.getMessage()));
-            System.out.println(e);
+            logger.error(e.toString());
             throw new GoGoDuckException(e.getMessage());
         }
         finally {
@@ -95,17 +100,17 @@ public class GoGoDuck {
     }
 
     private void enforceFileLimit(URIList URIList, Integer limit) throws GoGoDuckException {
-        System.out.println("Enforcing file limit...");
+        logger.info("Enforcing file limit...");
         if (URIList.size() > limit) {
             userLog.log("Sorry we cannot process this request due to the amount of files requiring processing.");
             userLog.log(String.format("The file limit is '%d' and this aggregation job requires '%d' files.", limit, URIList.size()));
             userLog.log("Please recreate a download request that will require less files to aggregate.");
-            System.out.println(String.format("Aggregation asked for %d, we allow only %d", URIList.size(), limit));
+            logger.error(String.format("Aggregation asked for %d, we allow only %d", URIList.size(), limit));
             throw new GoGoDuckException("Too many files");
         }
         else if (URIList.size() == 0) {
             userLog.log("The list of URLs obtained was empty, were your subseting parameters OK?");
-            System.out.println("No URLs returned for aggregation");
+            logger.error("No URLs returned for aggregation");
             throw new GoGoDuckException("No files returned from geoserver");
         }
 
@@ -113,7 +118,7 @@ public class GoGoDuck {
     }
 
     private void downloadFiles(URIList uriList, Path tmpDir) throws GoGoDuckException {
-        System.out.println(String.format("Downloading %d file(s)", uriList.size()));
+        logger.info(String.format("Downloading %d file(s)", uriList.size()));
 
         for (URI uri : uriList) {
             File srcFile = new File(uriList.get(0).toString());
@@ -124,7 +129,7 @@ public class GoGoDuck {
                 Path src = new File(uri.toString()).toPath();
 
                 try {
-                    System.out.println(String.format("Linking '%s' -> '%s'", src, dst));
+                    logger.info(String.format("Linking '%s' -> '%s'", src, dst));
                     Files.createSymbolicLink(dst, src);
                 } catch (IOException e) {
                     userLog.log(String.format("Failed accessing '%s'", src));
@@ -133,7 +138,7 @@ public class GoGoDuck {
             }
             else {
                 URL url = fileURItoURL(uri);
-                System.out.println(String.format("Downloading '%s' -> '%s'", url.toString(), dst));
+                logger.info(String.format("Downloading '%s' -> '%s'", url.toString(), dst));
 
                 try {
                     ReadableByteChannel rbc = Channels.newChannel(url.openStream());
@@ -171,7 +176,7 @@ public class GoGoDuck {
 
     private static void gunzip(File file) {
         try {
-            System.out.println(String.format("Gunzipping '%s'", file));
+            logger.info(String.format("Gunzipping '%s'", file));
             File gunzipped = File.createTempFile("tmp", ".nc");
 
             FileInputStream fis = new FileInputStream(file);
@@ -210,7 +215,7 @@ public class GoGoDuck {
             command.add(file.getPath());
             command.add(tmpFile.getPath());
 
-            System.out.println(String.format("Applying subset '%s' to '%s'", ncksSubsetParameters, file.toPath()));
+            logger.info(String.format("Applying subset '%s' to '%s'", ncksSubsetParameters, file.toPath()));
             execute(command);
 
             Files.delete(file.toPath());
@@ -226,6 +231,8 @@ public class GoGoDuck {
     }
 
     private static class ncksRunnable implements Runnable {
+        private static final Logger logger = LoggerFactory.getLogger(GoGoDuck.class);
+
         private String name;
         private Deque<File> workQueue;
         private GoGoDuckModule module = null;
@@ -247,17 +254,17 @@ public class GoGoDuck {
                 }
             }
             catch (NoSuchElementException e) {
-                System.out.println(String.format("Thread %s finished successfully", name));
+                logger.info(String.format("Thread %s finished successfully", name));
             }
         }
     }
 
     private void applySubsetMultiThread(Path tmpDir, GoGoDuckModule module, int threadCount) throws GoGoDuckException {
         userLog.log(String.format("Applying subset '%s'", module.getSubsetParameters().toString()));
-        System.out.println(String.format("Applying subset on directory '%s'", tmpDir));
+        logger.info(String.format("Applying subset on directory '%s'", tmpDir));
 
         File[] directoryListing = tmpDir.toFile().listFiles();
-        System.out.println(String.format("Subset for operation is '%s'", module.getSubsetParameters()));
+        logger.info(String.format("Subset for operation is '%s'", module.getSubsetParameters()));
 
         Deque<File> workQueue = new ArrayDeque<File>();
         for (File file : directoryListing) {
@@ -284,10 +291,10 @@ public class GoGoDuck {
     }
 
     private static void applySubsetSingleThread(Path tmpDir, GoGoDuckModule module) throws GoGoDuckException {
-        System.out.println(String.format("Applying subset on directory '%s'", tmpDir));
+        logger.info(String.format("Applying subset on directory '%s'", tmpDir));
 
         File[] directoryListing = tmpDir.toFile().listFiles();
-        System.out.println(String.format("Subset for operation is '%s'", module.getSubsetParameters()));
+        logger.info(String.format("Subset for operation is '%s'", module.getSubsetParameters()));
 
         for (File file : directoryListing) {
             applySubsetSingleFileNcks(file, module);
@@ -319,19 +326,19 @@ public class GoGoDuck {
             File file = directoryListing[0];
             try {
                 if(outputFile.toFile().exists() && outputFile.toFile().isFile()) {
-                    System.out.println(String.format("Deleting '%s'", outputFile));
+                    logger.info(String.format("Deleting '%s'", outputFile));
                     Files.delete(outputFile);
                 }
-                System.out.println(String.format("Renaming '%s' -> '%s'", file, outputFile));
+                logger.info(String.format("Renaming '%s' -> '%s'", file, outputFile));
                 Files.move(file.toPath(), outputFile);
             }
             catch (IOException e) {
-                System.out.println(e);
+                logger.error(e.toString());
                 throw new GoGoDuckException(String.format("Could not rename result file: '%s'", e.getMessage()));
             }
         }
         else {
-            System.out.println(String.format("Concatenating %d files into '%s'", directoryListing.length, outputFile));
+            logger.info(String.format("Concatenating %d files into '%s'", directoryListing.length, outputFile));
             for (File file : directoryListing) {
                 command.add(file.getAbsolutePath());
             }
@@ -356,7 +363,7 @@ public class GoGoDuck {
     }
 
     private static void cleanTmpDir(Path tmpDir) {
-        System.out.println(String.format("Removing temporary directory '%s'", tmpDir));
+        logger.debug(String.format("Removing temporary directory '%s'", tmpDir));
         try {
             FileUtils.deleteDirectory(tmpDir.toFile());
         } catch (IOException e) {
@@ -370,16 +377,16 @@ public class GoGoDuck {
 
         GoGoDuckModule module = null;
         while (null == module && "" != classToInstantiate) {
-            System.out.println(String.format("Trying class '%s.%s'", thisPackage, classToInstantiate));
+            logger.debug(String.format("Trying class '%s.%s'", thisPackage, classToInstantiate));
             try {
                 Class classz = Class.forName(String.format("%s.%s", thisPackage, classToInstantiate));
                 module = (GoGoDuckModule) classz.newInstance();
                 module.init(profile, geoserver, subset, userLog);
-                System.out.println(String.format("Using class '%s.%s'", thisPackage, classToInstantiate));
+                logger.info(String.format("Using class '%s.%s'", thisPackage, classToInstantiate));
                 return module;
             }
             catch (Exception e) {
-                System.out.println(String.format("Could not find class for '%s.%s'", thisPackage, classToInstantiate));
+                logger.debug(String.format("Could not find class for '%s.%s'", thisPackage, classToInstantiate));
             }
             classToInstantiate = nextProfile(classToInstantiate);
         }
@@ -401,7 +408,7 @@ public class GoGoDuck {
     }
 
     public static int execute(List<String> command) throws Exception {
-        System.out.println(command);
+        logger.info(StringUtils.join(command.toArray(), " "));
 
         ProcessBuilder builder = new ProcessBuilder(command);
         Map<String, String> environ = builder.environment();
@@ -412,14 +419,14 @@ public class GoGoDuck {
         BufferedReader br = new BufferedReader(isr);
         String line;
         while ((line = br.readLine()) != null) {
-            System.out.println(line);
+            logger.info(line);
         }
 
         try {
             process.waitFor();
         }
         catch (InterruptedException e) {
-            System.out.println("Interrupted: '%s'");
+            logger.error(String.format("Interrupted: '%s'", e.getMessage()));
             throw e;
         }
 
@@ -438,7 +445,7 @@ public class GoGoDuck {
             }
             catch (IOException e) {
                 this.userLogFileWriter = null;
-                System.out.println(String.format("Exception while opening user log at '%s', continuing anyway", logFile));
+                logger.info(String.format("Exception while opening user log at '%s', continuing anyway", logFile));
             }
         }
 
@@ -450,7 +457,7 @@ public class GoGoDuck {
                 }
             }
             catch (IOException e) {
-                System.out.println("Could not close user log file");
+                logger.debug("Could not close user log file");
             }
         }
 
@@ -461,7 +468,7 @@ public class GoGoDuck {
                     userLogFileWriter.write(System.lineSeparator());
                 }
                 catch (IOException e) {
-                    System.out.println("Exception while writing to user log");
+                    logger.debug("Exception while writing to user log");
                 }
             }
         }

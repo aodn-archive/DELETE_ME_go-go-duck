@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ucar.nc2.Attribute;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.NetcdfFileWriter;
@@ -19,6 +21,8 @@ import ucar.nc2.NetcdfFileWriter;
 import au.org.emii.gogoduck.worker.GoGoDuck.UserLog;
 
 public class GoGoDuckModule {
+    private static final Logger logger = LoggerFactory.getLogger(GoGoDuckModule.class);
+
     protected String profile = null;
     protected String geoserver = null;
     protected SubsetParameters subset = null;
@@ -53,8 +57,6 @@ public class GoGoDuckModule {
             params.put("VERSION", "1.0.0");
             params.put("CQL_FILTER", cqlFilter);
 
-            System.out.println(downloadUrl);
-
             byte[] postDataBytes = encodeMapForPostRequest(params);
 
             URL url = new URL(downloadUrl);
@@ -68,8 +70,8 @@ public class GoGoDuckModule {
             InputStream inputStream = conn.getInputStream();
             DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(inputStream));
 
-            System.out.println(String.format("Getting list of files from '%s'", downloadUrl));
-            System.out.println(String.format("Parameters: '%s'", new String(postDataBytes)));
+            logger.info(String.format("Getting list of files from '%s'", downloadUrl));
+            logger.debug(String.format("Parameters: '%s'", new String(postDataBytes)));
             String line = null;
             Integer i = 0;
             while ((line = dataInputStream.readLine()) != null) {
@@ -101,7 +103,7 @@ public class GoGoDuckModule {
             postDataBytes = postData.toString().getBytes("UTF-8");
         }
         catch (Exception e) {
-            System.out.println("Error encoding parameters");
+            logger.error(String.format("Error encoding parameters: '%s'", e.getMessage()));
         }
 
         return postDataBytes;
@@ -128,7 +130,7 @@ public class GoGoDuckModule {
         }
         catch (Exception e) {
             // Don't fail because of this bullshit :)
-            System.out.println("Could not find 'title' attribute in result file");
+            logger.warn("Could not find 'title' attribute in result file");
         }
 
         newAttributeList.add(new Attribute("title",
