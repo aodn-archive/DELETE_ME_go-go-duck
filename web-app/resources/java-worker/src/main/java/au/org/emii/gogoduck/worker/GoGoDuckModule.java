@@ -162,7 +162,6 @@ public class GoGoDuckModule {
         }
         catch (IOException e) {
             throw new GoGoDuckException(String.format("Failed updating metadata for file '%s': '%s'", outputFile, e.getMessage()));
-
         }
     }
 
