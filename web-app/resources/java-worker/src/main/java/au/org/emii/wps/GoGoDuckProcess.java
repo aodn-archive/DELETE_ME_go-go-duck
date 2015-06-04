@@ -5,6 +5,9 @@ import java.io.File;
 import au.org.emii.gogoduck.worker.GoGoDuckException;
 import au.org.emii.gogoduck.worker.GoGoDuck;
 
+import net.opengis.wps10.ExecuteType;
+import org.geoserver.ows.Dispatcher;
+import org.geoserver.platform.Operation;
 import org.opengis.util.ProgressListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +30,6 @@ public class GoGoDuckProcess implements GeoServerProcess {
     // TODO all values here are hardcoded
     private final int fileLimit = 2232;
     private final int threadCount = 2;
-    private final String geoserver = "http://geoserver-123.aodn.org.au/geoserver";
 
     public GoGoDuckProcess(WPSResourceManager resourceManager, ServletContext context) {
         this.resourceManager = resourceManager;
@@ -47,7 +49,7 @@ public class GoGoDuckProcess implements GeoServerProcess {
 
             final String filePath = outputFile.toPath().toAbsolutePath().toString();
 
-            GoGoDuck ggd = new GoGoDuck(geoserver, layer, subset, filePath, fileLimit);
+            GoGoDuck ggd = new GoGoDuck(getBaseUrl(), layer, subset, filePath, fileLimit);
 
             ggd.setTmpDir(getWorkingDir(resourceManager));
             ggd.setThreadCount(threadCount);
@@ -59,6 +61,14 @@ public class GoGoDuckProcess implements GeoServerProcess {
             logger.error(e.toString());
             throw new ProcessException(e);
         }
+    }
+
+    private String getBaseUrl() {
+        // TODO is there a nicer way of getting BaseUrl?
+        Dispatcher.REQUEST.get().getOperation();
+        Operation op = Dispatcher.REQUEST.get().getOperation();
+        ExecuteType execute = (ExecuteType) op.getParameters()[0];
+        return execute.getBaseUrl();
     }
 
     private String getWorkingDir(WPSResourceManager resourceManager) {
