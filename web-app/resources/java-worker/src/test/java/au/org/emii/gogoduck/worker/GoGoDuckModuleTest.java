@@ -10,7 +10,7 @@ public class GoGoDuckModuleTest {
     @Test
     public void testGetSubsetParameters() throws Exception {
         GoGoDuckModule ggdm = new GoGoDuckModule();
-        ggdm.init("", "", "TIME,1,2;LONGITUDE,2,3");
+        ggdm.init("", "", "TIME,1,2;LONGITUDE,2,3", null);
 
         // Make sure it removes `TIME` subset parameter
         assertFalse(ggdm.getSubsetParameters().containsKey("TIME"));

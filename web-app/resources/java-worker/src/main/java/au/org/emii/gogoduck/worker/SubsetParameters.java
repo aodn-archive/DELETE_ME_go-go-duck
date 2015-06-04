@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import au.org.emii.gogoduck.worker.SubsetParameters.SubsetParameter;
+import org.codehaus.plexus.util.StringUtils;
 
 public class SubsetParameters extends HashMap<String, SubsetParameter> {
     public class SubsetParameter {
@@ -39,5 +40,9 @@ public class SubsetParameters extends HashMap<String, SubsetParameter> {
         }
 
         return ncksParameters;
+    }
+
+    public String toString() {
+        return StringUtils.join(getNcksParameters().toArray(), " ");
     }
 }

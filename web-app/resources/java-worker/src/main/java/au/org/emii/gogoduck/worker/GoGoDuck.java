@@ -35,6 +35,7 @@ public class GoGoDuck {
     private final Integer limit;
     private Path baseTmpDir;
     private int threadCount = 1;
+    private UserLog userLog = null;
 
     public GoGoDuck(String geoserver, String profile, String subset, String outputFile, Integer limit) {
         this.geoserver = geoserver;
@@ -43,6 +44,7 @@ public class GoGoDuck {
         this.outputFile = new File(outputFile).toPath();
         this.limit = limit;
         this.baseTmpDir = new File(System.getProperty("java.io.tmpdir")).toPath();
+        this.userLog = new UserLog();
     }
 
     public void setTmpDir(String tmpDir) {
@@ -54,8 +56,12 @@ public class GoGoDuck {
         this.threadCount = threadCount;
     }
 
+    public void setUserLog(String userLog) {
+        this.userLog = new UserLog(userLog);
+    }
+
     public void run() {
-        GoGoDuckModule module = getProfileModule(profile, geoserver, subset);
+        GoGoDuckModule module = getProfileModule(profile, geoserver, subset, userLog);
 
         Path tmpDir = null;
 
@@ -70,13 +76,17 @@ public class GoGoDuck {
             postProcess(tmpDir, module);
             aggregate(tmpDir, outputFile);
             updateMetadata(module, outputFile);
+            userLog.log("Your aggregation was successful!");
         }
         catch (Exception e) {
+            userLog.log("Your aggregation failed!");
+            userLog.log(String.format("Reason for failure is: '%s'", e.getMessage()));
             System.out.println(e);
             throw new GoGoDuckException(e.getMessage());
         }
         finally {
             cleanTmpDir(tmpDir);
+            userLog.close();
         }
     }
 
@@ -84,13 +94,17 @@ public class GoGoDuck {
         return 0;
     }
 
-    private static void enforceFileLimit(URIList URIList, Integer limit) throws GoGoDuckException {
+    private void enforceFileLimit(URIList URIList, Integer limit) throws GoGoDuckException {
         System.out.println("Enforcing file limit...");
         if (URIList.size() > limit) {
+            userLog.log("Sorry we cannot process this request due to the amount of files requiring processing.");
+            userLog.log(String.format("The file limit is '%d' and this aggregation job requires '%d' files.", limit, URIList.size()));
+            userLog.log("Please recreate a download request that will require less files to aggregate.");
             System.out.println(String.format("Aggregation asked for %d, we allow only %d", URIList.size(), limit));
             throw new GoGoDuckException("Too many files");
         }
         else if (URIList.size() == 0) {
+            userLog.log("The list of URLs obtained was empty, were your subseting parameters OK?");
             System.out.println("No URLs returned for aggregation");
             throw new GoGoDuckException("No files returned from geoserver");
         }
@@ -98,7 +112,7 @@ public class GoGoDuck {
         // All good - keep going :)
     }
 
-    private static void downloadFiles(URIList uriList, Path tmpDir) throws GoGoDuckException {
+    private void downloadFiles(URIList uriList, Path tmpDir) throws GoGoDuckException {
         System.out.println(String.format("Downloading %d file(s)", uriList.size()));
 
         for (URI uri : uriList) {
@@ -113,6 +127,7 @@ public class GoGoDuck {
                     System.out.println(String.format("Linking '%s' -> '%s'", src, dst));
                     Files.createSymbolicLink(dst, src);
                 } catch (IOException e) {
+                    userLog.log(String.format("Failed accessing '%s'", src));
                     throw new GoGoDuckException(e.getMessage());
                 }
             }
@@ -126,6 +141,7 @@ public class GoGoDuck {
                     fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
                 }
                 catch (IOException e) {
+                    userLog.log(String.format("Failed downloading '%s'", url));
                     throw new GoGoDuckException(e.getMessage());
                 }
             }
@@ -213,17 +229,20 @@ public class GoGoDuck {
         private String name;
         private Deque<File> workQueue;
         private GoGoDuckModule module = null;
+        private UserLog userLog = null;
 
-        ncksRunnable(String name, Deque<File> workQueue, GoGoDuckModule module) {
+        ncksRunnable(String name, Deque<File> workQueue, GoGoDuckModule module, UserLog userLog) {
             this.name = name;
             this.workQueue = workQueue;
             this.module = module;
+            this.userLog = userLog;
         }
 
         public void run() {
             try {
                 File file = null;
                 while ((file = workQueue.pop()) != null) {
+                    userLog.log(String.format("Processing file '%s'", file.toPath().getFileName()));
                     applySubsetSingleFileNcks(file, module);
                 }
             }
@@ -233,7 +252,8 @@ public class GoGoDuck {
         }
     }
 
-    private static void applySubsetMultiThread(Path tmpDir, GoGoDuckModule module, int threadCount) throws GoGoDuckException {
+    private void applySubsetMultiThread(Path tmpDir, GoGoDuckModule module, int threadCount) throws GoGoDuckException {
+        userLog.log(String.format("Applying subset '%s'", module.getSubsetParameters().toString()));
         System.out.println(String.format("Applying subset on directory '%s'", tmpDir));
 
         File[] directoryListing = tmpDir.toFile().listFiles();
@@ -248,7 +268,7 @@ public class GoGoDuck {
             Thread[] threads = new Thread[threadCount];
             for (int i = 0; i < threadCount; i++) {
                 String threadName = String.format("Subset_%d", i + 1);
-                threads[i] = new Thread(new ncksRunnable(threadName, workQueue, module));
+                threads[i] = new Thread(new ncksRunnable(threadName, workQueue, module, userLog));
             }
             for (int i = 0; i < threadCount; i++) {
                 threads[i].start();
@@ -258,6 +278,7 @@ public class GoGoDuck {
             }
         }
         catch (InterruptedException e) {
+            userLog.log("Failed ");
             throw new GoGoDuckException(String.format("InterruptedException: '%s'", e.getMessage()));
         }
     }
@@ -343,7 +364,7 @@ public class GoGoDuck {
         }
     }
 
-    private static GoGoDuckModule getProfileModule(String profile, String geoserver, String subset) {
+    private static GoGoDuckModule getProfileModule(String profile, String geoserver, String subset, UserLog userLog) {
         String thisPackage = GoGoDuckModule.class.getPackage().getName();
         String classToInstantiate = String.format("GoGoDuckModule_%s", profile);
 
@@ -353,7 +374,7 @@ public class GoGoDuck {
             try {
                 Class classz = Class.forName(String.format("%s.%s", thisPackage, classToInstantiate));
                 module = (GoGoDuckModule) classz.newInstance();
-                module.init(profile, geoserver, subset);
+                module.init(profile, geoserver, subset, userLog);
                 System.out.println(String.format("Using class '%s.%s'", thisPackage, classToInstantiate));
                 return module;
             }
@@ -374,8 +395,7 @@ public class GoGoDuck {
        GoGoDuckModule_acorn_hourly_avg
        GoGoDuckModule_acorn_hourly
        GoGoDuckModule_acorn
-       GoGoDuckModule
-    */
+       GoGoDuckModule */
     private static String nextProfile(String profile) {
         return profile.substring(0, profile.lastIndexOf("_"));
     }
@@ -404,5 +424,46 @@ public class GoGoDuck {
         }
 
         return process.exitValue();
+    }
+
+    public class UserLog {
+        private FileWriter userLogFileWriter;
+        UserLog() {
+            this.userLogFileWriter = null;
+        }
+
+        UserLog(String logFile) {
+            try {
+                this.userLogFileWriter = new FileWriter(logFile);
+            }
+            catch (IOException e) {
+                this.userLogFileWriter = null;
+                System.out.println(String.format("Exception while opening user log at '%s', continuing anyway", logFile));
+            }
+        }
+
+        public void close() {
+            try {
+                if (null != userLogFileWriter) {
+                    userLogFileWriter.close();
+
+                }
+            }
+            catch (IOException e) {
+                System.out.println("Could not close user log file");
+            }
+        }
+
+        public void log(String s) {
+            if (null != userLogFileWriter) {
+                try {
+                    userLogFileWriter.write(s);
+                    userLogFileWriter.write(System.lineSeparator());
+                }
+                catch (IOException e) {
+                    System.out.println("Exception while writing to user log");
+                }
+            }
+        }
     }
 }

@@ -16,17 +16,21 @@ import ucar.nc2.Attribute;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.NetcdfFileWriter;
 
+import au.org.emii.gogoduck.worker.GoGoDuck.UserLog;
+
 public class GoGoDuckModule {
     protected String profile = null;
     protected String geoserver = null;
     protected SubsetParameters subset = null;
+    protected UserLog userLog = null;
 
     public GoGoDuckModule() {}
 
-    public void init(String profile, String geoserver, String subset) {
+    public void init(String profile, String geoserver, String subset, UserLog userLog) {
         this.profile = profile;
         this.geoserver = geoserver;
         this.subset = new SubsetParameters(subset);
+        this.userLog = userLog;
     }
 
     public URIList getUriList() throws GoGoDuckException {
@@ -77,7 +81,8 @@ public class GoGoDuckModule {
             }
         }
         catch (Exception e) {
-            throw new GoGoDuckException(String.format("Error getting list of URLs: '%s'", e.getMessage()));
+            userLog.log("We could not obtain list of URLs, does the collection still exist?");
+            throw new GoGoDuckException(String.format("Could not obtain list of URLs: '%s'", e.getMessage()));
         }
 
         return uriList;

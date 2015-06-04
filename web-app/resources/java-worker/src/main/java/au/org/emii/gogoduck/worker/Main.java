@@ -55,6 +55,10 @@ public class Main {
             ggd.setTmpDir(tmpDir);
         }
 
+        if(cmd.hasOption("u")) {
+            ggd.setUserLog(userLog);
+        }
+
         if (cmd.hasOption("S")) {
             ggd.score();
         }
