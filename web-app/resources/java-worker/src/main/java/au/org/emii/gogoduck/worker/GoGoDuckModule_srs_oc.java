@@ -8,8 +8,8 @@ public class GoGoDuckModule_srs_oc extends GoGoDuckModule_srs {
 
         // Rename LATITUDE -> latitude
         // Rename LONGITUDE -> longitude
-        subsetParametersNew.parameters.put("latitude", subset.parameters.get("LATITUDE"));
-        subsetParametersNew.parameters.put("longitude", subset.parameters.get("LONGITUDE"));
+        subsetParametersNew.put("latitude", subset.get("LATITUDE"));
+        subsetParametersNew.put("longitude", subset.get("LONGITUDE"));
 
         return subsetParametersNew;
     }

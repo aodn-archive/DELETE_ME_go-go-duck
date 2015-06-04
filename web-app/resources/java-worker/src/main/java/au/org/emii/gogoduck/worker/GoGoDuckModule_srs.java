@@ -19,8 +19,8 @@ public class GoGoDuckModule_srs extends GoGoDuckModule {
 
         // Rename LATITUDE -> lat
         // Rename LONGITUDE -> lon
-        subsetParametersNew.put("lat", subset.parameters.get("LATITUDE"));
-        subsetParametersNew.put("lon", subset.parameters.get("LONGITUDE"));
+        subsetParametersNew.put("lat", subset.get("LATITUDE"));
+        subsetParametersNew.put("lon", subset.get("LONGITUDE"));
 
         return subsetParametersNew;
     }
