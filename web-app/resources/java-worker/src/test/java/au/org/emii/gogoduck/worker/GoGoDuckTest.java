@@ -14,7 +14,10 @@ public class GoGoDuckTest {
         Method fileURItoURLMethod = GoGoDuck.class.getDeclaredMethod("fileURItoURL", URI.class);
         fileURItoURLMethod.setAccessible(true);
         URL u = (URL) fileURItoURLMethod.invoke(GoGoDuck.class, new URI("/mnt/imos-t3/file.nc"));
-        assertEquals(u, new URL("http://data.aodn.org.au/file.nc"));
+        assertEquals(u, new URL("https://data.aodn.org.au/file.nc"));
+
+        u = (URL) fileURItoURLMethod.invoke(GoGoDuck.class, new URI("/mnt/opendap/2/SRS/sst/ghrsst/L3S-1d/dn/2014/20141011092000-ABOM-L3S_GHRSST-SSTfnd-AVHRR_D-1d_dn-v02.0-fv02.0.nc"));
+        assertEquals(u, new URL("https://thredds.aodn.org.au/thredds/fileServer/srs/sst/ghrsst/L3S-1d/dn/2014/20141011092000-ABOM-L3S_GHRSST-SSTfnd-AVHRR_D-1d_dn-v02.0-fv02.0.nc"));
     }
 
     @Test

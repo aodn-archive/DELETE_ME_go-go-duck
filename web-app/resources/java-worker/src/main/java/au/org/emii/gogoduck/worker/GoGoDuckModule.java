@@ -20,8 +20,7 @@ public class GoGoDuckModule {
     protected String geoserver = null;
     protected SubsetParameters subset = null;
 
-    public GoGoDuckModule() {
-    }
+    public GoGoDuckModule() {}
 
     public void init(String profile, String geoserver, String subset) {
         this.profile = profile;

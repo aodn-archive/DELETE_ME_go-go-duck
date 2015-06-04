@@ -7,11 +7,14 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class GoGoDuckModule_srs extends GoGoDuckModule {
+    private static final String srsVariables = "time,lat,lon,dt_analysis,l2p_flags,quality_level,satellite_zenith_angle,sea_surface_temperature,sses_bias,sses_count,sses_standard_deviation,sst_dtime,wind_speed,wind_speed_dtime_from_sst";
+
     @Override
     public SubsetParameters getSubsetParameters() {
         SubsetParameters subsetParametersNew = new SubsetParameters(subset);
@@ -30,22 +33,27 @@ public class GoGoDuckModule_srs extends GoGoDuckModule {
         List<String> ncksExtraParameters = new ArrayList<String>();
         ncksExtraParameters.add("--mk_rec_dmn");
         ncksExtraParameters.add("time");
+
+        // For SRS, use only defined variables rather than all
+        ncksExtraParameters.add("-v");
+        ncksExtraParameters.add(srsVariables);
         return ncksExtraParameters;
     }
 
     @Override
     public void postProcess(File file) {
-        // TODO run command!!
         try {
             File tmpFile = File.createTempFile("ncpdq", ".nc");
-            String command = String.format("ncpdq -O -U %s %s", file, tmpFile);
+
+            List<String> command = new ArrayList<String>();
+            command.add(GoGoDuck.ncdpqPath);
+            command.add("-O");
+            command.add("-U");
+            command.add(file.getAbsolutePath());
+            command.add(tmpFile.getAbsolutePath());
 
             System.out.println(String.format("Unpacking file (ncpdq) '%s' to '%s'", file.toPath(), tmpFile.toPath()));
-            System.out.println(command);
-
-            if(0 != Runtime.getRuntime().exec(command).exitValue()) {
-                throw new GoGoDuckException("ncpdq exited with non-zero exit value");
-            }
+            GoGoDuck.execute(command);
 
             Files.delete(file.toPath());
             Files.move(tmpFile.toPath(), file.toPath());
@@ -65,9 +73,6 @@ public class GoGoDuckModule_srs extends GoGoDuckModule {
             String title = profile;
             try {
                 title = nc.getNetcdfFile().findGlobalAttribute("title").toString();
-
-                // Remove time slice from title ('something_a, something_b, 2013-11-20T03:30:00Z' -> 'something_a, something_b')
-                title = title.substring(0, title.lastIndexOf(","));
             }
             catch (NullPointerException e) {
                 // Don't fail because of this bullshit :)

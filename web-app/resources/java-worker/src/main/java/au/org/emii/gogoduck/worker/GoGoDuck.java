@@ -23,11 +23,13 @@ import java.util.zip.GZIPInputStream;
 public class GoGoDuck {
     private static final Map<String, String> replacePrefixes = new HashMap<String, String>();
     static {
-        replacePrefixes.put("/mnt/imos-t3/", "http://data.aodn.org.au/");
+        replacePrefixes.put("/mnt/imos-t3/", "https://data.aodn.org.au/");
+        replacePrefixes.put("/mnt/opendap/2/SRS/", "https://thredds.aodn.org.au/thredds/fileServer/srs/");
     }
 
-    private static final String ncksPath = "/usr/bin/ncks";
-    private static final String ncrcatPath = "/usr/bin/ncrcat";
+    public static final String ncksPath = "/usr/bin/ncks";
+    public static final String ncrcatPath = "/usr/bin/ncrcat";
+    public static final String ncdpqPath = "/usr/bin/ncpdq";
 
     private final String geoserver;
     private final String profile;
