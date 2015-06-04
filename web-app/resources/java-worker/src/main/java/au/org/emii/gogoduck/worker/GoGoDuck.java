@@ -12,9 +12,9 @@ import java.util.ArrayList;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.codehaus.plexus.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.opengis.util.ProgressListener;
 
 import java.io.IOException;
 import java.util.*;
@@ -41,6 +41,7 @@ public class GoGoDuck {
     private Path baseTmpDir;
     private int threadCount = 1;
     private UserLog userLog = null;
+    private ProgressListener progressListener = null;
 
     public GoGoDuck(String geoserver, String profile, String subset, String outputFile, Integer limit) {
         this.geoserver = geoserver;
@@ -65,6 +66,24 @@ public class GoGoDuck {
         this.userLog = new UserLog(userLog);
     }
 
+    public void setProgressListener(ProgressListener progressListener) {
+        this.progressListener = progressListener;
+    }
+
+    public boolean isCancelled() {
+        if (null != progressListener) {
+            return progressListener.isCanceled();
+        }
+        else {
+            return false;
+        }
+    }
+
+    private void throwIfCancelled() throws GoGoDuckException {
+        if (isCancelled())
+            throw new GoGoDuckException("Job cancelled");
+    }
+
     public void run() {
         GoGoDuckModule module = getProfileModule(profile, geoserver, subset, userLog);
 
@@ -77,10 +96,15 @@ public class GoGoDuck {
 
             enforceFileLimit(URIList, limit);
             downloadFiles(URIList, tmpDir);
+            throwIfCancelled();
             applySubsetMultiThread(tmpDir, module, threadCount);
+            throwIfCancelled();
             postProcess(tmpDir, module);
+            throwIfCancelled();
             aggregate(tmpDir, outputFile);
+            throwIfCancelled();
             updateMetadata(module, outputFile);
+            throwIfCancelled();
             userLog.log("Your aggregation was successful!");
         }
         catch (Exception e) {
@@ -121,6 +145,11 @@ public class GoGoDuck {
         logger.info(String.format("Downloading %d file(s)", uriList.size()));
 
         for (URI uri : uriList) {
+            if (isCancelled()) {
+                logger.warn("GoGoDuck was cancelled during download.");
+                return;
+            }
+
             File srcFile = new File(uriList.get(0).toString());
             String basename = new File(uri.toString()).getName();
             Path dst = new File(tmpDir + File.separator + basename).toPath();
@@ -236,20 +265,26 @@ public class GoGoDuck {
         private String name;
         private Deque<File> workQueue;
         private GoGoDuckModule module = null;
-        private UserLog userLog = null;
+        private GoGoDuck gogoduck = null;
+        private ProgressListener progressListener = null;
 
-        ncksRunnable(String name, Deque<File> workQueue, GoGoDuckModule module, UserLog userLog) {
+        ncksRunnable(String name, Deque<File> workQueue, GoGoDuckModule module, GoGoDuck gogoduck) {
             this.name = name;
             this.workQueue = workQueue;
             this.module = module;
-            this.userLog = userLog;
+            this.gogoduck = gogoduck;
         }
 
         public void run() {
             try {
                 File file = null;
                 while ((file = workQueue.pop()) != null) {
-                    userLog.log(String.format("Processing file '%s'", file.toPath().getFileName()));
+                    if (gogoduck.isCancelled()) {
+                        gogoduck.userLog.log("Job was cancelled");
+                        logger.warn("Cancelled by progress listener.");
+                        return;
+                    }
+                    gogoduck.userLog.log(String.format("Processing file '%s'", file.toPath().getFileName()));
                     applySubsetSingleFileNcks(file, module);
                 }
             }
@@ -275,7 +310,7 @@ public class GoGoDuck {
             Thread[] threads = new Thread[threadCount];
             for (int i = 0; i < threadCount; i++) {
                 String threadName = String.format("Subset_%d", i + 1);
-                threads[i] = new Thread(new ncksRunnable(threadName, workQueue, module, userLog));
+                threads[i] = new Thread(new ncksRunnable(threadName, workQueue, module, this));
             }
             for (int i = 0; i < threadCount; i++) {
                 threads[i].start();
@@ -408,7 +443,7 @@ public class GoGoDuck {
     }
 
     public static int execute(List<String> command) throws Exception {
-        logger.info(StringUtils.join(command.toArray(), " "));
+        logger.info(command.toString());
 
         ProcessBuilder builder = new ProcessBuilder(command);
         Map<String, String> environ = builder.environment();

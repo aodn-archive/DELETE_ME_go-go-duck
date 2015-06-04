@@ -58,6 +58,15 @@ Running on SRS data (big files!):
 $ mvn exec:java -Dexec.mainClass=au.org.emii.gogoduck.worker.Main -Dexec.args="-g http://geoserver-123.aodn.org.au/geoserver -p srs_sst_l3s_1d_dn_gridded_url -s TIME,2014-10-10T00:00:00.000Z,2014-10-12T00:00:00.000Z;LATITUDE,-33.433849,-32.150743;LONGITUDE,114.15197,115.741219 -o output.nc"
 ```
 
+## Running as WPS
+
+In order to run as a WPS request, you can run the following:
+```
+$ curl --data @doc/wps-acorn.xml --header "Content-Type: application/xml" http://localhost:8080/geoserver/wps
+$ curl --data @doc/wps-gsla.xml --header "Content-Type: application/xml" http://localhost:8080/geoserver/wps
+$ curl --data @doc/wps-srs.xml --header "Content-Type: application/xml" http://localhost:8080/geoserver/wps
+```
+
 ## Unit Tests
 
 Run:
