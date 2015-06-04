@@ -2,16 +2,11 @@ package au.org.emii.gogoduck.worker;
 
 import ucar.nc2.Attribute;
 import ucar.nc2.NetcdfFile;
-import ucar.nc2.NetcdfFileWriter;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class GoGoDuckModule_srs extends GoGoDuckModule {
     private static final String srsVariables = "time,lat,lon,dt_analysis,l2p_flags,quality_level,satellite_zenith_angle,sea_surface_temperature,sses_bias,sses_count,sses_standard_deviation,sst_dtime,wind_speed,wind_speed_dtime_from_sst";

@@ -8,7 +8,6 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 
 import org.apache.commons.io.FileUtils;
@@ -16,8 +15,6 @@ import org.apache.commons.io.FilenameUtils;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.TransferQueue;
 import java.util.zip.GZIPInputStream;
 
 public class GoGoDuck {
