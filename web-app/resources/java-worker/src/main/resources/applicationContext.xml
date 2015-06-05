@@ -3,6 +3,7 @@
 <beans>
     <bean id="goGoDuckProcess" class="au.org.emii.wps.GoGoDuckProcess">
       <constructor-arg index="0" ref="wpsResourceManager"/>
-      <constructor-arg index="1" ref="servletContext"/>
+      <constructor-arg index="1" ref="geoServer"/>
+      <constructor-arg index="2" ref="resourceLoader"/>
     </bean>
 </beans>
