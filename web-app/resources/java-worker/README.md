@@ -62,9 +62,9 @@ $ mvn exec:java -Dexec.mainClass=au.org.emii.gogoduck.worker.Main -Dexec.args="-
 
 In order to run as a WPS request, you can run the following:
 ```
-$ curl --data @doc/wps-acorn.xml --header "Content-Type: application/xml" http://localhost:8080/geoserver/wps
-$ curl --data @doc/wps-gsla.xml --header "Content-Type: application/xml" http://localhost:8080/geoserver/wps
-$ curl --data @doc/wps-srs.xml --header "Content-Type: application/xml" http://localhost:8080/geoserver/wps
+$ curl --data @doc/wps-acorn.xml --header "Expect:" --header "Content-Type: application/xml" http://localhost:8080/geoserver/wps
+$ curl --data @doc/wps-gsla.xml --header "Expect:" --header "Content-Type: application/xml" http://localhost:8080/geoserver/wps
+$ curl --data @doc/wps-srs.xml --header "Expect:" --header "Content-Type: application/xml" http://localhost:8080/geoserver/wps
 ```
 
 ## Unit Tests
