@@ -2,6 +2,8 @@
 
 [![Build Status](https://travis-ci.org/aodn/go-go-duck.png?branch=master)](https://travis-ci.org/aodn/go-go-duck)
 
+The Go Go Duck is a lightweight application with the single function of subsetting and aggregating gridded netCDF files and returning an email pointing to the aggregated output netCDF file. It was developed in a short space of time as a proof of concept, and was later deployed to the IMOS production environment. The GoGoDuck works with any CF-compliant NetCDF files.
+
 ## Usage
 
 ### Request a new job
