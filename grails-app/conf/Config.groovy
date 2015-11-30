@@ -47,18 +47,7 @@ grails.hibernate.cache.queries = false
 
 grails.serverURL = "http://${InetAddress.localHost.hostAddress}:${server.port ?: 8080}/$appName"
 
-grails {
-    mail {
-        'default' {
-            from = "gogoduck@emii.org.au"
-        }
-
-        // Configurable mail properties: see http://grails.org/plugin/mail
-        host = "localhost"
-        port = 25
-        props = ["mail.smtp.auth": "false"]
-    }
-}
+grails.mail.disabled = true
 
 job {
     cleanup {
