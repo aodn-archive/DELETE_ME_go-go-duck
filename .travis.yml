@@ -16,8 +16,3 @@ before_install:
 
 script:
     grails refresh-dependencies && grails test-app
-
-notifications:
-  email:
-    - jkburges@utas.edu.au
-    - dnahodil@utas.edu.au
