@@ -18,7 +18,7 @@ export PROFILES_DIR
 declare -r DEFAULT_GEOSERVER=http://geoserver-123.aodn.org.au/geoserver
 
 # set a timeout of 10 seconds
-declare -r CURL_OPTS="--connect-timeout 10 --max-time 30"
+declare -r CURL_OPTS="-L --connect-timeout 10 --max-time 30"
 
 declare -i -r MAX_PROCS=4
 
