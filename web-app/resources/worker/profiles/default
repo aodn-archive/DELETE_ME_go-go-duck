@@ -1,8 +1,11 @@
 #!/bin/bash
 
 # when downloading stuff from GeoServer we'll need to do some manipulation!
-declare -r URL_PREFIX_PATTERN=/mnt/imos-t3/
-declare -r URL_PREFIX_REPLACE=http://data.aodn.org.au/
+declare -r URL_PREFIX_PATTERN1=^IMOS/
+declare -r URL_PREFIX_REPLACE1=http://imos-data.aodn.org.au/IMOS/
+
+declare -r URL_PREFIX_PATTERN2=/mnt/imos-t3/
+declare -r URL_PREFIX_REPLACE2=http://data.aodn.org.au/
 
 # returns 0 if given file can be accessed by filesystem, 1 otherwise
 # $1 - file to check
@@ -44,7 +47,8 @@ format_output_file() {
     else
         # if not, just use the download method
         logger_info "Using HTTP method, could not find '$sample_file' in its location"
-        sed -i -e "s#${URL_PREFIX_PATTERN}#${URL_PREFIX_REPLACE}#" $file
+        sed -i -e "s#${URL_PREFIX_PATTERN1}#${URL_PREFIX_REPLACE1}#" $file
+        sed -i -e "s#${URL_PREFIX_PATTERN2}#${URL_PREFIX_REPLACE2}#" $file
     fi
 }
 
