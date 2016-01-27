@@ -62,7 +62,7 @@ class JobControllerSpec extends Specification {
         where:
         status             | queuePosition | report        | hasAggrUrl
         Status.NEW         | 5             | null          | null
-        Status.IN_PROGRESS | null          | null          | null
+        Status.IN_PROGRESS | 1             | null          | null
         Status.SUCCEEDED   | null          | 'report text' | true
         Status.FAILED      | null          | 'report text' | false
     }

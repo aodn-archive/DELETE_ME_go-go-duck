@@ -1,7 +1,5 @@
 package au.org.emii.gogoduck.job
 
-import grails.converters.JSON
-
 class JobController {
 
     static allowedMethods = [ save: "POST", show: "GET" ]
