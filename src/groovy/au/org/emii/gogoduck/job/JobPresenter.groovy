@@ -16,6 +16,10 @@ class JobPresenter extends HashMap {
                 addQueuePosition(job, jobExecutorService)
                 break
 
+            case (Status.IN_PROGRESS):
+                addQueuePosition(job, jobExecutorService)
+                break
+
             case (Status.SUCCEEDED):
                 addAggrUrl(job, createLink)
                 addReport(job, jobStoreService)

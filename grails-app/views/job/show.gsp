@@ -23,7 +23,15 @@
                     <g:labelledContent labelCode="job.reason.label"><g:message code="job.reason.${job.reason}" default="${job.reason.toString()}" /></g:labelledContent>
                 </g:if>
 
-                <g:labelledContent if="${job.queuePosition}" labelCode="job.queuePosition.label">${job.queuePosition}</g:labelledContent>
+                <g:labelledContent if="${job.queuePosition > -1}" labelCode="job.queuePosition.label">
+                    <g:if test="${job.queuePosition == 0}">
+                        <g:message code="job.currentlyProcessing" />
+                    </g:if>
+                    <g:else>
+                        ${job.queuePosition}
+                    </g:else>
+                </g:labelledContent>
+
                 <g:labelledContent if="${job.aggrUrl}" labelCode="job.aggrUrl.label">
                     <a href="${job.aggrUrl}">${job.aggrUrl}</a>
                 </g:labelledContent>
