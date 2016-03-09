@@ -7,6 +7,9 @@ declare -r URL_PREFIX_REPLACE1=http://imos-data.aodn.org.au/IMOS/
 declare -r URL_PREFIX_PATTERN2=/mnt/imos-t3/
 declare -r URL_PREFIX_REPLACE2=http://data.aodn.org.au/
 
+declare -r URL_PREFIX_PATTERN3=^/mnt/opendap/2/SRS/
+declare -r URL_PREFIX_REPLACE3=http://rs-data1-mel.csiro.au/thredds/fileServer/imos-srs/
+
 # returns 0 if given file can be accessed by filesystem, 1 otherwise
 # $1 - file to check
 can_access_via_fs() {
@@ -49,6 +52,7 @@ format_output_file() {
         logger_info "Using HTTP method, could not find '$sample_file' in its location"
         sed -i -e "s#${URL_PREFIX_PATTERN1}#${URL_PREFIX_REPLACE1}#" $file
         sed -i -e "s#${URL_PREFIX_PATTERN2}#${URL_PREFIX_REPLACE2}#" $file
+        sed -i -e "s#${URL_PREFIX_PATTERN3}#${URL_PREFIX_REPLACE3}#" $file
     fi
 }
 
