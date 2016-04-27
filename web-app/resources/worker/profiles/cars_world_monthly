@@ -2,4 +2,4 @@
 
 # use the cars profile, just override the data
 source $PROFILES_DIR/cars
-declare -r CARS_DATA="http://data.aodn.org.au/AODN/Australian_Government/CSIRO/Climatology/CARS/2009/eMII-product/CARS2009_World_monthly.nc"
+declare -r CARS_DATA="http://data.aodn.org.au/CSIRO/Climatology/CARS/2009/eMII-product/CARS2009_World_monthly.nc"
