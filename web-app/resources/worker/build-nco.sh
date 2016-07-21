@@ -25,7 +25,7 @@ main() {
     sed -i -e '/nco.html/d' debian/rules
 
     # build!
-    dpkg-buildpackage -B -nc
+    dpkg-buildpackage -B -nc -uc
 }
 
 main "$@"
